@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Diagnostics;
 
 namespace ponderthis
 {
@@ -10,29 +11,24 @@ namespace ponderthis
         {
             private readonly SortedSet<ulong> _primes = new SortedSet<ulong>() { 3 };
             private ulong _currentSqrt = 1;
-            private ulong _currentSqr = 1;
 
-            public ulong UpTo(ulong value)
+            public bool IsPrime(ulong value)
             {
-                if (value <= 2) return 2;
+                UpTo(value);
 
-                if (_primes.TryGetValue(value, out ulong result))
+                return _primes.Contains(value);
+            }
+
+            public void UpTo(ulong value)
+            {
+                while (_primes.Max <= value)
                 {
-                    return result;
-                }
-
-                result = _primes.Max;
-                while (_primes.Max < value)
-                {
-                    result = _primes.Max;
-
                     ulong candidate = _primes.Max + 2;
                     while (true)
                     {
                         for (ulong nextSqrt = _currentSqrt + 1; nextSqrt * nextSqrt <= candidate; nextSqrt++)
                         {
                             _currentSqrt = nextSqrt;
-                            _currentSqr = _currentSqrt * _currentSqrt;
                         }
 
                         if (_primes.Any(prime => prime <= _currentSqrt && candidate % prime == 0))
@@ -47,13 +43,19 @@ namespace ponderthis
 
                     _primes.Add(candidate);
                 }
+            }
 
-                return result;
+            public int GetCount()
+            {
+                return 1 + _primes.Count;
             }
         }
 
-        private class ArithmeticProgressionSequence
+        public class ArithmeticProgressionSequence
         {
+            private readonly Primes _primes = new Primes();
+            private readonly SortedSet<ulong> _sequences = new SortedSet<ulong>() { 1 };
+
             private ulong GetTerm(ulong initialValue, uint index)
             {
                 return initialValue + (index * (index + 1ul) / 2ul);
@@ -66,6 +68,37 @@ namespace ponderthis
                     yield return GetTerm(initialValue, i);
                 }
             }
+
+            public IEnumerable<ulong> GetNextSequence()
+            {
+                uint nextLength = (uint)_sequences.Count;
+
+                for (ulong candidate = _sequences.Max + 1; ; candidate++)
+                {
+                    if (_primes.IsPrime(candidate)) continue;
+
+                    bool found = true;
+                    ulong next = candidate;
+                    for (uint i = 0; i < nextLength; i++)
+                    {
+                        next += i + 1;
+
+                        if (_primes.IsPrime(next))
+                        {
+                            found = false;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        _sequences.Add(candidate);
+                        break;
+                    }
+                }
+
+                return GetSequence(_sequences.Max, (uint)_sequences.Count);
+            }
         }
 
         [TestMethod]
@@ -73,9 +106,12 @@ namespace ponderthis
         {
             var primes = new Primes();
 
-            Assert.AreEqual(7907ul, primes.UpTo(7918ul));
-            Assert.AreEqual(7919ul, primes.UpTo(7919ul));
-            Assert.AreEqual(7919ul, primes.UpTo(7920ul));
+            Assert.IsFalse(primes.IsPrime(7918ul));
+            Assert.AreEqual(1000, primes.GetCount());
+            Assert.IsTrue(primes.IsPrime(7919ul));
+            Assert.AreEqual(1001, primes.GetCount());
+            Assert.IsFalse(primes.IsPrime(7920ul));
+            Assert.AreEqual(1001, primes.GetCount());
         }
 
         [TestMethod]
@@ -85,7 +121,8 @@ namespace ponderthis
 
             Assert.AreEqual("1", string.Join(',', seq.GetSequence(1, 1)), "X1");
             Assert.AreEqual("8,9", string.Join(',', seq.GetSequence(8, 2)), "X2");
-            Assert.AreEqual("15,16,18", string.Join(',', seq.GetSequence(15, 3)), "X3");
+            Assert.AreEqual("9,10,12", string.Join(',', seq.GetSequence(9, 3)), "X3");
+            Assert.AreEqual("15,16,18,21", string.Join(',', seq.GetSequence(15, 4)), "X4");
         }
     }
 }
