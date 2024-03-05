@@ -1,113 +1,36 @@
+using System.Data;
+
 public class ComputersAndBatteries
 {
-    private sealed class BatteryBag : SortedList<int, int>
+    public class SortedBag<T>
     {
-        private sealed class ReverseComparer : IComparer<int>
+        private readonly SortedDictionary<T, int> _dict = new SortedDictionary<T, int>();
+        public SortedBag(IEnumerable<T> values)
         {
-            public int Compare(int x, int y)
+            foreach (var value in values)
             {
-                return y - x;
+                Add(value);
             }
         }
 
-        public BatteryBag(int[] batteries) : base(new ReverseComparer())
+        public void Add(T value)
         {
-            PutBatteries(batteries);
-        }
-
-        public bool TryGetBatteries(int[] batteries)
-        {
-            for (int i = 0; i < batteries.Length; i++)
+            if (_dict.TryGetValue(value, out int count))
             {
-                if (Count == 0) return false;
-
-                batteries[i] = this.Keys[0];
-                int current = this.Values[0];
-
-                if (current > 1)
-                {
-                    this[this.Keys[0]] = current - 1;
-                }
-                else
-                {
-                    this.RemoveAt(0);
-                }
+                _dict[value] = count + 1;
             }
-
-            return true;
-        }
-
-        public int RemoveCompleteSets(int computers)
-        {
-            var batteriesToRemove = new Dictionary<int, int>();
-
-            foreach (var key in Keys)
+            else
             {
-                if (this.TryGetValue(key, out var value) && value >= 2 * computers)
-                {
-                    int setsToRemove = value / computers;
-
-                    if (setsToRemove > 0)
-                    {
-                        batteriesToRemove.Add(key, setsToRemove);
-                    }
-                }
-            }
-
-            if (batteriesToRemove.Count == 0) return 0;
-
-            int result = 0;
-            foreach (var pair in batteriesToRemove)
-            {
-                this[pair.Key] -= pair.Value * computers;
-                result += pair.Key * pair.Value;
-            }
-
-            return result;
-        }
-
-        public void PutBatteries(int[] batteries)
-        {
-            foreach (var battery in batteries)
-            {
-                if (battery == 0) continue;
-
-                if (!TryGetValue(battery, out int value))
-                {
-                    this[battery] = 1;
-                }
-                else
-                {
-                    this[battery] = value + 1;
-                }
+                _dict.Add(value, 1);
             }
         }
+
+        public T Min => _dict.Keys.Min();
     }
 
     public long MaxRunTime(int computers, int[] batteries)
     {
         if (computers == 0 || batteries.Length < computers) return 0;
-
-        var bag = new BatteryBag(batteries);
-
-        int usage = 0;
-        var used = new int[computers];
-
-        while (true)
-        {
-            usage += bag.RemoveCompleteSets(computers);
-
-            if (!bag.TryGetBatteries(used)) break;
-
-            int roundUsage = Math.Max(1, used[used.Length - 1] - 1);
-            for (int i = 0; i < used.Length; i++) used[i] -= roundUsage;
-
-            usage += roundUsage;
-
-            bag.PutBatteries(used);
-        }
-
-        return usage;
     }
 
     [Fact]
