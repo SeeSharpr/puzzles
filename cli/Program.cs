@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using static ponderthis.APSeq;
 
-var sequence = new ArithmeticProgressionSequence();
+var sequence = new ArithmeticProgressionSequence(1001);
 
 using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
 

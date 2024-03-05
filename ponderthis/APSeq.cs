@@ -1,7 +1,3 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Diagnostics;
-
 namespace ponderthis
 {
     [TestClass]
@@ -10,6 +6,7 @@ namespace ponderthis
         private class Primes
         {
             private readonly SortedSet<ulong> _primes = new SortedSet<ulong>() { 3 };
+            private int locked = 0;
             private ulong _currentSqrt = 1;
 
             public bool IsPrime(ulong value)
@@ -21,6 +18,8 @@ namespace ponderthis
 
             public void UpTo(ulong value)
             {
+                if (_primes.Max < value && locked == 1) throw new InvalidOperationException("Locked");
+
                 while (_primes.Max <= value)
                 {
                     ulong candidate = _primes.Max + 2;
@@ -49,12 +48,28 @@ namespace ponderthis
             {
                 return 1 + _primes.Count;
             }
+
+            internal void Lock()
+            {
+                if (Interlocked.CompareExchange(ref locked, 1, 0) == 1) throw new InvalidOperationException("Already locked");
+            }
+
+            internal void Unlock()
+            {
+                if (Interlocked.CompareExchange(ref locked, 0, 1) == 0) throw new InvalidOperationException("Already unlocked");
+            }
         }
 
         public class ArithmeticProgressionSequence
         {
             private readonly Primes _primes = new Primes();
             private readonly SortedSet<ulong> _sequences = new SortedSet<ulong>() { 1 };
+            private readonly ulong[] _values;
+
+            public ArithmeticProgressionSequence(int maxSize)
+            {
+                this._values = new ulong[maxSize];
+            }
 
             public IEnumerable<ulong> GetSequence(ulong initialValue, int length)
             {
@@ -66,30 +81,26 @@ namespace ponderthis
 
             public IEnumerable<ulong> GetNextSequence()
             {
-                uint nextLength = (uint)_sequences.Count;
+                int nextLength = _sequences.Count + 1;
 
                 for (ulong candidate = _sequences.Max + 1; ; candidate++)
                 {
-                    if (_primes.IsPrime(candidate)) continue;
+                    while (_primes.IsPrime(candidate) || _primes.IsPrime(candidate + 1)) candidate += 2;
 
-                    bool found = true;
-                    ulong next = candidate;
-                    for (uint i = 0; i < nextLength; i++)
-                    {
-                        next += i + 1;
+                    Parallel.For(0, nextLength + 1, i => _values[i] = candidate + (ulong)((i + 1) * i / 2));
 
-                        if (_primes.IsPrime(next))
-                        {
-                            found = false;
-                            break;
-                        }
-                    }
+                    // Ensures the prime cache contains at least up to the value past the last
+                    _primes.UpTo(_values[nextLength]);
+                    _primes.Lock();
+                    bool hasPrime = _values.Take(nextLength).AsParallel().Any(_primes.IsPrime);
+                    _primes.Unlock();
 
-                    if (found)
+                    if (!hasPrime)
                     {
                         _sequences.Add(candidate);
                         break;
                     }
+
                 }
 
                 return GetSequence(_sequences.Max, _sequences.Count);
@@ -112,7 +123,7 @@ namespace ponderthis
         [TestMethod]
         public void ExampleSequences()
         {
-            var seq = new ArithmeticProgressionSequence();
+            var seq = new ArithmeticProgressionSequence(1001);
 
             Assert.AreEqual("1", string.Join(',', seq.GetSequence(1, 1)), "X1");
             Assert.AreEqual("8,9", string.Join(',', seq.GetSequence(8, 2)), "X2");
