@@ -31,6 +31,7 @@ public class ComputersAndBatteries
     public long MaxRunTime(int computers, int[] batteries)
     {
         if (computers == 0 || batteries.Length < computers) return 0;
+        return -1;
     }
 
     [Fact]
