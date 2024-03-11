@@ -1,48 +1,24 @@
-﻿using System.Diagnostics;
-using static ponderthis.APSeq;
+﻿using ponderthis;
+using System.Diagnostics;
+using static ponderthis.Sequence;
 
-var sequence = new ArithmeticProgressionSequence(1001);
-
-using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
-
-Stopwatch sw = Stopwatch.StartNew();
-TimeSpan previousElapsed = TimeSpan.Zero;
-
-for (int i = 0; i < 1000; i++)
+internal class Program
 {
-    Console.Write($"{i} - {sw.Elapsed} - ");
-    writer.Write($"{i} - {sw.Elapsed} - ");
-
-    var result = sequence.GetNextSequence();
-
-    if (i % 10 == 0 || i == 999)
+    private static void Main(string[] args)
     {
-        writer.Write($"{sw.Elapsed - previousElapsed} - ");
-        previousElapsed = sw.Elapsed;
+        var sequence = new Sequence(2024);
 
-        bool first = true;
-        foreach (var item in result)
+        int startingCount = 0;
+        TimeSpan startingTimestamp = TimeSpan.Zero;
+
+        using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
+
+        Stopwatch sw = Stopwatch.StartNew();
+
+        foreach (var pair in sequence.GetNextSequence())
         {
-            if (!first)
-            {
-                writer.Write(',');
-            }
-            else
-            {
-                Console.WriteLine(item);
-                first = false;
-            }
-
-            writer.Write(item);
+            sequence.SerializeLatest(writer, pair.Value, sw.Elapsed + startingTimestamp, sequence.GetSequence(pair.Key, pair.Value), 10, 999);
+            sequence.SerializeLatest(Console.Out, pair.Value, sw.Elapsed + startingTimestamp, sequence.GetSequence(pair.Key, pair.Value), 1000, 999);
         }
-
-        writer.WriteLine();
-    }
-    else
-    {
-        var first = result.First();
-
-        Console.WriteLine(first);
-        writer.WriteLine($"{first}...");
     }
 }
