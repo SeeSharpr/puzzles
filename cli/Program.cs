@@ -1,6 +1,5 @@
 ﻿using ponderthis;
 using System.Diagnostics;
-using static ponderthis.Sequence;
 
 internal class Program
 {
@@ -8,7 +7,6 @@ internal class Program
     {
         var sequence = new Sequence(2024);
 
-        int startingCount = 0;
         TimeSpan startingTimestamp = TimeSpan.Zero;
 
         using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");

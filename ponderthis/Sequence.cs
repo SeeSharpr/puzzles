@@ -1,45 +1,52 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace ponderthis
 {
     public class Primes
     {
-        private readonly SortedSet<ulong> _primes = new SortedSet<ulong>() { 3 };
-        private int locked = 0;
-        private ulong _currentSqrt = 1;
+        private readonly SortedSet<ulong> _primes = [3, 5, 7];
+        private uint _candidateSqrt = 5;
 
         public bool IsPrime(ulong value)
         {
-            UpTo(value);
-
-            return _primes.Contains(value) || value == 1 || value == 2;
+            if (value <= 1) return false;
+            else if (value == 2 || value == 3) return true;
+            else if (value % 2 == 0 || value % 3 == 0) return false;
+            else
+            {
+                UpTo(value);
+                return _primes.Contains(value);
+            }
         }
 
         public void UpTo(ulong value)
         {
-            if (_primes.Max < value && locked == 1) throw new InvalidOperationException("Locked");
+            ulong candidate = _primes.Max;
 
             while (_primes.Max <= value)
             {
-                ulong candidate = _primes.Max + 2;
-                while (true)
-                {
-                    for (ulong nextSqrt = _currentSqrt + 1; nextSqrt * nextSqrt <= candidate; nextSqrt++)
-                    {
-                        _currentSqrt = nextSqrt;
-                    }
+                do candidate += 2; while (candidate % 3 == 0 || candidate % 5 == 0);
 
-                    if (_primes.Any(prime => prime <= _currentSqrt && candidate % prime == 0))
+                while (_candidateSqrt * _candidateSqrt < candidate)
+                {
+                    _candidateSqrt += 2;
+                }
+
+                bool isPrime = true;
+                for (uint i = 5; i <= _candidateSqrt; i += 6)
+                {
+                    if (candidate % i == 0 || candidate % (i + 2) == 0)
                     {
-                        candidate += 2;
-                    }
-                    else
-                    {
+                        isPrime = false;
                         break;
                     }
                 }
+
+                if (!isPrime) continue;
 
                 _primes.Add(candidate);
             }
@@ -49,27 +56,17 @@ namespace ponderthis
         {
             return 1 + _primes.Count;
         }
-
-        internal void Lock()
-        {
-            if (Interlocked.CompareExchange(ref locked, 1, 0) == 1) throw new InvalidOperationException("Already locked");
-        }
-
-        internal void Unlock()
-        {
-            if (Interlocked.CompareExchange(ref locked, 0, 1) == 0) throw new InvalidOperationException("Already unlocked");
-        }
     }
 
     public class Sequence
     {
         private readonly Primes _primes = new Primes();
         private readonly SortedList<ulong, int> _sequences = new() { { 1, 1 } };
-        private readonly ulong[] _values;
+        private readonly int maxLength;
 
-        public Sequence(int maxSize)
+        public Sequence(int maxLength)
         {
-            this._values = new ulong[maxSize + 1];
+            this.maxLength = maxLength;
         }
 
         public IEnumerable<ulong> GetSequence(ulong initialValue, int length)
@@ -88,48 +85,43 @@ namespace ponderthis
             ulong candidate = _sequences.Keys[_sequences.Keys.Count - 1];
             int length = _sequences.Values[_sequences.Values.Count - 1] + 1;
 
-            while (length < _values.Length)
+            while (length <= maxLength)
             {
-                while (_primes.IsPrime(candidate)) candidate++;
+                ulong value = candidate;
+                bool hasPrime = false;
 
-                // Load values to test in parallel
-                Parallel.For(fromInclusive: 0, toExclusive: length + 1, body: index => _values[index] = candidate + (ulong)((index + 1) * index / 2));
+                _primes.UpTo(candidate + (ulong)((1 + maxLength) * maxLength / 2));
 
-                // Ensures we have enough primes in cache
-                _primes.UpTo(_values[length]);
-
-                // Primality check
-                _primes.Lock();
-                bool hasPrime = _values.Take(length).AsParallel().Any(_primes.IsPrime);
-                _primes.Unlock();
-
-                if (hasPrime)
+                for (int i = 1; i <= length; i++)
                 {
-                    // There is a prime, continue searching
-                    candidate++;
-                    continue;
+                    if (_primes.IsPrime(value))
+                    {
+                        hasPrime = true;
+                        break;
+                    }
+
+                    value += (ulong)i;
                 }
 
-                // There is no prime, try to keep looking for the same candidate
-                while (length < _values.Length)
+                while (!hasPrime && length <= maxLength)
                 {
                     yield return new KeyValuePair<ulong, int>(candidate, length);
 
+                    _sequences[candidate] = length;
+                    hasPrime = _primes.IsPrime(value);
                     length++;
-
-                    _values[length] = _values[length - 1] + (ulong)length;
-                    _primes.UpTo(_values[length]);
-                    _primes.Lock();
-                    hasPrime = _primes.IsPrime(_values[length - 1]);
-                    _primes.Unlock();
 
                     if (hasPrime)
                     {
-                        _sequences.Add(candidate, length-1);
-                        candidate++;
                         break;
                     }
+                    else
+                    {
+                        value += (ulong)length;
+                    }
                 }
+
+                candidate++;
             }
 
             yield break;
@@ -176,7 +168,6 @@ namespace ponderthis
             var primes = new Primes();
 
             Assert.IsFalse(primes.IsPrime(7918ul));
-            Assert.AreEqual(1000, primes.GetCount());
             Assert.IsTrue(primes.IsPrime(7919ul));
             Assert.AreEqual(1001, primes.GetCount());
             Assert.IsFalse(primes.IsPrime(7920ul));
