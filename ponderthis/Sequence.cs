@@ -13,8 +13,8 @@ namespace ponderthis
 
         public bool IsPrime(ulong value)
         {
-            if (value <= 1) return false;
-            else if (value == 2 || value == 3) return true;
+            if (value < 1) return false;
+            else if (value == 1 || value == 2 || value == 3) return true;
             else if (value % 2 == 0 || value % 3 == 0) return false;
             else
             {
@@ -82,6 +82,8 @@ namespace ponderthis
 
         public IEnumerable<KeyValuePair<ulong, int>> GetNextSequence()
         {
+            yield return new KeyValuePair<ulong, int>(1, 1);
+
             ulong candidate = _sequences.Keys[_sequences.Keys.Count - 1];
             int length = _sequences.Values[_sequences.Values.Count - 1] + 1;
 
@@ -185,6 +187,20 @@ namespace ponderthis
             Assert.AreEqual("9,10,12,15", string.Join(',', seq.GetSequence(9, 4)), "X4");
             Assert.AreEqual("15,16,18,21,25", string.Join(',', seq.GetSequence(15, 5)), "X5");
         }
+
+        [TestMethod]
+        public void GetNextSequence()
+        {
+            var seq = new Sequence(1001);
+            var result = seq.GetNextSequence().Take(5).ToArray();
+
+            Assert.AreEqual("1", string.Join(',', seq.GetSequence(result[0].Key, result[0].Value)), "X1");
+            Assert.AreEqual("8,9", string.Join(',', seq.GetSequence(result[1].Key, result[1].Value)), "X2");
+            Assert.AreEqual("9,10,12", string.Join(',', seq.GetSequence(result[2].Key, result[2].Value)), "X3");
+            Assert.AreEqual("9,10,12,15", string.Join(',', seq.GetSequence(result[3].Key, result[3].Value)), "X4");
+            Assert.AreEqual("15,16,18,21,25", string.Join(',', seq.GetSequence(result[4].Key, result[4].Value)), "X5");
+        }
+
 
         [TestMethod]
         public void SerializationDeserialization()
