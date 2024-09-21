@@ -1,28 +1,69 @@
 ﻿using System.Diagnostics;
 using static ponderthis.APSeq;
 
-var seq = new ArithmeticProgressionSequence();
+<<<<<<< Updated upstream
+internal class Program
+{
+    private static void Main(string[] args)
+    {
+        var sequence = new Sequence(2024);
+
+using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
 
 Stopwatch sw = Stopwatch.StartNew();
+TimeSpan previousElapsed = TimeSpan.Zero;
+
+        foreach (var pair in sequence.GetNextSequence())
+        {
+            sequence.SerializeLatest(writer, pair.Value, sw.Elapsed + startingTimestamp, sequence.GetSequence(pair.Key, pair.Value), 10, 999);
+            sequence.SerializeLatest(Console.Out, pair.Value, sw.Elapsed + startingTimestamp, sequence.GetSequence(pair.Key, pair.Value), 1000, 999);
+        }
+    }
+}
+=======
+var sequence = new ArithmeticProgressionSequence();
+
+using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
+
+Stopwatch sw = Stopwatch.StartNew();
+TimeSpan previousElapsed = TimeSpan.Zero;
+
 for (int i = 0; i < 1000; i++)
 {
-    Console.Write($"{sw.Elapsed} {i} - ");
+    Console.Write($"{i} - {sw.Elapsed} - ");
+    writer.Write($"{i} - {sw.Elapsed} - ");
+
+    var result = sequence.GetNextSequence();
 
     if (i % 10 == 0 || i == 999)
     {
-        bool first = true;
-        foreach (var item in seq.GetNextSequence())
-        {
-            if (!first) Console.Write(',');
-            else first = false;
+        writer.Write($"{sw.Elapsed - previousElapsed} - ");
+        previousElapsed = sw.Elapsed;
 
-            Console.Write(item);
+        bool first = true;
+        foreach (var item in result)
+        {
+            if (!first)
+            {
+                writer.Write(',');
+            }
+            else
+            {
+                Console.WriteLine(item);
+                first = false;
+            }
+
+            writer.Write(item);
         }
 
-        Console.WriteLine();
+        writer.WriteLine();
     }
     else
     {
-        Console.WriteLine($"{seq.GetNextSequence().First()}...");
+        var first = result.First();
+
+        Console.WriteLine(first);
+        writer.WriteLine($"{first}...");
     }
 }
+>>>>>>> Stashed changes

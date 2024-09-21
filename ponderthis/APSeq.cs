@@ -56,16 +56,11 @@ namespace ponderthis
             private readonly Primes _primes = new Primes();
             private readonly SortedSet<ulong> _sequences = new SortedSet<ulong>() { 1 };
 
-            private ulong GetTerm(ulong initialValue, uint index)
+            public IEnumerable<ulong> GetSequence(ulong initialValue, int length)
             {
-                return initialValue + (index * (index + 1ul) / 2ul);
-            }
-
-            public IEnumerable<ulong> GetSequence(ulong initialValue, uint length)
-            {
-                for (uint i = 0; i < length; i++)
+                for (int i = 0; i < length; i++)
                 {
-                    yield return GetTerm(initialValue, i);
+                    yield return initialValue + (ulong)i;
                 }
             }
 
@@ -97,7 +92,7 @@ namespace ponderthis
                     }
                 }
 
-                return GetSequence(_sequences.Max, (uint)_sequences.Count);
+                return GetSequence(_sequences.Max, _sequences.Count);
             }
         }
 
