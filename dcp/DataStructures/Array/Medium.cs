@@ -80,5 +80,26 @@
 
             Assert.Equal(expected, longest);
         }
+
+        [Theory]
+        [InlineData(new int[] { 100, 4, 200, 1, 3, 2 }, 4)]
+        [InlineData(new int[] { 1, 3, 5, 7, 2, 4, 6, 8 }, 8)]
+        public void LongestSequence_Copilot(int[] input, int expected)
+        {
+            HashSet<int> numbers = new(input);
+
+            int longest = 0;
+            foreach (int number in numbers)
+            {
+                if (numbers.Contains(number - 1)) continue;
+
+                int streak = 0;
+                for (int candidate = number; numbers.Contains(candidate); candidate++, streak++) ;
+
+                if (streak > longest) longest = streak;
+            }
+
+            Assert.Equal(expected, longest);
+        }
     }
 }
