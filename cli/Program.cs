@@ -1,26 +1,6 @@
 ﻿using System.Diagnostics;
 using static ponderthis.APSeq;
 
-<<<<<<< Updated upstream
-internal class Program
-{
-    private static void Main(string[] args)
-    {
-        var sequence = new Sequence(2024);
-
-using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
-
-Stopwatch sw = Stopwatch.StartNew();
-TimeSpan previousElapsed = TimeSpan.Zero;
-
-        foreach (var pair in sequence.GetNextSequence())
-        {
-            sequence.SerializeLatest(writer, pair.Value, sw.Elapsed + startingTimestamp, sequence.GetSequence(pair.Key, pair.Value), 10, 999);
-            sequence.SerializeLatest(Console.Out, pair.Value, sw.Elapsed + startingTimestamp, sequence.GetSequence(pair.Key, pair.Value), 1000, 999);
-        }
-    }
-}
-=======
 var sequence = new ArithmeticProgressionSequence();
 
 using TextWriter writer = new StreamWriter($"execution_{DateTime.UtcNow.ToString("yyyy_MM_dd_hh_mm_ss")}.txt");
@@ -66,4 +46,3 @@ for (int i = 0; i < 1000; i++)
         writer.WriteLine($"{first}...");
     }
 }
->>>>>>> Stashed changes
