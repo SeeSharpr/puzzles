@@ -1,4 +1,8 @@
-﻿namespace leetcode.Lists
+﻿using static System.Collections.Specialized.BitVector32;
+using System.Diagnostics;
+using System.Threading.Tasks;
+
+namespace leetcode.Lists
 {
     public class Top150
     {
@@ -552,8 +556,49 @@
         [Theory]
         [InlineData(new[] { 1, 2, 3, 4 }, new[] { 24, 12, 8, 6 })]
         [InlineData(new[] { -1, 1, 0, -3, 3 }, new[] { 0, 0, 9, 0, 0 })]
+        [InlineData(new[] { -1 }, new[] { 0 })]
+        [InlineData(new[] { -1, -1 }, new[] { -1, -1 })]
+        [InlineData(new[] { 1, -1 }, new[] { -1, 1 })]
+        // Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].
+        // The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.
+        // You must write an algorithm that runs in O(n) time and without using the division operation.
         public void ProductExceptSelf(int[] nums, int[] expected)
         {
+            int[] result = new int[nums.Length];
+            for (int i = 0; i < result.Length; i++) result[i] = nums.Length == 1 ? 0 : 1;
+
+            int left = 1;
+            for (int i = 0; i < nums.Length; i++)
+            {
+                result[i] *= left;
+                left *= nums[i];
+            }
+
+            int right = 1;
+            for (int i = result.Length - 1; i >= 0; i--)
+            {
+                result[i] *= right;
+                right *= nums[i];
+            }
+
+            Assert.True(expected.SequenceEqual(result));
+        }
+
+        [Theory]
+        [InlineData(new[] { 1, 2, 3, 4, 5 }, new[] { 3, 4, 5, 1, 2 }, 3)]
+        [InlineData(new[] { 2, 3, 4 }, new[] { 3, 4, 3 }, -1)]
+        // There are n gas stations along a circular route, where the amount of gas at the ith station is gas[i].
+        // You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from the ith station to its next(i + 1)th station.You begin the journey with an empty tank at one of the gas stations.
+        // Given two integer arrays gas and cost, return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1. If there exists a solution, it is guaranteed to be unique.
+        public void CanCompleteCircuit(int[] gas, int[] cost, int expected)
+        {
+            Dictionary<int, int> map = new();
+            int n = gas.Length;
+
+            for (int i = 0; i < n; i++)
+            {
+
+            }
         }
     }
 }
