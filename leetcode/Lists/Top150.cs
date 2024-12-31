@@ -1,7 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System;
-
-namespace leetcode.Lists
+﻿namespace leetcode.Lists
 {
     public class Top150
     {
@@ -194,7 +191,7 @@ namespace leetcode.Lists
         // Given an integer array nums, rotate the array to the right by k steps, where k is non-negative.
         public void Rotate(int[] nums, int k, int[] expected)
         {
-            var reverse = delegate (int[] array, int start, int end)
+            static void reverse(int[] array, int start, int end)
             {
                 int l = (end - start + 1) / 2;
 
@@ -207,7 +204,7 @@ namespace leetcode.Lists
                     array[to] ^= array[from];
                     array[from] ^= array[to];
                 }
-            };
+            }
 
             k %= nums.Length;
             int l = nums.Length - 1;
@@ -466,6 +463,97 @@ namespace leetcode.Lists
             }
 
             Assert.Equal(expected, actual);
+        }
+
+        public class RandomizedSet
+        {
+            private readonly Random random = new();
+            private readonly Dictionary<int, int> val2idx = new();
+            private readonly Dictionary<int, int> idx2val = new();
+
+            public RandomizedSet()
+            {
+            }
+
+            public bool Insert(int val)
+            {
+                int idx = idx2val.Count + 1;
+
+                bool result = val2idx.TryAdd(val, idx);
+
+                if (result)
+                {
+                    idx2val.Add(idx, val);
+                }
+
+                return result;
+            }
+
+            public bool Remove(int val)
+            {
+                bool result = val2idx.TryGetValue(val, out int idx);
+
+                if (result)
+                {
+                    int lastIdx = idx2val.Count;
+
+                    // Remove from both
+                    val2idx.Remove(val);
+                    idx2val.Remove(idx);
+
+                    // Fill the gap, if any
+                    if (lastIdx != idx)
+                    {
+                        int lastVal = idx2val[lastIdx];
+                        idx2val.Remove(lastIdx);
+                        val2idx[lastVal] = idx;
+                        idx2val[idx] = lastVal;
+                    }
+                }
+
+                return result;
+            }
+
+            public int GetRandom()
+            {
+                return idx2val[random.Next(idx2val.Count) + 1];
+            }
+        }
+
+        [Theory]
+        [InlineData(new int[] { })]
+        [InlineData(10, 10)]
+        [InlineData(-10)]
+        [InlineData(10, 20, 30, -30)]
+        [InlineData(10, 20, 30, -20)]
+        [InlineData(10, 20, 30, -10)]
+        [InlineData(10, -20, 20, 0, -10, 20, 0)]
+        public void RandomizedSetTest(params int[] vals)
+        {
+            RandomizedSet set = new();
+
+            foreach (int val in vals)
+            {
+                if (val > 0)
+                {
+                    set.Insert(val);
+                }
+                else if (val < 0)
+                {
+                    set.Remove(-val);
+                }
+                else
+                {
+                    int _ = set.GetRandom();
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(new[] { 1, 2, 3, 4 }, new[] { 24, 12, 8, 6 })]
+        [InlineData(new[] { -1, 1, 0, -3, 3 }, new[] { 0, 0, 9, 0, 0 })]
+        public void ProductExceptSelf(int[] nums, int[] expected)
+        {
         }
     }
 }
