@@ -60,5 +60,40 @@
 
             Assert.Equal(expected, result);
         }
+
+        [Theory]
+        [InlineData(new[] { 2, 7, 11, 15 }, 9, new[] { 1, 2 })]
+        [InlineData(new[] { 2, 3, 4 }, 6, new[] { 1, 3 })]
+        [InlineData(new[] { -1, 0 }, -1, new[] { 1, 2 })]
+        public void TwoSum2(int[] numbers, int target, int[] expected)
+        {
+            int n = numbers.Length - 1;
+            int i = 0;
+            int j = n;
+
+            while (i < j)
+            {
+                int sum = numbers[i] + numbers[j];
+
+                if (sum < target)
+                {
+                    if (j < n && numbers[i] + numbers[j + 1] < target) j++;
+                    else i++;
+                }
+                else if (sum > target)
+                {
+                    if (i > 0 && numbers[i - 1] + numbers[j] > target) i--;
+                    else j--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            int[] result = new[] { i + 1, j + 1 };
+
+            Assert.True(expected.SequenceEqual(result));
+        }
     }
 }
