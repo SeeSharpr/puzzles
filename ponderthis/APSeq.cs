@@ -1,6 +1,5 @@
 namespace ponderthis
 {
-    [TestClass]
     public class APSeq
     {
         private class Primes
@@ -92,28 +91,28 @@ namespace ponderthis
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UpTo()
         {
             var primes = new Primes();
 
-            Assert.IsFalse(primes.IsPrime(7918ul));
-            Assert.AreEqual(1000, primes.GetCount());
-            Assert.IsTrue(primes.IsPrime(7919ul));
-            Assert.AreEqual(1001, primes.GetCount());
-            Assert.IsFalse(primes.IsPrime(7920ul));
-            Assert.AreEqual(1001, primes.GetCount());
+            Assert.False(primes.IsPrime(7918ul));
+            Assert.Equal(1000, primes.GetCount());
+            Assert.True(primes.IsPrime(7919ul));
+            Assert.Equal(1001, primes.GetCount());
+            Assert.False(primes.IsPrime(7920ul));
+            Assert.Equal(1001, primes.GetCount());
         }
 
-        [TestMethod]
+        [Fact]
         public void ExampleSequences()
         {
             var seq = new ArithmeticProgressionSequence();
 
-            Assert.AreEqual("1", string.Join(',', seq.GetSequence(1, 1)), "X1");
-            Assert.AreEqual("8,9", string.Join(',', seq.GetSequence(8, 2)), "X2");
-            Assert.AreEqual("9,10,12", string.Join(',', seq.GetSequence(9, 3)), "X3");
-            Assert.AreEqual("15,16,18,21", string.Join(',', seq.GetSequence(15, 4)), "X4");
+            Assert.Equal("1", string.Join(',', seq.GetSequence(1, 1)));
+            Assert.Equal("8,9", string.Join(',', seq.GetSequence(8, 2)));
+            Assert.Equal("9,10,12", string.Join(',', seq.GetSequence(9, 3)));
+            Assert.Equal("15,16,18,21", string.Join(',', seq.GetSequence(15, 4)));
         }
     }
 }
