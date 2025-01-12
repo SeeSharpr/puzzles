@@ -160,33 +160,56 @@ namespace leetcode.Lists.Top150
         public void MajorityElement(int[] nums, int expected)
         {
             // The question assumes the majority number *always* exists, so basically we just need to find the number with highest occurrences
-            Dictionary<int, int> counts = new();
-            int maxCount = int.MinValue;
-            int maxNumber = int.MinValue;
 
-            foreach (int i in nums)
+            int maxNumber = 0;
+            int count = 0;
+            int limit = nums.Length;
+
+            for (int i = 0; i < limit; i++)
             {
-                if (!counts.ContainsKey(i))
+                if (count == 0)
                 {
-                    counts[i] = 1;
+                    maxNumber = nums[i];
+                }
 
-                    if (1 > maxCount)
-                    {
-                        maxCount = 1;
-                        maxNumber = i;
-                    }
+                if (nums[i] == maxNumber)
+                {
+                    count++;
                 }
                 else
                 {
-                    int newCount = ++counts[i];
-
-                    if (newCount > maxCount)
-                    {
-                        maxCount = newCount;
-                        maxNumber = i;
-                    }
+                    count--;
                 }
             }
+
+
+            //Dictionary<int, int> counts = new();
+            //int maxCount = int.MinValue;
+            //int maxNumber = int.MinValue;
+
+            //foreach (int i in nums)
+            //{
+            //    if (!counts.ContainsKey(i))
+            //    {
+            //        counts[i] = 1;
+
+            //        if (1 > maxCount)
+            //        {
+            //            maxCount = 1;
+            //            maxNumber = i;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        int newCount = ++counts[i];
+
+            //        if (newCount > maxCount)
+            //        {
+            //            maxCount = newCount;
+            //            maxNumber = i;
+            //        }
+            //    }
+            //}
 
             Assert.Equal(expected, maxNumber);
         }

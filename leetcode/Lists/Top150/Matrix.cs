@@ -111,5 +111,56 @@
 
             Assert.Equal(expected, valid);
         }
+
+        [Fact]
+        public void SpiralOrder()
+        {
+            Tuple<int[][], IList<int>>[] inlineData = [
+                new ([[1, 2, 3], [4, 5, 6], [7, 8, 9]], [1, 2, 3, 6, 9, 8, 7, 4, 5]),
+                new ([[1,2,3,4],[5,6,7,8],[9,10,11,12]], [1,2,3,4,8,12,11,10,9,5,6,7]),
+                new ([[1,2,3]], [1,2,3]),
+                new ([[1],[4],[7]], [1,4,7]),
+                new ([[3],[2]], [3,2]),
+                ];
+
+            foreach (var tuple in inlineData)
+            {
+                int[][] matrix = tuple.Item1;
+                IList<int> expected = tuple.Item2;
+
+                List<int> result = [];
+
+                if (matrix.Length > 0 && matrix[0].Length > 0)
+                {
+                    int xi = 0;
+                    int xf = matrix[0].Length - 1;
+                    int yi = 0;
+                    int yf = matrix.Length - 1;
+
+                    while (xi <= xf && yi <= yf)
+                    {
+                        for (int i = xi; i <= xf; i++) result.Add(matrix[yi][i]);
+                        yi++;
+
+                        for (int j = yi; j <= yf; j++) result.Add(matrix[j][xf]);
+                        xf--;
+
+                        if (yi <= yf)
+                        {
+                            for (int i = xf; i >= xi; i--) result.Add(matrix[yf][i]);
+                            yf--;
+                        }
+
+                        if (xi <= xf)
+                        {
+                            for (int j = yf; j >= yi; j--) result.Add(matrix[j][xi]);
+                            xi++;
+                        }
+                    }
+                }
+
+                Assert.True(expected.SequenceEqual(result));
+            }
+        }
     }
 }
