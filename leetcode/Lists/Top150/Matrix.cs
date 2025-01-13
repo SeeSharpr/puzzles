@@ -162,5 +162,55 @@
                 Assert.True(expected.SequenceEqual(result));
             }
         }
+
+        // You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+        [Fact]
+        public void Rotate()
+        {
+            foreach (var tuple in new Tuple<int[][], int[][]>[] {
+                new ([[1,2,3],[4,5,6],[7,8,9]], [[7,4,1],[8,5,2],[9,6,3]]),
+                new ([[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]],[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]),
+            })
+            {
+                int[][] matrix = tuple.Item1;
+                int[][] expected = tuple.Item2;
+
+                static void RotateRight(ref int a1, ref int a2, ref int a3, ref int a4)
+                {
+                    int temp = a4;
+                    a4 = a3;
+                    a3 = a2;
+                    a2 = a1;
+                    a1 = temp;
+                }
+
+                if (matrix.Length == 0) return;
+
+                int left = 0;
+                int right = matrix[0].Length - 1;
+                int top = 0;
+                int bottom = matrix.Length - 1;
+
+                while (left < right && top < bottom)
+                {
+                    int limit = right - left;
+
+                    for (int i = 0; i < limit; i++)
+                    {
+                        RotateRight(ref matrix[top][left + i], ref matrix[top + i][right], ref matrix[bottom][right - i], ref matrix[bottom - i][left]);
+                    }
+
+                    left++;
+                    right--;
+                    top++;
+                    bottom--;
+                }
+
+                for (int i = 0; i < matrix.Length;i++)
+                {
+                    Assert.True(expected[i].SequenceEqual(matrix[i]));
+                }
+            }
+        }
     }
 }

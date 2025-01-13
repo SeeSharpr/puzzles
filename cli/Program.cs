@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using static ponderthis.APSeq;
 
 var sequence = new ArithmeticProgressionSequence();
 
