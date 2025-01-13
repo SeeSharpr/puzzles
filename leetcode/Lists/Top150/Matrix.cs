@@ -206,7 +206,97 @@
                     bottom--;
                 }
 
-                for (int i = 0; i < matrix.Length;i++)
+                for (int i = 0; i < matrix.Length; i++)
+                {
+                    Assert.True(expected[i].SequenceEqual(matrix[i]));
+                }
+            }
+        }
+
+        // Given an m x n integer matrix matrix, if an element is 0, set its entire row and column to 0's.
+        [Fact]
+        public void SetZeroes()
+        {
+            foreach (var tuple in new Tuple<int[][], int[][]>[] {
+            new ([[1,1,1],[1,0,1],[1,1,1]], [[1,0,1],[0,0,0],[1,0,1]]),
+            new ([[0, 1, 2, 0], [3, 4, 5, 2], [1, 3, 1, 5]], [[0, 0, 0, 0], [0, 4, 5, 0], [0, 3, 1, 0]]),
+            new ([[1,2,3,4],[5,0,7,8],[0,10,11,12],[13,14,15,0]],[[0,0,3,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]])
+            })
+            {
+                int[][] matrix = tuple.Item1;
+                int[][] expected = tuple.Item2;
+
+                if (matrix.Length == 0) return;
+
+                int height = matrix.Length;
+                int width = matrix[0].Length;
+
+                //HashSet<int> cols = new();
+                //HashSet<int> rows = new();
+
+                //for (int j = 0; j < height; j++)
+                //{
+                //    for (int i = 0; i < width; i++)
+                //    {
+                //        if (matrix[j][i] != 0) continue;
+
+                //        cols.Add(i);
+                //        rows.Add(j);
+                //    }
+                //}
+
+                //foreach (var col in cols)
+                //{
+                //    for (int k = 0; k < height; k++) matrix[k][col] = 0;
+                //}
+
+                //foreach (var row in rows)
+                //{
+                //    for (int k = 0; k < width; k++) matrix[row][k] = 0;
+                //}
+
+                bool shouldZeroFirstRow = false;
+                bool shouldZeroFirstCol = false;
+
+                for (int j = 0; j < height; j++)
+                {
+                    for (int i = 0; i < width; i++)
+                    {
+                        if (matrix[j][i] != 0) continue;
+
+                        if (j == 0) shouldZeroFirstRow = true;
+                        if (i == 0) shouldZeroFirstCol = true;
+
+                        matrix[0][i] = 0;
+                        matrix[j][0] = 0;
+                    }
+                }
+
+                for (int col = 1; col < width; col++)
+                {
+                    if (matrix[0][col] != 0) continue;
+
+                    for (int k = 0; k < height; k++) matrix[k][col] = 0;
+                }
+
+                for (int row = 1; row < height; row++)
+                {
+                    if (matrix[row][0] != 0) continue;
+
+                    for (int k = 0; k < width; k++) matrix[row][k] = 0;
+                }
+
+                if (shouldZeroFirstCol)
+                {
+                    for (int k = 0; k < height; k++) matrix[k][0] = 0;
+                }
+
+                if (shouldZeroFirstRow)
+                {
+                    for (int k = 0; k < width; k++) matrix[0][k] = 0;
+                }
+
+                for (int i = 0; i < matrix.Length; i++)
                 {
                     Assert.True(expected[i].SequenceEqual(matrix[i]));
                 }
