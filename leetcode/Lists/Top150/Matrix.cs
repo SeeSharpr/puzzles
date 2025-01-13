@@ -302,5 +302,125 @@
                 }
             }
         }
+
+        [Fact]
+        public void GameOfLife()
+        {
+            foreach (var tuple in new Tuple<int[][], int[][]>[] {
+                new ([[0,1,0],[0,0,1],[1,1,1],[0,0,0]],[[0,0,0],[1,0,1],[0,1,1],[0,1,0]]),
+                new ([[1,1],[1,0]],[[1,1],[1,1]]),
+            })
+            {
+                int[][] board = tuple.Item1;
+                int[][] expected = tuple.Item2;
+
+                const int StayAtZero = 10;
+                const int SwitchToOne = 20;
+                const int StayAtOne = 30;
+                const int SwitchToZero = 40;
+
+                if (board.Length == 0) return;
+
+                static int countNeighbors(int[][] board, int x, int y, int width, int height)
+                {
+                    int neighbors = 0;
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        for (int i = -1; i <= 1; i++)
+                        {
+                            if (x + i < 0 || y + j < 0) continue;
+                            if (x + i >= width || y + j >= height) continue;
+                            if (i == 0 && j == 0) continue;
+
+                            switch (board[y + j][x + i])
+                            {
+                                case 1:
+                                case StayAtOne:
+                                case SwitchToZero:
+                                    neighbors += 1;
+                                    break;
+                            }
+                        }
+                    }
+
+                    return neighbors;
+                }
+
+                int height = board.Length;
+                int width = board[0].Length;
+
+                for (int j = 0; j < height; j++)
+                {
+                    for (int i = 0; i < width; i++)
+                    {
+                        bool isAlive = false;
+                        switch (board[j][i])
+                        {
+                            case 1:
+                            case StayAtOne:
+                            case SwitchToZero:
+                                isAlive = true;
+                                break;
+                        }
+
+                        int neighbors = countNeighbors(board, i, j, width, height);
+
+                        if (isAlive)
+                        {
+                            if (neighbors < 2 || neighbors > 3)
+                            {
+                                board[j][i] = SwitchToZero;
+                            }
+                            else
+                            {
+                                board[j][i] = StayAtOne;
+                            }
+                        }
+                        else
+                        {
+                            if (neighbors == 3)
+                            {
+                                board[j][i] = SwitchToOne;
+                            }
+                            else
+                            {
+                                board[j][i] = StayAtZero;
+                            }
+                        }
+                    }
+                }
+
+                for (int j = 0; j < height; j++)
+                {
+                    for (int i = 0; i < width; i++)
+                    {
+                        int nextState;
+
+                        switch (board[j][i])
+                        {
+                            case 0:
+                            case StayAtZero:
+                            case SwitchToZero:
+                                nextState = 0;
+                                break;
+                            case 1:
+                            case StayAtOne:
+                            case SwitchToOne:
+                                nextState = 1;
+                                break;
+                            default:
+                                throw new InvalidOperationException();
+                        }
+
+                        board[j][i] = nextState;
+                    }
+                }
+
+                for (int i = 0; i < board.Length; i++)
+                {
+                    Assert.True(expected[i].SequenceEqual(board[i]));
+                }
+            }
+        }
     }
 }
