@@ -1,7 +1,5 @@
 ﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Metrics;
-using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace leetcode.Lists.Top150
@@ -31,18 +29,16 @@ namespace leetcode.Lists.Top150
         [InlineData("aa", "aab", true)]
         public void CanConstruct(string ransomNote, string magazine, bool expected)
         {
-            Dictionary<char, int> letterBag = new();
+            Dictionary<char, int> letterBag = [];
 
             foreach (var letter in magazine)
             {
-                if (letterBag.ContainsKey(letter))
+                if (!letterBag.TryGetValue(letter, out int value))
                 {
-                    letterBag[letter]++;
+                    value = 0;
                 }
-                else
-                {
-                    letterBag[letter] = 1;
-                }
+
+                letterBag[letter] = ++value;
             }
 
             bool result = true;
@@ -77,7 +73,7 @@ namespace leetcode.Lists.Top150
         {
             static HashSet<string> ToIsoMap(string str)
             {
-                Dictionary<char, BitArray> letters = new();
+                Dictionary<char, BitArray> letters = [];
 
                 for (int i = 0; i < str.Length; i++)
                 {
@@ -95,8 +91,8 @@ namespace leetcode.Lists.Top150
             HashSet<string> isoMapS = ToIsoMap(s);
             HashSet<string> isoMapT = ToIsoMap(t);
 
-            bool sMinusTEmpty = isoMapS.Except(isoMapT).Count() == 0;
-            bool tMinusSEmpty = isoMapT.Except(isoMapS).Count() == 0;
+            bool sMinusTEmpty = !isoMapS.Except(isoMapT).Any();
+            bool tMinusSEmpty = !isoMapT.Except(isoMapS).Any();
 
             bool result = sMinusTEmpty && tMinusSEmpty;
 
@@ -115,8 +111,8 @@ namespace leetcode.Lists.Top150
         [InlineData("abba", "dog dog dog dog", false)]
         public void WordPattern(string pattern, string s, bool expected)
         {
-            Dictionary<char, string> map = new();
-            Dictionary<string, char> reverse = new();
+            Dictionary<char, string> map = [];
+            Dictionary<string, char> reverse = [];
 
             string[] strings = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -205,34 +201,77 @@ namespace leetcode.Lists.Top150
         [InlineData("rat", "car", false)]
         public void IsAnagram(string s, string t, bool expected)
         {
-            int[] ss = new int[26];
-            int[] ts = new int[26];
+            int[] chars = new int[26];
             bool result = s.Length == t.Length;
 
             if (result)
             {
-                foreach (char c in s)
+                int limit = s.Length;
+                for (int i = 0; i < limit; i++)
                 {
-                    ss[c - 'a']++;
+                    chars[s[i] - 'a']++;
                 }
 
-                foreach (char c in t)
+                limit = t.Length;
+                for (int i = 0; i < limit && result; i++)
                 {
-                    int i = c - 'a';
-
-                    if (ss[i] == 0 || ss[i] <= ts[i])
-                    {
-                        result = false;
-                        break;
-                    }
-
-                    ts[i]++;
+                    result = --chars[t[i] - 'a'] >= 0;
                 }
 
-                result = result && ss.SequenceEqual(ts);
+                result = result && chars.Sum() == 0;
             }
 
             Assert.Equal(expected, result);
+        }
+
+        // Given an array of strings strs, group the anagrams together.You can return the answer in any order.
+        [Theory]
+        [InlineData("eat,tea,tan,ate,nat,bat", "bat,nat|tan,ate|eat|tea")]
+        [InlineData("","")]
+        [InlineData("a","a")]
+        public void GroupAnagrams(string input, string output)
+        {
+            string[] strs = input.Split(',');
+            IList<IList<string>> expected = output.Split(",").Select(i => i.Split("|").ToList() as IList<string>).ToList();
+
+            Dictionary<string, IList<string>> map = [];
+
+            foreach (string str in strs)
+            {
+                char[] keyChars = str.ToCharArray();
+                Array.Sort(keyChars);
+                string key = new(keyChars);
+
+                if (!map.TryGetValue(key, out IList<string>? value))
+                {
+                    map.Add(key, value = []);
+                }
+
+                value.Add(str);
+            }
+
+            IList<IList<string>> result = [.. map.Values];
+
+            List<string[]> sortedResult = result.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
+            List<string[]> sortedExpected = expected.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
+
+            while (sortedResult.Count > 0 && sortedExpected.Count > 0)
+            {
+                string[] oneResult = sortedResult[0];
+                sortedResult.RemoveAt(0);
+
+                for (int i = 0; i < sortedExpected.Count; i++)
+                {
+                    if (oneResult.SequenceEqual(sortedExpected[i]))
+                    {
+                        sortedExpected.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            Assert.Empty(sortedExpected);
+            Assert.Empty(sortedExpected);
         }
     }
 }
