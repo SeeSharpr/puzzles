@@ -1,6 +1,9 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
@@ -227,8 +230,8 @@ namespace leetcode.Lists.Top150
         // Given an array of strings strs, group the anagrams together.You can return the answer in any order.
         [Theory]
         [InlineData("eat,tea,tan,ate,nat,bat", "bat,nat|tan,ate|eat|tea")]
-        [InlineData("","")]
-        [InlineData("a","a")]
+        [InlineData("", "")]
+        [InlineData("a", "a")]
         public void GroupAnagrams(string input, string output)
         {
             string[] strs = input.Split(',');
@@ -272,6 +275,39 @@ namespace leetcode.Lists.Top150
 
             Assert.Empty(sortedExpected);
             Assert.Empty(sortedExpected);
+        }
+
+        // Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+        // You may assume that each input would have exactly one solution, and you may not use the same element twice.
+        // You can return the answer in any order.
+        [Theory]
+        [InlineData("2,7,11,15|9|0,1")]
+        [InlineData("3,2,4|6|1,2")]
+        [InlineData("3,3|6|0,1")]
+        public void TwoSum(string input)
+        {
+            string[] inputs = input.Split('|');
+            int[] nums = inputs[0].Split(',').Select(i => int.Parse(i)).ToArray();
+            int target = int.Parse(inputs[1]);
+            int[] expected = inputs[2].Split(',').Select(i => int.Parse(i)).ToArray();
+
+            Dictionary<int, int> map = new();
+            int[] result = [];
+
+            for (int i = 0; i < nums.Length; i++)
+            {
+                if (map.TryGetValue(target - nums[i], out int j))
+                {
+                    result = [j, i];
+                    break;
+                }
+
+                map[nums[i]] = i;
+            }
+
+            Array.Sort(result);
+            Array.Sort(expected);
+            Assert.True(expected.SequenceEqual(result));
         }
     }
 }
