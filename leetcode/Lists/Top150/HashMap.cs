@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
@@ -308,6 +309,46 @@ namespace leetcode.Lists.Top150
             Array.Sort(result);
             Array.Sort(expected);
             Assert.True(expected.SequenceEqual(result));
+        }
+
+        // Write an algorithm to determine if a number n is happy.
+        // A happy number is a number defined by the following process:
+        // Starting with any positive integer, replace the number by the sum of the squares of its digits.
+        // Repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1.
+        // Those numbers for which this process ends in 1 are happy.
+        // Return true if n is a happy number, and false if not.
+        [Theory]
+        [InlineData(19, true)]
+        [InlineData(2, false)]
+        public void IsHappy(int n, bool expected)
+        {
+            HashSet<int> visited = new();
+
+            bool result = false;
+
+            for (int candidate = n; !visited.Contains(candidate);)
+            {
+                visited.Add(candidate);
+
+                int sum = 0;
+                while (candidate > 0)
+                {
+                    sum += (candidate % 10) * (candidate % 10);
+                    candidate /= 10;
+                }
+
+                if (sum == 1)
+                {
+                    result = true;
+                    break;
+                }
+                else
+                {
+                    candidate = sum;
+                }
+            }
+
+            Assert.Equal(expected, result);
         }
     }
 }
