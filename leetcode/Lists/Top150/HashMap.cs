@@ -292,7 +292,7 @@ namespace leetcode.Lists.Top150
             int target = int.Parse(inputs[1]);
             int[] expected = inputs[2].Split(',').Select(i => int.Parse(i)).ToArray();
 
-            Dictionary<int, int> map = new();
+            Dictionary<int, int> map = [];
             int[] result = [];
 
             for (int i = 0; i < nums.Length; i++)
@@ -322,7 +322,7 @@ namespace leetcode.Lists.Top150
         [InlineData(2, false)]
         public void IsHappy(int n, bool expected)
         {
-            HashSet<int> visited = new();
+            HashSet<int> visited = [];
 
             bool result = false;
 
@@ -345,6 +345,42 @@ namespace leetcode.Lists.Top150
                 else
                 {
                     candidate = sum;
+                }
+            }
+
+            Assert.Equal(expected, result);
+        }
+
+        // Given an integer array nums and an integer k, return true if there are two distinct indices i and j in the array such that nums[i] == nums[j] and abs(i - j) <= k.
+        [Theory]
+        [InlineData("1, 2, 3, 1", 3, true)]
+        [InlineData("1, 0, 1, 1", 1, true)]
+        [InlineData("1, 2, 3, 1, 2, 3", 2, false)]
+        public void ContainsNearbyDuplicate(string input, int k, bool expected)
+        {
+            int[] nums = input.Split([' ', ','], StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+
+            Dictionary<int, int> firstIndexOf = [];
+
+            bool result = false;
+
+            for (int i = 0; i < nums.Length; i++)
+            {
+                if (firstIndexOf.TryGetValue(nums[i], out int j) && nums[j] == nums[i])
+                {
+                    if (Math.Abs(i - j) <= k)
+                    {
+                        result = true;
+                        break;
+                    }
+                    else
+                    {
+                        firstIndexOf[nums[i]] = i;
+                    }
+                }
+                else
+                {
+                    firstIndexOf.Add(nums[i], i);
                 }
             }
 
