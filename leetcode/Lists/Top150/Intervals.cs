@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text;
 
 namespace leetcode.Lists.Top150
 {
@@ -45,6 +46,50 @@ namespace leetcode.Lists.Top150
             }
 
             Assert.True(expected.SequenceEqual(result));
+        }
+
+        // Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.
+        [Theory]
+        [InlineData("1, 3|2, 6|8, 10|15, 18", "1, 6|8, 10|15, 18")]
+        [InlineData("1, 4|4, 5", "1, 5")]
+        [InlineData("1,4|0,4", "0,4")]
+        [InlineData("2,3|4,5|6,7|8,9|1,10", "1,10")]
+        public void Merge(string input, string output)
+        {
+            int[][] intervals = input.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(pair => pair.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(int.Parse).ToArray()).ToArray();
+            int[][] expected = output.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(pair => pair.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(int.Parse).ToArray()).ToArray();
+
+
+            List<int[]> result = [];
+            Array.Sort(intervals, new Comparison<int[]>((left, right) => left[0] - right[0]));
+
+            if (intervals.Length > 0)
+            {
+                int k = 0;
+                result.Add(intervals[0]);
+
+                for (int i = 1; i < intervals.Length; i++)
+                {
+                    if (intervals[i][1] < result[k][0] || intervals[i][0] > result[k][1])
+                    {
+                        result.Add(intervals[i]);
+                        k++;
+                        continue;
+                    }
+
+                    if (intervals[i][0] < result[k][0] && intervals[i][1] >= result[k][0])
+                    {
+                        result[k][0] = intervals[i][0];
+                    }
+
+                    if (intervals[i][0] <= result[k][1] && intervals[i][1] > result[k][1])
+                    {
+                        result[k][1] = intervals[i][1];
+                    }
+                }
+            }
+
+            Assert.Equal(string.Join('|', expected.Select(tuple => string.Join(',', tuple))), string.Join('|', result.Select(tuple => string.Join(',', tuple))));
         }
     }
 }
