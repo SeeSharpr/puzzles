@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -358,7 +360,7 @@ namespace leetcode.Lists.Top150
         [InlineData("1, 2, 3, 1, 2, 3", 2, false)]
         public void ContainsNearbyDuplicate(string input, int k, bool expected)
         {
-            int[] nums = input.Split([' ', ','], StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
+            int[] nums = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(int.Parse).ToArray();
 
             Dictionary<int, int> firstIndexOf = [];
 
@@ -381,6 +383,47 @@ namespace leetcode.Lists.Top150
                 else
                 {
                     firstIndexOf.Add(nums[i], i);
+                }
+            }
+
+            Assert.Equal(expected, result);
+        }
+
+        // Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
+        // You must write an algorithm that runs in O(n) time.
+        [Theory]
+        [InlineData("100, 4, 200, 1, 3, 2", 4)]
+        [InlineData("0,3,7,2,5,8,4,6,0,1", 9)]
+        public void LongestConsecutive(string input, int expected)
+        {
+            int[] nums = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(int.Parse).ToArray();
+
+            HashSet<int> visited = new();
+
+            for (int i = 0; i < nums.Length; i++)
+            {
+                visited.Add(nums[i]);
+            }
+
+            int result = 0;
+
+            foreach (int i in visited)
+            {
+                // Ignore the successor since we can count backwards from the successor
+                if (visited.Contains(i + 1)) continue;
+
+                // Whatever number we end in it's the maximum of a given sequence
+                int count = 1;
+                int cand = i;
+                while (visited.Contains(cand - 1))
+                {
+                    count++; 
+                    cand--;
+                }
+
+                if (count > result)
+                {
+                    result = count;
                 }
             }
 
