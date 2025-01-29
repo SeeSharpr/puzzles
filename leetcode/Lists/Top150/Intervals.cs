@@ -98,6 +98,8 @@ namespace leetcode.Lists.Top150
         [Theory]
         [InlineData("1,3|6,9", "2,5", "1,5|6,9")]
         [InlineData("1,2|3,5|6,7|8,10|12,16", "4,8", "1,2|3,10|12,16")]
+        [InlineData("", "5,7", "5,7")]
+        [InlineData("1,5", "2,3", "1,5")]
         public void Insert(string inputIntervals, string inputNew, string output)
         {
             int[][] intervals = inputIntervals.ParseDoubleEnumerableLC(int.Parse).Select(Enumerable.ToArray).ToArray();
@@ -105,11 +107,33 @@ namespace leetcode.Lists.Top150
 
             List<int[]> result = new();
 
-            if (intervals.Length > 0 && newInterval.Length > 0)
+            if (intervals.Length > 0 || newInterval.Length > 0)
             {
+                int i = 0;
+
+                while (i < intervals.Length && newInterval[0] > intervals[i][1])
+                {
+                    result.Add(intervals[i]);
+                    i++;
+                }
+
+                while (i < intervals.Length && newInterval[1] >= intervals[i][0])
+                {
+                    newInterval[0] = Math.Min(newInterval[0], intervals[i][0]);
+                    newInterval[1] = Math.Max(newInterval[1], intervals[i][1]);
+                    i++;
+                }
+
+                result.Add(newInterval);
+
+                while (i < intervals.Length)
+                {
+                    result.Add(intervals[i]);
+                    i++;
+                }
             }
 
-            Assert.Equal(output, result.ToString());
+            Assert.Equal(output, result.ToLCDoubleString());
         }
     }
 }

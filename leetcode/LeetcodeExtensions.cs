@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace leetcode
+﻿namespace leetcode
 {
     public static class LeetcodeExtensions
     {
@@ -22,14 +16,14 @@ namespace leetcode
                 .Select(pair => pair.ParseSingleEnumerable<T>(parse, elementSeparator));
         }
 
-        public static string ToString<T>(this IEnumerable<T> input, char elementSeparator = ',')
+        public static string ToLCString<T>(this IEnumerable<T> input, char elementSeparator = ',')
         {
             return string.Join(elementSeparator, input);
         }
 
-        public static string ToString<T>(this IEnumerable<IEnumerable<T>> input, char elementSeparator = ',', char entrySeparator = '|')
+        public static string ToLCDoubleString<T>(this IEnumerable<IEnumerable<T>> input, char elementSeparator = ',', char entrySeparator = '|')
         {
-            return string.Join(entrySeparator, input.Select(entry => entry.ToString(elementSeparator)));
+            return string.Join(entrySeparator, input.Select(entry => entry.ToLCString(elementSeparator)));
         }
     }
 }
