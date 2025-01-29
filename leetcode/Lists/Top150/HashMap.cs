@@ -120,7 +120,7 @@ namespace leetcode.Lists.Top150
             Dictionary<char, string> map = [];
             Dictionary<string, char> reverse = [];
 
-            string[] strings = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[] strings = s.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
             bool result = pattern.Length == strings.Length;
 
@@ -232,13 +232,13 @@ namespace leetcode.Lists.Top150
 
         // Given an array of strings strs, group the anagrams together.You can return the answer in any order.
         [Theory]
-        [InlineData("eat,tea,tan,ate,nat,bat", "bat,nat|tan,ate|eat|tea")]
+        [InlineData("eat,tea,tan,ate,nat,bat", "bat|nat,tan|ate,eat,tea")]
         [InlineData("", "")]
         [InlineData("a", "a")]
         public void GroupAnagrams(string input, string output)
         {
-            string[] strs = input.Split(',');
-            IList<IList<string>> expected = output.Split(",").Select(i => i.Split("|").ToList() as IList<string>).ToList();
+            string[] strs = input.ParseSingleEnumerable(s => s).ToArray();
+            IList<IList<string>> expected = output.ParseDoubleEnumerableLC(s => s).Select(e => e.ToList() as IList<string>).ToList();
 
             Dictionary<string, IList<string>> map = [];
 
@@ -284,15 +284,13 @@ namespace leetcode.Lists.Top150
         // You may assume that each input would have exactly one solution, and you may not use the same element twice.
         // You can return the answer in any order.
         [Theory]
-        [InlineData("2,7,11,15|9|0,1")]
-        [InlineData("3,2,4|6|1,2")]
-        [InlineData("3,3|6|0,1")]
-        public void TwoSum(string input)
+        [InlineData("2,7,11,15", 9, "0,1")]
+        [InlineData("3,2,4", 6, "1,2")]
+        [InlineData("3,3", 6, "0,1")]
+        public void TwoSum(string inputArray, int target, string output)
         {
-            string[] inputs = input.Split('|');
-            int[] nums = inputs[0].Split(',').Select(i => int.Parse(i)).ToArray();
-            int target = int.Parse(inputs[1]);
-            int[] expected = inputs[2].Split(',').Select(i => int.Parse(i)).ToArray();
+            int[] nums = inputArray.ParseSingleEnumerable(int.Parse).ToArray();
+            int[] expected = output.ParseSingleEnumerable(int.Parse).ToArray();
 
             Dictionary<int, int> map = [];
             int[] result = [];
@@ -360,7 +358,7 @@ namespace leetcode.Lists.Top150
         [InlineData("1, 2, 3, 1, 2, 3", 2, false)]
         public void ContainsNearbyDuplicate(string input, int k, bool expected)
         {
-            int[] nums = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(int.Parse).ToArray();
+            int[] nums = input.ParseSingleEnumerable(int.Parse).ToArray();
 
             Dictionary<int, int> firstIndexOf = [];
 
@@ -396,7 +394,7 @@ namespace leetcode.Lists.Top150
         [InlineData("0,3,7,2,5,8,4,6,0,1", 9)]
         public void LongestConsecutive(string input, int expected)
         {
-            int[] nums = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(int.Parse).ToArray();
+            int[] nums = input.ParseSingleEnumerable(int.Parse).ToArray();
 
             HashSet<int> visited = [];
 
@@ -417,7 +415,7 @@ namespace leetcode.Lists.Top150
                 int cand = i;
                 while (visited.Contains(cand - 1))
                 {
-                    count++; 
+                    count++;
                     cand--;
                 }
 
