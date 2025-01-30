@@ -237,8 +237,8 @@ namespace leetcode.Lists.Top150
         [InlineData("a", "a")]
         public void GroupAnagrams(string input, string output)
         {
-            string[] strs = input.ParseSingleEnumerable(s => s).ToArray();
-            IList<IList<string>> expected = output.ParseDoubleEnumerableLC(s => s).Select(e => e.ToList() as IList<string>).ToList();
+            string[] strs = input.ParseEnumerable(s => s).ToArray();
+            IList<IList<string>> expected = output.ParseNestedEnumerable(s => s).Select(e => e.ToList() as IList<string>).ToList();
 
             Dictionary<string, IList<string>> map = [];
 
@@ -289,8 +289,8 @@ namespace leetcode.Lists.Top150
         [InlineData("3,3", 6, "0,1")]
         public void TwoSum(string inputArray, int target, string output)
         {
-            int[] nums = inputArray.ParseSingleEnumerable(int.Parse).ToArray();
-            int[] expected = output.ParseSingleEnumerable(int.Parse).ToArray();
+            int[] nums = inputArray.ParseEnumerable(int.Parse).ToArray();
+            int[] expected = output.ParseEnumerable(int.Parse).ToArray();
 
             Dictionary<int, int> map = [];
             int[] result = [];
@@ -358,7 +358,7 @@ namespace leetcode.Lists.Top150
         [InlineData("1, 2, 3, 1, 2, 3", 2, false)]
         public void ContainsNearbyDuplicate(string input, int k, bool expected)
         {
-            int[] nums = input.ParseSingleEnumerable(int.Parse).ToArray();
+            int[] nums = input.ParseEnumerable(int.Parse).ToArray();
 
             Dictionary<int, int> firstIndexOf = [];
 
@@ -394,7 +394,7 @@ namespace leetcode.Lists.Top150
         [InlineData("0,3,7,2,5,8,4,6,0,1", 9)]
         public void LongestConsecutive(string input, int expected)
         {
-            int[] nums = input.ParseSingleEnumerable(int.Parse).ToArray();
+            int[] nums = input.ParseEnumerable(int.Parse).ToArray();
 
             HashSet<int> visited = [];
 

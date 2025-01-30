@@ -2,18 +2,36 @@
 {
     public static class LeetcodeExtensions
     {
-        public static IEnumerable<T> ParseSingleEnumerable<T>(this string input, Func<string, T> parse, char elementSeparator = ',')
+        public static IEnumerable<IEnumerable<T>> ParseNestedArrayStringLC<T>(this string input, Func<string, T> parse, char elementSeparator = ',', char entrySeparator = '|')
+        {
+            return input
+                .Replace("], [", $"{entrySeparator}")
+                .Replace("],[", $"{entrySeparator}")
+                .Replace("[", "")
+                .Replace("]", "")
+                .ParseNestedEnumerable(parse, elementSeparator, entrySeparator);
+        }
+
+        public static IEnumerable<T> ParseArrayStringLC<T>(this string input, Func<string, T> parse, char elementSeparator = ',')
+        {
+            return input
+                .Replace("[", "")
+                .Replace("]", "")
+                .ParseEnumerable(parse, elementSeparator);
+        }
+
+        public static IEnumerable<T> ParseEnumerable<T>(this string input, Func<string, T> parse, char elementSeparator = ',')
         {
             return input
                 .Split(elementSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Select(parse);
         }
 
-        public static IEnumerable<IEnumerable<T>> ParseDoubleEnumerableLC<T>(this string input, Func<string, T> parse, char elementSeparator = ',', char entrySeparator = '|')
+        public static IEnumerable<IEnumerable<T>> ParseNestedEnumerable<T>(this string input, Func<string, T> parse, char elementSeparator = ',', char entrySeparator = '|')
         {
             return input
                 .Split(entrySeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Select(pair => pair.ParseSingleEnumerable<T>(parse, elementSeparator));
+                .Select(pair => pair.ParseEnumerable<T>(parse, elementSeparator));
         }
 
         public static string ToLCString<T>(this IEnumerable<T> input, char elementSeparator = ',')

@@ -15,8 +15,8 @@ namespace leetcode.Lists.Top150
         [InlineData("0, 2, 3, 4, 6, 8, 9", "0, 2->4, 6, 8->9")]
         public void SummaryRanges(string input, string output)
         {
-            int[] nums = input.ParseSingleEnumerable(int.Parse).ToArray();
-            IList<string> expected = output.ParseSingleEnumerable(s => s).ToList();
+            int[] nums = input.ParseEnumerable(int.Parse).ToArray();
+            IList<string> expected = output.ParseEnumerable(s => s).ToList();
 
             List<string> result = [];
             StringBuilder interval = new();
@@ -55,8 +55,8 @@ namespace leetcode.Lists.Top150
         [InlineData("2,3|4,5|6,7|8,9|1,10", "1,10")]
         public void Merge(string input, string output)
         {
-            int[][] intervals = input.ParseDoubleEnumerableLC(int.Parse).Select(Enumerable.ToArray).ToArray();
-            int[][] expected = output.ParseDoubleEnumerableLC(int.Parse).Select(Enumerable.ToArray).ToArray();
+            int[][] intervals = input.ParseNestedEnumerable(int.Parse).Select(Enumerable.ToArray).ToArray();
+            int[][] expected = output.ParseNestedEnumerable(int.Parse).Select(Enumerable.ToArray).ToArray();
 
 
             List<int[]> result = [];
@@ -102,8 +102,8 @@ namespace leetcode.Lists.Top150
         [InlineData("1,5", "2,3", "1,5")]
         public void Insert(string inputIntervals, string inputNew, string output)
         {
-            int[][] intervals = inputIntervals.ParseDoubleEnumerableLC(int.Parse).Select(Enumerable.ToArray).ToArray();
-            int[] newInterval = inputNew.ParseSingleEnumerable(int.Parse).ToArray();
+            int[][] intervals = inputIntervals.ParseNestedEnumerable(int.Parse).Select(Enumerable.ToArray).ToArray();
+            int[] newInterval = inputNew.ParseEnumerable(int.Parse).ToArray();
 
             List<int[]> result = new();
 
@@ -132,8 +132,39 @@ namespace leetcode.Lists.Top150
                     i++;
                 }
             }
-
             Assert.Equal(output, result.ToLCDoubleString());
+        }
+
+        // There are some spherical balloons taped onto a flat wall that represents the XY-plane.The balloons are represented as a 2D integer array points where points[i] = [xstart, xend] denotes a balloon whose horizontal diameter stretches between xstart and xend.You do not know the exact y-coordinates of the balloons.
+        // Arrows can be shot up directly vertically (in the positive y-direction) from different points along the x-axis.A balloon with xstart and xend is burst by an arrow shot at x if xstart <= x <= xend.There is no limit to the number of arrows that can be shot.A shot arrow keeps traveling up infinitely, bursting any balloons in its path.
+        // Given the array points, return the minimum number of arrows that must be shot to burst all balloons.
+        [Theory]
+        [InlineData("[[10, 16], [2, 8], [1, 6], [7, 12]]", 2)]
+        [InlineData("[[1, 2], [3, 4], [5, 6], [7, 8]]", 4)]
+        [InlineData("[[1, 2], [2, 3], [3, 4], [4, 5]]", 2)]
+        [InlineData("[[-2147483646,-2147483645],[2147483646,2147483647]]", 2)]
+        public void FindMinArrowShots(string inputPoints, int expected)
+        {
+            int[][] points = inputPoints.ParseNestedArrayStringLC(int.Parse).Select(e => e.ToArray()).ToArray();
+
+            int result = points.Length > 0 ? 1 : 0;
+
+            if (points.Length > 0)
+            {
+                Array.Sort(points, (left, right) => left[1].CompareTo(right[1]));
+
+                int end = points[0][1];
+                for (int i = 1; i < points.Length; i++)
+                {
+                    if (end < points[i][0])
+                    {
+                        result++;
+                        end = points[i][1];
+                    }
+                }
+            }
+
+            Assert.Equal(expected, result);
         }
     }
 }
