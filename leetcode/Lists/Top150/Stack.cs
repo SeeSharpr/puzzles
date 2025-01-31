@@ -1,4 +1,8 @@
-﻿namespace leetcode.Lists.Top150
+﻿using Newtonsoft.Json.Linq;
+using System.Linq.Expressions;
+using Xunit.Sdk;
+
+namespace leetcode.Lists.Top150
 {
     public class Stack
     {
@@ -161,6 +165,52 @@
             minStack.Pop();
             Assert.Equal(0, minStack.Top());
             Assert.Equal(-2, minStack.GetMin());
+        }
+
+        // You are given an array of strings tokens that represents an arithmetic expression in a Reverse Polish Notation.
+        // Evaluate the expression.Return an integer that represents the value of the expression.
+
+        [Theory]
+        [InlineData("2, 1, +, 3, *", 9)]
+        [InlineData("4, 13, 5, /, +", 6)]
+        [InlineData("10, 6, 9, 3, +, -1, *, /, *, 17, +, 5, +", 22)]
+        public void EvalRPN(string inputTokens, int expected)
+        {
+            string[] tokens = inputTokens.ParseArrayStringLC<string>(s => s).ToArray();
+
+            Stack<int> stack = new();
+
+            foreach (string token in tokens)
+            {
+                {
+                    switch (token)
+                    {
+                        case "+":
+                        case "-":
+                        case "*":
+                        case "/":
+                            _ = stack.TryPop(out int op2);
+                            _ = stack.TryPop(out int op1);
+
+                            stack.Push(
+                                token == "+" ? op1 + op2 :
+                                token == "-" ? op1 - op2 :
+                                token == "*" ? op1 * op2 :
+                                token == "/" ? op1 / op2 :
+                                throw new InvalidOperationException(token)
+                                );
+
+                            break;
+                        default:
+                            stack.Push(int.Parse(token));
+                            break;
+                    }
+                }
+            }
+
+            _ = stack.TryPop(out int result);
+
+            Assert.Equal(expected, result);
         }
     }
 }
