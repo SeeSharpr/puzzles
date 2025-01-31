@@ -1,9 +1,4 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.IO;
-using System;
-using System.Text;
-
-namespace leetcode.Lists.Top150
+﻿namespace leetcode.Lists.Top150
 {
     public class Stack
     {
@@ -108,6 +103,64 @@ namespace leetcode.Lists.Top150
             string result = "/" + string.Join("/", list);
 
             Assert.Equal(expected, result);
+        }
+
+        // Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+        // Implement the MinStack class:
+        // MinStack() initializes the stack object.
+        // void push(int val) pushes the element val onto the stack.
+        // void pop() removes the element on the top of the stack.
+        // int top() gets the top element of the stack.
+        // int getMin() retrieves the minimum element in the stack.
+        // You must implement a solution with O(1) time complexity for each function.
+        public class MinStack
+        {
+            private readonly Stack<int> _stack = new();
+            private readonly Stack<int> _minSoFar = new();
+
+            public MinStack()
+            {
+            }
+
+            public void Push(int val)
+            {
+                _stack.Push(val);
+                if (_minSoFar.Count == 0 || val <= _minSoFar.Peek())
+                {
+                    _minSoFar.Push(val);
+                }
+            }
+
+            public void Pop()
+            {
+                if (_stack.TryPop(out int val) && (val == _minSoFar.Peek()))
+                {
+                    _minSoFar.Pop();
+                }
+            }
+
+            public int Top()
+            {
+                return _stack.Peek();
+            }
+
+            public int GetMin()
+            {
+                return _minSoFar.Peek();
+            }
+        }
+
+        [Fact]
+        public void MinStackTest()
+        {
+            MinStack minStack = new MinStack();
+            minStack.Push(-2);
+            minStack.Push(0);
+            minStack.Push(-3);
+            Assert.Equal(-3, minStack.GetMin());
+            minStack.Pop();
+            Assert.Equal(0, minStack.Top());
+            Assert.Equal(-2, minStack.GetMin());
         }
     }
 }
