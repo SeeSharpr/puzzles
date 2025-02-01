@@ -228,31 +228,21 @@ namespace leetcode.Lists.Top150
         {
             static int Precedence(char op)
             {
-                switch (op)
+                return op switch
                 {
-                    case '+':
-                    case '-':
-                        return 1;
-                    case '*':
-                    case '/':
-                        return 2;
-                    default:
-                        return 0;
-                }
+                    '+' or '-' => 1,
+                    '*' or '/' => 2,
+                    _ => 0,
+                };
             }
 
             static bool IsOperator(char op)
             {
-                switch (op)
+                return op switch
                 {
-                    case '+':
-                    case '-':
-                    case '*':
-                    case '/':
-                        return true;
-                    default:
-                        return false;
-                }
+                    '+' or '-' or '*' or '/' => true,
+                    _ => false,
+                };
             }
 
             static void Evaluate(Stack<int> vals, Stack<char> ops)
