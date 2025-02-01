@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
+using System.Windows.Markup;
 using Xunit.Sdk;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
@@ -84,7 +86,7 @@ namespace leetcode.Lists.Top150
 
                 if (left < path.Length)
                 {
-                    string part = path.Substring(left, right - left);
+                    string part = path[left..right];
 
                     switch (part)
                     {
@@ -157,7 +159,7 @@ namespace leetcode.Lists.Top150
         [Fact]
         public void MinStackTest()
         {
-            MinStack minStack = new MinStack();
+            MinStack minStack = new();
             minStack.Push(-2);
             minStack.Push(0);
             minStack.Push(-3);
@@ -209,6 +211,113 @@ namespace leetcode.Lists.Top150
             }
 
             _ = stack.TryPop(out int result);
+
+            Assert.Equal(expected, result);
+        }
+
+        // Given a string s representing a valid expression, implement a basic calculator to evaluate it, and return the result of the evaluation.
+        // Note: You are not allowed to use any built-in function which evaluates strings as mathematical expressions, such as eval().
+        [Theory]
+        [InlineData("1 + 1", 2)]
+        [InlineData(" 2-1 + 2 ", 3)]
+        [InlineData("(1+(4+5+2)-3)+(6+8)", 23)]
+        [InlineData("2147483647", 2147483647)]
+        [InlineData("1-(     -2)", 3)]
+        [InlineData("- (3 + (4 + 5))", -12)]
+        public void Calculate(string s, int expected)
+        {
+            static int Precedence(char op)
+            {
+                switch (op)
+                {
+                    case '+':
+                    case '-':
+                        return 1;
+                    case '*':
+                    case '/':
+                        return 2;
+                    default:
+                        return 0;
+                }
+            }
+
+            static bool IsOperator(char op)
+            {
+                switch (op)
+                {
+                    case '+':
+                    case '-':
+                    case '*':
+                    case '/':
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            static void Evaluate(Stack<int> vals, Stack<char> ops)
+            {
+                _ = vals.TryPop(out int op2);
+                _ = vals.TryPop(out int op1);
+                _ = ops.TryPop(out char op);
+
+                vals.Push(op == '+' ? op1 + op2 : op == '-' ? op1 - op2 : op == '*' ? op1 * op2 : op == '/' ? op1 / op2 : throw new InvalidOperationException(op.ToString()));
+            }
+
+            Stack<int> vals = new();
+            Stack<char> ops = new();
+
+            int pars = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (char.IsDigit(s[i]))
+                {
+                    int val = s[i] - '0';
+                    while (i + 1 < s.Length && char.IsDigit(s[i + 1]))
+                    {
+                        val = val * 10 + (s[i + 1] - '0');
+                        i++;
+                    }
+
+                    vals.Push(val);
+                }
+                else if (s[i] == '(')
+                {
+                    pars++;
+                    ops.Push(s[i]);
+                }
+                else if (IsOperator(s[i]) || s[i] == ')')
+                {
+                    if (s[i] == '-' && ops.Count - pars >= vals.Count)
+                    {
+                        vals.Push(0);
+                    }
+
+                    while (ops.TryPeek(out char op) && op != '(' && Precedence(s[i]) <= Precedence(op))
+                    {
+                        Evaluate(vals, ops);
+                    }
+
+                    if (s[i] != ')')
+                    {
+                        // Push actual operator
+                        ops.Push(s[i]);
+                    }
+                    else
+                    {
+                        // Pop the '('
+                        ops.Pop();
+                        pars--;
+                    }
+                }
+
+                while (vals.Count > 1 + pars && ops.TryPeek(out char op) && op != '(')
+                {
+                    Evaluate(vals, ops);
+                }
+            }
+
+            _ = vals.TryPop(out int result);
 
             Assert.Equal(expected, result);
         }
