@@ -6,6 +6,8 @@ using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Globalization;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using System.Xml.Linq;
 using static leetcode.Lists.Top150.LinkedList;
 using static System.Net.Mime.MediaTypeNames;
@@ -200,18 +202,138 @@ namespace leetcode.Lists.Top150
             Assert.Null(ptr1);
             Assert.Null(ptr2);
         }
-        public class Node
+        public class Node : IEnumerable<Node>
         {
+            private static int idGen = 0;
+
             public int val;
             public Node? next;
             public Node? random;
+            public readonly int id;
 
             public Node(int _val)
             {
                 val = _val;
                 next = null;
                 random = null;
+                id = Interlocked.Increment(ref idGen);
             }
+
+            public IEnumerator<Node> GetEnumerator()
+            {
+                return new NodeEnumerator(this);
+            }
+
+            public override string ToString()
+            {
+                return $"(id:{id}, val:{val}, next:{next?.id}, random: {random?.id})";
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new NodeEnumerator(this);
+            }
+
+            private class NodeEnumerator(Node head) : IEnumerator<Node>
+            {
+                private readonly Node? head = head;
+                private bool reset = true;
+                private Node? current = head;
+
+                public Node Current => current ?? throw new NullReferenceException();
+
+                object IEnumerator.Current => current ?? throw new NullReferenceException();
+
+                public void Dispose()
+                {
+                    // Do nothing
+                }
+
+                public bool MoveNext()
+                {
+                    if (reset)
+                    {
+                        reset = false;
+                        return true;
+                    }
+                    else
+                    {
+                        current = current?.next;
+                        
+                        return current != null;
+                    }
+                }
+
+                public void Reset()
+                {
+                    current = head;
+                    reset = true;
+                }
+            }
+        }
+
+        // A linked list of length n is given such that each node contains an additional random pointer, which could point to any node in the list, or null.
+        // Construct a deep copy of the list.The deep copy should consist of exactly n brand new nodes, where each new node has its value set to the value of its corresponding original node.Both the next and random pointer of the new nodes should point to new nodes in the copied list such that the pointers in the original list and copied list represent the same list state.None of the pointers in the new list should point to nodes in the original list.
+        // For example, if there are two nodes X and Y in the original list, where X.random --> Y, then for the corresponding two nodes x and y in the copied list, x.random --> y.
+        // Return the head of the copied linked list.
+        // The linked list is represented in the input/output as a list of n nodes.Each node is represented as a pair of[val, random_index] where:
+        // val: an integer representing Node.val
+        // random_index: the index of the node (range from 0 to n-1) that the random pointer points to, or null if it does not point to any node.
+        // Your code will only be given the head of the original linked list.
+        [Theory]
+        [InlineData("7,-1|13,0|11,4|10,2|1,0")]
+        [InlineData("1,1|2,1")]
+        [InlineData("3,-1|3,0|3,-1")]
+        public void CopyRandomList(string input)
+        {
+            int[][] data = input.ParseNestedArrayStringLC(int.Parse).Select(s => s.ToArray()).ToArray();
+            Node? head = data.Select(d => d[0]).Reverse().Aggregate((Node?)null, (next, val) => { Node? node = new(val); node.next = next; return node; });
+
+            Node? ptr = head;
+            foreach (int index in data.Select(d => d[1]))
+            {
+                if (index != -1)
+                {
+                    Node? random = head;
+                    for (int i = 0; i < index; i++)
+                    {
+                        random = random?.next;
+                    }
+
+                    ptr.random = random;
+                }
+
+                ptr = ptr?.next;
+            }
+
+            Dictionary<Node, Node> nodeMap = new();
+
+            for (Node? oldNode = head; oldNode != null; oldNode = oldNode?.next)
+            {
+                nodeMap.Add(oldNode, new Node(oldNode.val));
+            }
+
+            for (Node? oldNode = head; oldNode != null; oldNode = oldNode?.next)
+            {
+                Node? newNode = nodeMap[oldNode];
+                newNode.next = oldNode.next == null ? null : nodeMap[oldNode.next];
+                newNode.random = oldNode.random == null ? null : nodeMap[oldNode.random];
+            }
+
+            Node? newHead = head == null ? null : nodeMap[head];
+
+            // Values match
+            Assert.True(head?.Select(x => x.val).SequenceEqual(newHead.Select(y => y.val)));
+            // No IDs match for next
+            Assert.Empty(head?.Select(x => x.id).Where(x => x != null).Intersect(newHead.Select(y => y.id).Where(x => x != null)));
+            // No IDs match for random
+            Assert.Empty(head.Select(x => x.random?.id).Where(x => x != null).Intersect(newHead.Select(y => y.random?.id).Where(x => x != null)));
+            // Index of random matches
+            int[] oldRandomIndex = head.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = head; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
+            int[] newRandomIndex = newHead.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = newHead; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
+
+            Assert.True(oldRandomIndex.SequenceEqual(newRandomIndex));
+
         }
     }
 }
