@@ -1,4 +1,14 @@
-﻿using System.Reflection;
+﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Drawing;
+using System.Globalization;
+using System.Reflection;
+using System.Xml.Linq;
+using static leetcode.Lists.Top150.LinkedList;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
@@ -128,6 +138,80 @@ namespace leetcode.Lists.Top150
 
             Assert.Null(ptr1);
             Assert.Null(ptr2);
+        }
+
+        // You are given the heads of two sorted linked lists list1 and list2.
+        // Merge the two lists into one sorted list.The list should be made by splicing together the nodes of the first two lists.
+        // Return the head of the merged linked list.
+        [Theory]
+        [InlineData("1,2,4", "1,3,4", "1,1,2,3,4,4")]
+        [InlineData("", "", "")]
+        [InlineData("", "0", "0")]
+        public void MergeTwoLists(string inputL1, string inputL2, string output)
+        {
+            ListNode? list1 = inputL1.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
+            ListNode? list2 = inputL2.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
+            ListNode? expected = output.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
+
+            ListNode? result = null;
+            ListNode? next = null;
+
+            while (true)
+            {
+                if (list1 != null && list2 != null)
+                {
+                    if (list1.val < list2.val)
+                    {
+                        next = (result == null) ? (result = new ListNode(list1.val)) : (next.next = new ListNode(list1.val));
+                        list1 = list1.next;
+                    }
+                    else
+                    {
+                        next = (result == null) ? (next = result = new ListNode(list2.val)) : (next.next = new ListNode(list2.val));
+                        list2 = list2.next;
+                    }
+                }
+                else if (list1 != null)
+                {
+                    next = (result == null) ? (result = new ListNode(list1.val)) : (next.next = new ListNode(list1.val));
+                    list1 = list1.next;
+                }
+                else if (list2 != null)
+                {
+                    next = (result == null) ? (next = result = new ListNode(list2.val)) : (next.next = new ListNode(list2.val));
+                    list2 = list2.next;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            ListNode? ptr1 = result;
+            ListNode? ptr2 = expected;
+
+            while (ptr1 != null && ptr2 != null)
+            {
+                Assert.Equal(ptr1.val, ptr2.val);
+                ptr1 = ptr1.next;
+                ptr2 = ptr2.next;
+            }
+
+            Assert.Null(ptr1);
+            Assert.Null(ptr2);
+        }
+        public class Node
+        {
+            public int val;
+            public Node? next;
+            public Node? random;
+
+            public Node(int _val)
+            {
+                val = _val;
+                next = null;
+                random = null;
+            }
         }
     }
 }
