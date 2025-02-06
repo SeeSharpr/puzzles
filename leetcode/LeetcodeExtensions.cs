@@ -20,6 +20,23 @@
                 .ParseEnumerable(parse, elementSeparator);
         }
 
+        public static TNode? ParseLinkedListLC<TNode, TData>(this string input, Func<TData?, TNode> createNode, Action<TNode, TNode?> setNext, Func<TNode?, TNode?> getNext, Func<string, TData> parse, char elementSeparator = ',')
+        {
+            TNode dummy = createNode(default);
+
+            TNode? ptr = dummy;
+            foreach (TData u in input.ParseArrayStringLC(parse, elementSeparator))
+            {
+                setNext(ptr, createNode(u));
+                ptr = getNext(ptr);
+            }
+
+            TNode? result = getNext(dummy);
+            setNext(dummy, default);
+
+            return result;
+        }
+
         public static IEnumerable<T> ParseEnumerable<T>(this string input, Func<string, T> parse, char elementSeparator = ',')
         {
             return input

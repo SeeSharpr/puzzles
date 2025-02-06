@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections.Generic;
 
 namespace leetcode.Lists.Top150
 {
@@ -6,7 +8,7 @@ namespace leetcode.Lists.Top150
     {
         private class ListNode(int x, ListNode? next = null) : IEnumerable<ListNode>
         {
-            private static int idGen = 1;
+            private static int idGen = -1;
             private readonly int id = Interlocked.Increment(ref idGen);
 
             public readonly int x = x;
@@ -80,7 +82,7 @@ namespace leetcode.Lists.Top150
 
         private class Node(int val, Node? next = null) : IEnumerable<Node>
         {
-            private static int idGen = 1;
+            private static int idGen = -1;
 
             public readonly int id = Interlocked.Increment(ref idGen);
             public int val = val;
@@ -134,12 +136,12 @@ namespace leetcode.Lists.Top150
         // There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer.Internally, pos is used to denote the index of the node that tail's next pointer is connected to. Note that pos is not passed as a parameter.
         // Return true if there is a cycle in the linked list.Otherwise, return false.
         [Theory]
-        [InlineData("3, 2, 0, -4", 1, true)]
-        [InlineData("1, 2", 0, true)]
-        [InlineData("1", -1, false)]
+        [InlineData("[3, 2, 0, -4]", 1, true)]
+        [InlineData("[1, 2]", 0, true)]
+        [InlineData("[1]", -1, false)]
         public void HasCycle(string inputData, int inputLoop, bool expected)
         {
-            ListNode? head = inputData.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
+            ListNode? head = inputData.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
             head?.CreateLoop(inputLoop);
 
             bool result = false;
@@ -165,14 +167,14 @@ namespace leetcode.Lists.Top150
         // You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.
         // You may assume the two numbers do not contain any leading zero, except the number 0 itself.
         [Theory]
-        [InlineData("2, 4, 3", "5, 6, 4", "7, 0, 8")]
-        [InlineData("0", "0", "0")]
-        [InlineData("9, 9, 9, 9, 9, 9, 9", "9, 9, 9, 9", "8, 9, 9, 9, 0, 0, 0, 1")]
+        [InlineData("[2, 4, 3]", "[5, 6, 4]", "[7, 0, 8]")]
+        [InlineData("[0]", "[0]", "[0]")]
+        [InlineData("[9, 9, 9, 9, 9, 9, 9]", "[9, 9, 9, 9]", "[8, 9, 9, 9, 0, 0, 0, 1]")]
         public void AddTwoNumbers(string inputL1, string inputL2, string output)
         {
-            ListNode? l1 = inputL1.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
-            ListNode? l2 = inputL2.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
-            ListNode? expected = output.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
+            ListNode? l1 = inputL1.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? l2 = inputL2.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
 
             ListNode? result = null;
             ListNode? previous = null;
@@ -231,14 +233,14 @@ namespace leetcode.Lists.Top150
         // Merge the two lists into one sorted list.The list should be made by splicing together the nodes of the first two lists.
         // Return the head of the merged linked list.
         [Theory]
-        [InlineData("1,2,4", "1,3,4", "1,1,2,3,4,4")]
-        [InlineData("", "", "")]
-        [InlineData("", "0", "0")]
+        [InlineData("[1,2,4]", "[1,3,4]", "[1,1,2,3,4,4]")]
+        [InlineData("[]", "[]", "[]")]
+        [InlineData("[]", "[0]", "[0]")]
         public void MergeTwoLists(string inputL1, string inputL2, string output)
         {
-            ListNode? list1 = inputL1.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
-            ListNode? list2 = inputL2.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
-            ListNode? expected = output.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode?)null, (node, value) => new ListNode(value, node));
+            ListNode? list1 = inputL1.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? list2 = inputL2.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
 
             ListNode? result = null;
             ListNode? next = null;
@@ -297,9 +299,9 @@ namespace leetcode.Lists.Top150
         // random_index: the index of the node (range from 0 to n-1) that the random pointer points to, or null if it does not point to any node.
         // Your code will only be given the head of the original linked list.
         [Theory]
-        [InlineData("7,-1|13,0|11,4|10,2|1,0")]
-        [InlineData("1,1|2,1")]
-        [InlineData("3,-1|3,0|3,-1")]
+        [InlineData("[[7,-1],[13,0],[11,4],[10,2],[1,0]]")]
+        [InlineData("[[1,1],[2,1]]")]
+        [InlineData("[[3,-1],[3,0],[3,-1]]")]
         public void CopyRandomList(string input)
         {
             int[][] data = input.ParseNestedArrayStringLC(int.Parse).Select(s => s.ToArray()).ToArray();
@@ -351,13 +353,14 @@ namespace leetcode.Lists.Top150
             Assert.True(oldRandomIndex.SequenceEqual(newRandomIndex));
         }
 
+        // Given the head of a singly linked list and two integers left and right where left <= right, reverse the nodes of the list from position left to position right, and return the reversed list.
         [Theory]
-        [InlineData("1, 2, 3, 4, 5", 2, 4, "1,4,3,2,5")]
-        [InlineData("5", 1, 1, "5")]
+        [InlineData("[1, 2, 3, 4, 5]", 2, 4, "[1,4,3,2,5]")]
+        [InlineData("[5]", 1, 1, "[5]")]
         public void ReverseBetween(string input, int left, int right, string output)
         {
-            ListNode head = input.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode)null, (a, v) => new ListNode(v, a));
-            int[] expected = output.ParseArrayStringLC(int.Parse).ToArray();
+            ListNode? head = input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
 
             if (head != null && left < right)
             {
@@ -378,9 +381,55 @@ namespace leetcode.Lists.Top150
                     predNode.next = rightSwap;
                     rightSwap = leftSwap.next;
                 }
+
+                head = dummy.next;
             }
 
-            Assert.True(expected.SequenceEqual(head.Select(n => n.val).ToArray() ?? []));
+            Assert.True(expected.Select(e => e.val).ToArray().SequenceEqual(head.Select(h => h.val).ToArray() ?? []));
+        }
+
+        // Given the head of a linked list, reverse the nodes of the list k at a time, and return the modified list.
+        // k is a positive integer and is less than or equal to the length of the linked list.If the number of nodes is not a multiple of k then left-out nodes, in the end, should remain as it is.
+        // You may not alter the values in the list's nodes, only nodes themselves may be changed.
+        [Theory]
+        [InlineData("[1,2,3,4,5]", 2, "[2,1,4,3,5]")]
+        [InlineData("[1,2,3,4,5]", 3, "[3,2,1,4,5]")]
+        public void ReverseKGroup(string headInput, int k, string output)
+        {
+            ListNode? head = headInput.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+
+            ListNode? dummy = new(0, head);
+            ListNode? predNode = dummy;
+
+            while (predNode != null)
+            {
+                // Check if it can be done
+                int len = 0;
+                for (ListNode? tail = predNode?.next; len < k && tail != null; tail = tail?.next) len++;
+                if (len != k) break;
+
+                // Reverse
+                ListNode? leftSwap = predNode?.next;
+                ListNode? rightSwap = leftSwap?.next;
+                for (int i = 1; i < k; i++)
+                {
+                    leftSwap.next = rightSwap?.next;
+                    rightSwap.next = predNode?.next;
+                    predNode.next = rightSwap;
+                    rightSwap = leftSwap.next;
+                }
+
+                // Adjust next baseline
+                for (int i = 0; i < k; i++)
+                {
+                    predNode = predNode?.next;
+                }
+            }
+
+            head = dummy.next;
+
+            Assert.True(head?.Select(h => h.val).ToArray().SequenceEqual(expected?.Select(e => e.val).ToArray() ?? throw new InvalidDataException())); ;
         }
     }
 }
