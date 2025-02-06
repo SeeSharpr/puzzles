@@ -1,24 +1,14 @@
-﻿using Microsoft.VisualStudio.TestPlatform.Utilities;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Drawing;
-using System.Globalization;
-using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Xml.Linq;
-using static leetcode.Lists.Top150.LinkedList;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.Collections;
 
 namespace leetcode.Lists.Top150
 {
     public class LinkedList
     {
-        private class ListNode(int x, ListNode? next = null)
+        private class ListNode(int x, ListNode? next = null) : IEnumerable<ListNode>
         {
+            private static int idGen = 1;
+            private readonly int id = Interlocked.Increment(ref idGen);
+
             public readonly int x = x;
 
             public readonly int val = x;
@@ -42,6 +32,101 @@ namespace leetcode.Lists.Top150
                 }
 
                 last.next = ptr;
+            }
+
+            public override string ToString()
+            {
+                return $"(id:{id}, val:{val}, next:{next?.id ?? 0}[{next?.val ?? 0}])";
+            }
+
+            public IEnumerator<ListNode> GetEnumerator()
+            {
+                return new NodeEnumerator(this);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new NodeEnumerator(this);
+            }
+
+            private class NodeEnumerator(ListNode? head) : IEnumerator<ListNode>
+            {
+                private readonly ListNode? head = head;
+
+                private ListNode? prev = null;
+
+                public ListNode Current => prev ?? throw new InvalidOperationException();
+
+                object IEnumerator.Current => prev ?? throw new InvalidOperationException();
+
+                public void Dispose()
+                {
+                    // Nothing to dispose
+                }
+
+                public bool MoveNext()
+                {
+                    prev = (prev == null) ? head : prev?.next;
+
+                    return prev != null;
+                }
+
+                public void Reset()
+                {
+                    prev = null;
+                }
+            }
+        }
+
+        private class Node(int val, Node? next = null) : IEnumerable<Node>
+        {
+            private static int idGen = 1;
+
+            public readonly int id = Interlocked.Increment(ref idGen);
+            public int val = val;
+            public Node? next = next;
+            public Node? random = null;
+
+            public IEnumerator<Node> GetEnumerator()
+            {
+                return new NodeEnumerator(this);
+            }
+
+            public override string ToString()
+            {
+                return $"(id:{id}, val:{val}, next:{next?.id ?? 0}, random: {random?.id ?? 0})";
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new NodeEnumerator(this);
+            }
+
+            private class NodeEnumerator(Node head) : IEnumerator<Node>
+            {
+                private readonly Node head = head;
+                Node? prev = null;
+
+                public Node Current => prev!;
+
+                object IEnumerator.Current => prev!;
+
+                public void Dispose()
+                {
+                    // Do nothing
+                }
+
+                public bool MoveNext()
+                {
+                    prev = (prev == null) ? head : prev?.next;
+
+                    return prev?.next != null;
+                }
+
+                public void Reset()
+                {
+                    prev = null;
+                }
             }
         }
 
@@ -202,75 +287,6 @@ namespace leetcode.Lists.Top150
             Assert.Null(ptr1);
             Assert.Null(ptr2);
         }
-        public class Node : IEnumerable<Node>
-        {
-            private static int idGen = 0;
-
-            public int val;
-            public Node? next;
-            public Node? random;
-            public readonly int id;
-
-            public Node(int _val)
-            {
-                val = _val;
-                next = null;
-                random = null;
-                id = Interlocked.Increment(ref idGen);
-            }
-
-            public IEnumerator<Node> GetEnumerator()
-            {
-                return new NodeEnumerator(this);
-            }
-
-            public override string ToString()
-            {
-                return $"(id:{id}, val:{val}, next:{next?.id}, random: {random?.id})";
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new NodeEnumerator(this);
-            }
-
-            private class NodeEnumerator(Node head) : IEnumerator<Node>
-            {
-                private readonly Node? head = head;
-                private bool reset = true;
-                private Node? current = head;
-
-                public Node Current => current ?? throw new NullReferenceException();
-
-                object IEnumerator.Current => current ?? throw new NullReferenceException();
-
-                public void Dispose()
-                {
-                    // Do nothing
-                }
-
-                public bool MoveNext()
-                {
-                    if (reset)
-                    {
-                        reset = false;
-                        return true;
-                    }
-                    else
-                    {
-                        current = current?.next;
-                        
-                        return current != null;
-                    }
-                }
-
-                public void Reset()
-                {
-                    current = head;
-                    reset = true;
-                }
-            }
-        }
 
         // A linked list of length n is given such that each node contains an additional random pointer, which could point to any node in the list, or null.
         // Construct a deep copy of the list.The deep copy should consist of exactly n brand new nodes, where each new node has its value set to the value of its corresponding original node.Both the next and random pointer of the new nodes should point to new nodes in the copied list such that the pointers in the original list and copied list represent the same list state.None of the pointers in the new list should point to nodes in the original list.
@@ -323,17 +339,48 @@ namespace leetcode.Lists.Top150
             Node? newHead = head == null ? null : nodeMap[head];
 
             // Values match
-            Assert.True(head?.Select(x => x.val).SequenceEqual(newHead.Select(y => y.val)));
+            Assert.True(head?.Select(x => x.val).SequenceEqual(newHead?.Select(y => y.val) ?? []));
             // No IDs match for next
-            Assert.Empty(head?.Select(x => x.id).Where(x => x != null).Intersect(newHead.Select(y => y.id).Where(x => x != null)));
+            Assert.Empty(head?.Select(x => x.id)?.Where(x => x != null)?.Intersect(newHead?.Select(y => y.id)?.Where(x => x != null)));
             // No IDs match for random
-            Assert.Empty(head.Select(x => x.random?.id).Where(x => x != null).Intersect(newHead.Select(y => y.random?.id).Where(x => x != null)));
+            Assert.Empty(head.Select(x => x.random?.id).Where(x => x != null).Intersect(newHead?.Select(y => y.random?.id)?.Where(x => x != null)));
             // Index of random matches
             int[] oldRandomIndex = head.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = head; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
             int[] newRandomIndex = newHead.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = newHead; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
 
             Assert.True(oldRandomIndex.SequenceEqual(newRandomIndex));
+        }
 
+        [Theory]
+        [InlineData("1, 2, 3, 4, 5", 2, 4, "1,4,3,2,5")]
+        [InlineData("5", 1, 1, "5")]
+        public void ReverseBetween(string input, int left, int right, string output)
+        {
+            ListNode head = input.ParseArrayStringLC(int.Parse).Reverse().Aggregate((ListNode)null, (a, v) => new ListNode(v, a));
+            int[] expected = output.ParseArrayStringLC(int.Parse).ToArray();
+
+            if (head != null && left < right)
+            {
+                ListNode dummy = new(0, head);
+                ListNode predNode = dummy;
+                for (int i = 1; i < left; i++)
+                {
+                    predNode = predNode.next;
+                }
+
+                ListNode leftSwap = predNode.next;
+                ListNode rightSwap = leftSwap.next;
+
+                for (int i = left; i < right; i++)
+                {
+                    leftSwap.next = rightSwap.next;
+                    rightSwap.next = predNode.next;
+                    predNode.next = rightSwap;
+                    rightSwap = leftSwap.next;
+                }
+            }
+
+            Assert.True(expected.SequenceEqual(head.Select(n => n.val).ToArray() ?? []));
         }
     }
 }
