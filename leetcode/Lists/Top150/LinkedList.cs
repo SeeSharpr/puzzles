@@ -341,7 +341,7 @@ namespace leetcode.Lists.Top150
             Node? newHead = head == null ? null : nodeMap[head];
 
             // Values match
-            Assert.True(head?.Select(x => x.val).SequenceEqual(newHead?.Select(y => y.val) ?? []));
+            Assert.Equal(head?.Select(x => x.val) ?? [], newHead?.Select(y => y.val) ?? []);
             // No IDs match for next
             Assert.Empty(head?.Select(x => x.id)?.Where(x => x != null)?.Intersect(newHead?.Select(y => y.id)?.Where(x => x != null)));
             // No IDs match for random
@@ -350,7 +350,7 @@ namespace leetcode.Lists.Top150
             int[] oldRandomIndex = head.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = head; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
             int[] newRandomIndex = newHead.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = newHead; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
 
-            Assert.True(oldRandomIndex.SequenceEqual(newRandomIndex));
+            Assert.Equal(oldRandomIndex, newRandomIndex);
         }
 
         // Given the head of a singly linked list and two integers left and right where left <= right, reverse the nodes of the list from position left to position right, and return the reversed list.
@@ -385,7 +385,7 @@ namespace leetcode.Lists.Top150
                 head = dummy.next;
             }
 
-            Assert.True(expected.Select(e => e.val).ToArray().SequenceEqual(head.Select(h => h.val).ToArray() ?? []));
+            Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
         }
 
         // Given the head of a linked list, reverse the nodes of the list k at a time, and return the modified list.
@@ -429,7 +429,35 @@ namespace leetcode.Lists.Top150
 
             head = dummy.next;
 
-            Assert.True(head?.Select(h => h.val).ToArray().SequenceEqual(expected?.Select(e => e.val).ToArray() ?? throw new InvalidDataException())); ;
+            Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
+        }
+
+        // Given the head of a linked list, remove the nth node from the end of the list and return its head.
+        [Theory]
+        [InlineData("[1, 2, 3, 4, 5]", 2, "[1, 2, 3, 5]")]
+        [InlineData("[1]", 1, "[]")]
+        [InlineData("[1, 2]", 1, "[1]")]
+        public void RemoveNthFromEnd(string inputHead, int n, string output)
+        {
+            ListNode? head = inputHead.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+
+            static ListNode? InternalRemoveNthFromEnd(ListNode? pred, ref int n)
+            {
+                if (pred == null) return null;
+
+                pred.next = InternalRemoveNthFromEnd(pred.next, ref n);
+
+                if (n-- == 0) pred.next = pred?.next?.next;
+
+                return pred;
+            }
+
+            ListNode? dummy = new(0, head);
+
+            head = InternalRemoveNthFromEnd(dummy, ref n)?.next;
+
+            Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
         }
     }
 }
