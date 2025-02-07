@@ -459,5 +459,35 @@ namespace leetcode.Lists.Top150
 
             Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
         }
+
+        // Given the head of a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list. Return the linked list sorted as well.
+        [Theory]
+        [InlineData("[1,2,3,3,4,4,5]", "[1,2,5]")]
+        [InlineData("[1,1,1,2,3]", "[2,3]")]
+        public void DeleteDuplicates(string input, string output)
+        {
+            ListNode? head = input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+
+            ListNode? dummy = new(0, head);
+            for (ListNode? pred = dummy; pred != null;)
+            {
+                ListNode? skipper = pred?.next;
+                while (skipper != null && skipper.val == skipper.next?.val) skipper = skipper.next;
+
+                if (skipper == pred?.next)
+                {
+                    pred = pred?.next;
+                }
+                else
+                {
+                    pred.next = skipper?.next;
+                }
+            }
+
+            head = dummy.next;
+
+            Assert.Equal(head?.Select(h => h.val) ?? [], expected?.Select(e => e.val) ?? []);
+        }
     }
 }
