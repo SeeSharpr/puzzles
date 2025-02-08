@@ -53,6 +53,8 @@ namespace leetcode.Lists.Top150
 
             private class NodeEnumerator(ListNode? head) : IEnumerator<ListNode>
             {
+                private readonly int limit = 20;
+                private int count = 0;
                 private readonly ListNode? head = head;
 
                 private ListNode? prev = null;
@@ -69,13 +71,15 @@ namespace leetcode.Lists.Top150
                 public bool MoveNext()
                 {
                     prev = (prev == null) ? head : prev?.next;
+                    count++;
 
-                    return prev != null;
+                    return prev != null && count < limit;
                 }
 
                 public void Reset()
                 {
                     prev = null;
+                    count = 0;
                 }
             }
         }
@@ -341,7 +345,7 @@ namespace leetcode.Lists.Top150
             Node? newHead = head == null ? null : nodeMap[head];
 
             // Values match
-            Assert.Equal(head?.Select(x => x.val) ?? [], newHead?.Select(y => y.val) ?? []);
+            Assert.Equal(head?.Select(n => n.val) ?? [], newHead?.Select(n => n.val) ?? []);
             // No IDs match for next
             Assert.Empty(head?.Select(x => x.id)?.Where(x => x != null)?.Intersect(newHead?.Select(y => y.id)?.Where(x => x != null)));
             // No IDs match for random
@@ -385,7 +389,7 @@ namespace leetcode.Lists.Top150
                 head = dummy.next;
             }
 
-            Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
+            Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []); ;
         }
 
         // Given the head of a linked list, reverse the nodes of the list k at a time, and return the modified list.
@@ -429,7 +433,7 @@ namespace leetcode.Lists.Top150
 
             head = dummy.next;
 
-            Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
+            Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []); ;
         }
 
         // Given the head of a linked list, remove the nth node from the end of the list and return its head.
@@ -457,7 +461,7 @@ namespace leetcode.Lists.Top150
 
             head = InternalRemoveNthFromEnd(dummy, ref n)?.next;
 
-            Assert.Equal(expected?.Select(e => e.val) ?? [], head?.Select(h => h.val) ?? []); ;
+            Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []); ;
         }
 
         // Given the head of a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list. Return the linked list sorted as well.
@@ -487,7 +491,50 @@ namespace leetcode.Lists.Top150
 
             head = dummy.next;
 
-            Assert.Equal(head?.Select(h => h.val) ?? [], expected?.Select(e => e.val) ?? []);
+            Assert.Equal(head?.Select(n => n.val) ?? [], expected?.Select(n => n.val) ?? []);
+        }
+
+        // Given the head of a linked list, rotate the list to the right by k places.
+        [Theory]
+        [InlineData("[1,2,3,4,5]", 0, "[1,2,3,4,5]")]
+        [InlineData("[1,2,3,4,5]", 1, "[5,1,2,3,4]")]
+        [InlineData("[1,2,3,4,5]", 2, "[4,5,1,2,3]")]
+        [InlineData("[1,2,3,4,5]", 3, "[3,4,5,1,2]")]
+        [InlineData("[1,2,3,4,5]", 4, "[2,3,4,5,1]")]
+        [InlineData("[1,2,3,4,5]", 5, "[1,2,3,4,5]")]
+        [InlineData("[1,2,3,4,5]", 6, "[5,1,2,3,4]")]
+        [InlineData("[0,1,2]", 4, "[2,0,1]")]
+        [InlineData("[]", 0, "[]")]
+        [InlineData("[1,2]", 1, "[2,1]")]
+        public void RotateRight(string inputHead, int k, string output)
+        {
+            ListNode? head = inputHead.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+
+            if (head != null && k > 0)
+            {
+                ListNode? oldTail = head;
+                int count = 1;
+                for (; oldTail?.next != null; oldTail = oldTail?.next) count++;
+
+                int skip = (count - (k % count)) % count;
+                ListNode? newHead = head;
+                ListNode? newTail = null;
+                for (int i = 0; i < skip; i++)
+                {
+                    newTail = newHead;
+                    newHead = newHead?.next;
+                }
+
+                if (newTail != null)
+                {
+                    oldTail.next = head;
+                    newTail.next = null;
+                    head = newHead;
+                }
+            }
+
+            Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []);
         }
     }
 }
