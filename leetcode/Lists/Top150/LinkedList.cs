@@ -51,6 +51,11 @@ namespace leetcode.Lists.Top150
                 return new NodeEnumerator(this);
             }
 
+            public static ListNode? ParseFromLC(string input)
+            {
+                return input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            }
+
             private class NodeEnumerator(ListNode? head) : IEnumerator<ListNode>
             {
                 private readonly int limit = 20;
@@ -145,7 +150,7 @@ namespace leetcode.Lists.Top150
         [InlineData("[1]", -1, false)]
         public void HasCycle(string inputData, int inputLoop, bool expected)
         {
-            ListNode? head = inputData.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? head = ListNode.ParseFromLC(inputData);
             head?.CreateLoop(inputLoop);
 
             bool result = false;
@@ -176,9 +181,9 @@ namespace leetcode.Lists.Top150
         [InlineData("[9, 9, 9, 9, 9, 9, 9]", "[9, 9, 9, 9]", "[8, 9, 9, 9, 0, 0, 0, 1]")]
         public void AddTwoNumbers(string inputL1, string inputL2, string output)
         {
-            ListNode? l1 = inputL1.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? l2 = inputL2.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? l1 = ListNode.ParseFromLC(inputL1);
+            ListNode? l2 = ListNode.ParseFromLC(inputL2);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             ListNode? result = null;
             ListNode? previous = null;
@@ -242,9 +247,9 @@ namespace leetcode.Lists.Top150
         [InlineData("[]", "[0]", "[0]")]
         public void MergeTwoLists(string inputL1, string inputL2, string output)
         {
-            ListNode? list1 = inputL1.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? list2 = inputL2.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? list1 = ListNode.ParseFromLC(inputL1);
+            ListNode? list2 = ListNode.ParseFromLC(inputL2);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             ListNode? result = null;
             ListNode? next = null;
@@ -363,8 +368,8 @@ namespace leetcode.Lists.Top150
         [InlineData("[5]", 1, 1, "[5]")]
         public void ReverseBetween(string input, int left, int right, string output)
         {
-            ListNode? head = input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? head = ListNode.ParseFromLC(input);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             if (head != null && left < right)
             {
@@ -400,8 +405,8 @@ namespace leetcode.Lists.Top150
         [InlineData("[1,2,3,4,5]", 3, "[3,2,1,4,5]")]
         public void ReverseKGroup(string headInput, int k, string output)
         {
-            ListNode? head = headInput.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? head = ListNode.ParseFromLC(headInput);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             ListNode? dummy = new(0, head);
             ListNode? predNode = dummy;
@@ -443,8 +448,8 @@ namespace leetcode.Lists.Top150
         [InlineData("[1, 2]", 1, "[1]")]
         public void RemoveNthFromEnd(string inputHead, int n, string output)
         {
-            ListNode? head = inputHead.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? head = ListNode.ParseFromLC(inputHead);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             static ListNode? InternalRemoveNthFromEnd(ListNode? pred, ref int n)
             {
@@ -470,8 +475,8 @@ namespace leetcode.Lists.Top150
         [InlineData("[1,1,1,2,3]", "[2,3]")]
         public void DeleteDuplicates(string input, string output)
         {
-            ListNode? head = input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? head = ListNode.ParseFromLC(input);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             ListNode? dummy = new(0, head);
             for (ListNode? pred = dummy; pred != null;)
@@ -508,8 +513,8 @@ namespace leetcode.Lists.Top150
         [InlineData("[1,2]", 1, "[2,1]")]
         public void RotateRight(string inputHead, int k, string output)
         {
-            ListNode? head = inputHead.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            ListNode? expected = output.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            ListNode? head = ListNode.ParseFromLC(inputHead);
+            ListNode? expected = ListNode.ParseFromLC(output);
 
             if (head != null && k > 0)
             {
@@ -535,6 +540,51 @@ namespace leetcode.Lists.Top150
             }
 
             Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []);
+        }
+
+        // Given the head of a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
+        // You should preserve the original relative order of the nodes in each of the two partitions.
+        [Theory]
+        [InlineData("[1,4,3,2,5,2]", 3, "[1,2,2,4,3,5]")]
+        [InlineData("[2,1]", 2, "[1,2]")]
+        public void Partition(string inputHead, int x, string output)
+        {
+            ListNode? head = ListNode.ParseFromLC(inputHead);
+            ListNode? expected = ListNode.ParseFromLC(output);
+
+            ListNode? dummy = new(0, head);
+
+            // Find the place where the lower nodes need to be moved to
+            ListNode? predTo = dummy;
+            while (predTo?.next?.val < x) predTo = predTo?.next;
+
+            ListNode? predFrom = predTo?.next;
+            while (predFrom?.next != null)
+            {
+                // Find a node that is less than the target
+                while (predFrom?.next?.val >= x) predFrom = predFrom?.next;
+
+                // If we reached the end of the list, bail out
+                if (predFrom?.next == null) continue;
+
+                ListNode? node = predFrom?.next;
+
+                // Remove the node from where it was...
+                // [predFrom]->[node]->[rest] => [predFrom]->[rest]
+                predFrom.next = predFrom?.next?.next;
+
+                // Inject the node where it needs to be
+                // [predTo]->[rest] => [predTo]->[node]->[rest]
+                node.next = predTo?.next;
+                predTo.next = node;
+
+                // Advance to the next injection point
+                predTo = predTo.next;
+            }
+
+            head = dummy.next;
+
+            Assert.Equal(expected.Select(n => n.val) ?? [], head.Select(n => n.val) ?? []);
         }
     }
 }
