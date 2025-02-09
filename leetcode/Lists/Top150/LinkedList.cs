@@ -1,6 +1,12 @@
 ﻿using System.Collections;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
+using Microsoft.VisualBasic;
+using Newtonsoft.Json.Linq;
+using System.Drawing;
+using System.Reflection.Metadata.Ecma335;
+using System.Diagnostics.CodeAnalysis;
+using static leetcode.Lists.Top150.LinkedList;
 
 namespace leetcode.Lists.Top150
 {
@@ -585,6 +591,197 @@ namespace leetcode.Lists.Top150
             head = dummy.next;
 
             Assert.Equal(expected.Select(n => n.val) ?? [], head.Select(n => n.val) ?? []);
+        }
+
+        // Design a data structure that follows the constraints of a Least Recently Used(LRU) cache.
+        // Implement the LRUCache class:
+        // LRUCache(int capacity) Initialize the LRU cache with positive size capacity.
+        // int get(int key) Return the value of the key if the key exists, otherwise return -1.
+        // void put(int key, int value) Update the value of the key if the key exists.Otherwise, add the key-value pair to the cache.If the number of keys exceeds the capacity from this operation, evict the least recently used key.
+        // The functions get and put must each run in O(1) average time complexity.
+        public class LRUCache
+        {
+            private class MyNode(int key, int value, MyNode? next = null, MyNode? prev = null)
+            {
+                public readonly int Key = key;
+                public int Value = value;
+                public MyNode? Next = next;
+                public MyNode? Prev = prev;
+
+                public override string ToString()
+                {
+                    return $"({Prev?.Value},{Prev?.Prev})<-[{Key},{Value}]->({Next?.Key},{Next?.Value})";
+                }
+            }
+
+            private readonly int capacity;
+            private readonly Dictionary<int, MyNode> cache = [];
+            private MyNode? head = null;
+            private MyNode? tail = null;
+
+            public LRUCache(int capacity)
+            {
+                this.capacity = capacity;
+            }
+
+            public int Get(int key)
+            {
+                if (!cache.TryGetValue(key, out MyNode? node)) return -1;
+
+                InternalPromoteToHead(key, node);
+
+                return node.Value;
+            }
+
+            public void Put(int key, int value)
+            {
+                if (!cache.TryGetValue(key, out MyNode? node))
+                {
+                    // If we are at capacity, we need to make space for the new node
+                    if (cache.Count == capacity && InternalTryEvictTail(out int oldKey))
+                    {
+                        cache.Remove(oldKey);
+                    }
+
+                    node = new MyNode(key, value);
+
+                    cache.Add(key, node);
+                }
+                else if (node.Value != value)
+                {
+                    // Update value if necessary
+                    node.Value = value;
+                }
+
+                // Update LRU
+                InternalPromoteToHead(key, node);
+            }
+
+            private void InternalPromoteToHead(int key, MyNode node)
+            {
+                if (head == null)
+                {
+                    // Initial state
+                    head = node;
+                    tail = node;
+
+                    return;
+                }
+                else if (node == head)
+                {
+                    // Not necessary
+                    return;
+                }
+                else if (node == tail)
+                {
+                    // If we are promoting the tail we need to rewind it
+                    tail = tail.Prev;
+                }
+
+                // Detach node from current position
+                if (node.Next != null) node.Next.Prev = node.Prev;
+                if (node.Prev != null) node.Prev.Next = node.Next;
+
+                // Attach node to current head
+                node.Next = head;
+                head.Prev = node;
+
+                // Make node the new head
+                head = node;
+                head.Prev = null;
+            }
+
+            private bool InternalTryEvictTail(out int key)
+            {
+                key = tail?.Key ?? 0;
+
+                if (tail == null) return false;
+
+                tail = tail?.Prev;
+
+                if (tail != null)
+                {
+                    tail.Next = null;
+                }
+                else
+                {
+                    head = null;
+                }
+
+                return true;
+            }
+
+            public IEnumerable<KeyValuePair<int, int>> GetQueue()
+            {
+                for (MyNode? node = head; node != null; node = node?.Next)
+                {
+                    yield return new KeyValuePair<int, int>(node.Key, node.Value);
+                }
+            }
+        }
+
+        [Fact]
+        public void LRUCacheTest()
+        {
+            KeyValuePair<int, int> p11 = new(1, 1);
+            KeyValuePair<int, int> p22 = new(2, 2);
+            KeyValuePair<int, int> p33 = new(3, 3);
+            KeyValuePair<int, int> p44 = new(4, 4);
+
+            {
+                LRUCache lRUCache = new LRUCache(2);
+
+                lRUCache.Put(1, 1); // cache is {1=1}
+                Assert.Equal([p11], lRUCache.GetQueue());
+
+                lRUCache.Put(2, 2); // cache is {1=1, 2=2}
+                Assert.Equal([p22, p11], lRUCache.GetQueue());
+
+                Assert.Equal(1, lRUCache.Get(1));    // return 1
+
+                lRUCache.Put(3, 3); // LRU key was 2, evicts key 2, cache is {1=1, 3=3}
+                Assert.Equal([p33, p11], lRUCache.GetQueue());
+
+                Assert.Equal(-1, lRUCache.Get(2));    // returns -1 (not found)
+
+                lRUCache.Put(4, 4); // LRU key was 1, evicts key 1, cache is {4=4, 3=3}
+                Assert.Equal([p44, p33], lRUCache.GetQueue());
+
+
+                Assert.Equal(-1, lRUCache.Get(1));    // return -1 (not found)
+
+                Assert.Equal(3, lRUCache.Get(3));    // return 3
+
+                Assert.Equal(4, lRUCache.Get(4));    // return 4
+            }
+
+            {
+                LRUCache lRUCache = new LRUCache(2);
+                lRUCache.Put(1, 0);
+                lRUCache.Put(2, 2);
+                Assert.Equal(0, lRUCache.Get(1));
+                lRUCache.Put(3, 3);
+                Assert.Equal(-1, lRUCache.Get(2));
+                lRUCache.Put(4, 4);
+                Assert.Equal(-1, lRUCache.Get(1));
+                Assert.Equal(3, lRUCache.Get(3));
+                Assert.Equal(4, lRUCache.Get(4));
+            }
+
+            {
+                LRUCache lRUCache = new LRUCache(1);
+                Assert.Equal(-1, lRUCache.Get(1));
+                Assert.Equal(-1, lRUCache.Get(6));
+                Assert.Equal(-1, lRUCache.Get(8));
+                lRUCache.Put(12, 1);
+                Assert.Equal(-1, lRUCache.Get(2));
+                lRUCache.Put(15, 11);
+                lRUCache.Put(5, 2);
+                lRUCache.Put(1, 15);
+                lRUCache.Put(4, 2);
+                Assert.Equal(-1, lRUCache.Get(5));
+                lRUCache.Put(15, 15);
+            }
         }
     }
 }
