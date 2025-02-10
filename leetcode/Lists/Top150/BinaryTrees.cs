@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System.Collections;
 
 namespace leetcode.Lists.Top150
 {
@@ -7,9 +8,9 @@ namespace leetcode.Lists.Top150
         public class TreeNode : IEnumerable<TreeNode>
         {
             public int val;
-            public TreeNode left;
-            public TreeNode right;
-            public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
+            public TreeNode? left;
+            public TreeNode? right;
+            public TreeNode(int val = 0, TreeNode? left = null, TreeNode? right = null)
             {
                 this.val = val;
                 this.left = left;
@@ -37,7 +38,7 @@ namespace leetcode.Lists.Top150
                 return list.GetEnumerator();
             }
 
-            private static void TraversePreOrder(TreeNode node, List<TreeNode> list)
+            private static void TraversePreOrder(TreeNode? node, List<TreeNode> list)
             {
                 if (node == null)
                 {
@@ -61,8 +62,7 @@ namespace leetcode.Lists.Top150
             [new TreeNode(1, null, new TreeNode(2)), 2]
             ];
 
-        [Theory]
-        [MemberData(nameof(MaxDepthData))]
+        [Theory, MemberData(nameof(MaxDepthData))]
         public void MaxDepth(TreeNode root, int expected)
         {
             static int _MaxDepth(TreeNode node)
@@ -85,8 +85,7 @@ namespace leetcode.Lists.Top150
             [new TreeNode(1, new TreeNode(2), new TreeNode(1)), new TreeNode(1, new TreeNode(1), new TreeNode(2)), false],
             ];
 
-        [Theory]
-        [MemberData(nameof(IsSameTreeData))]
+        [Theory, MemberData(nameof(IsSameTreeData))]
         public void IsSameTree(TreeNode p, TreeNode q, bool expected)
         {
             static bool _IsSameTree(TreeNode p, TreeNode q)
@@ -107,8 +106,7 @@ namespace leetcode.Lists.Top150
             [new TreeNode(2, new TreeNode(1), new TreeNode(3)), new TreeNode(2, new TreeNode(3), new TreeNode(1))],
             [null, null],
             ];
-        [Theory]
-        [MemberData(nameof(InvertTreeData))]
+        [Theory, MemberData(nameof(InvertTreeData))]
         public void InvertTree(TreeNode root, TreeNode expected)
         {
             static TreeNode _InvertTree(TreeNode node)
@@ -127,6 +125,28 @@ namespace leetcode.Lists.Top150
             TreeNode actual = _InvertTree(root);
 
             Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
+        }
+
+
+        // 101. Symmetric Tree
+        // Given the root of a binary tree, check whether it is a mirror of itself(i.e., symmetric around its center).
+        public static readonly IEnumerable<object[]> IsSymmetricData =
+            [
+            [new TreeNode(1, new TreeNode(2, new TreeNode(3), new TreeNode(4)), new TreeNode(2, new TreeNode(4), new TreeNode(3))), true],
+            [new TreeNode(1, new TreeNode(2, null, new TreeNode(3)), new TreeNode(2, null, new TreeNode(3))), false],
+            ];
+        [Theory, MemberData(nameof(IsSymmetricData))]
+        public void IsSymmetric(TreeNode root, bool expected)
+        {
+            static bool _IsMirror(TreeNode? left, TreeNode? right)
+            {
+                return (left == null && right == null)|| 
+                    (left?.val == right?.val && _IsMirror(left?.left, right?.right) && _IsMirror(left?.right, right?.left));
+            }
+
+            bool result = root == null || _IsMirror(root?.left, root?.right);
+
+            Assert.Equal(expected, result);
         }
     }
 }
