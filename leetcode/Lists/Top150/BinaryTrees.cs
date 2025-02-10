@@ -138,15 +138,38 @@ namespace leetcode.Lists.Top150
         [Theory, MemberData(nameof(IsSymmetricData))]
         public void IsSymmetric(TreeNode root, bool expected)
         {
-            static bool _IsMirror(TreeNode? left, TreeNode? right)
+            static bool _IsMirrorRecursive(TreeNode? left, TreeNode? right)
             {
-                return (left == null && right == null)|| 
-                    (left?.val == right?.val && _IsMirror(left?.left, right?.right) && _IsMirror(left?.right, right?.left));
+                return (left == null && right == null) ||
+                    (left?.val == right?.val && _IsMirrorRecursive(left?.left, right?.right) && _IsMirrorRecursive(left?.right, right?.left));
             }
 
-            bool result = root == null || _IsMirror(root?.left, root?.right);
+            static bool _IsMirrorInteractive(TreeNode? left, TreeNode? right)
+            {
+                Queue<TreeNode?> leftQueue = new([left]);
+                Queue<TreeNode?> rightQueue = new([right]);
 
-            Assert.Equal(expected, result);
+                while (leftQueue.TryDequeue(out TreeNode? leftHead) && rightQueue.TryDequeue(out TreeNode? rightHead))
+                {
+                    if (leftHead == null && rightHead == null) continue;
+
+                    if (leftHead?.val != rightHead?.val) return false;
+
+                    leftQueue.Enqueue(leftHead?.left);
+                    rightQueue.Enqueue(rightHead?.right);
+                    rightQueue.Enqueue(leftHead?.right);
+                    leftQueue.Enqueue(rightHead?.left);
+                }
+
+                if (leftQueue.Count > 0 || rightQueue.Count > 0) return false;
+
+                return true;
+            }
+
+            bool recursiveResult = root == null || _IsMirrorRecursive(root?.left, root?.right);
+            bool interactiveResult = root == null || _IsMirrorInteractive(root?.left, root?.right);
+
+            Assert.Equal(expected, recursiveResult);
         }
     }
 }
