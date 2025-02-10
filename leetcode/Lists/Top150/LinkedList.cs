@@ -1,12 +1,4 @@
 ﻿using System.Collections;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Collections.Generic;
-using Microsoft.VisualBasic;
-using Newtonsoft.Json.Linq;
-using System.Drawing;
-using System.Reflection.Metadata.Ecma335;
-using System.Diagnostics.CodeAnalysis;
-using static leetcode.Lists.Top150.LinkedList;
 
 namespace leetcode.Lists.Top150
 {

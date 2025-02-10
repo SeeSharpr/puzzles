@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using System.Collections;
+﻿using System.Collections;
 
 namespace leetcode.Lists.Top150
 {
@@ -24,7 +23,7 @@ namespace leetcode.Lists.Top150
 
             public IEnumerator<TreeNode> GetEnumerator()
             {
-                List<TreeNode> list = [];
+                List<TreeNode?> list = [];
                 TraversePreOrder(this, list);
 
                 return list.GetEnumerator();
@@ -32,13 +31,13 @@ namespace leetcode.Lists.Top150
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                List<TreeNode> list = [];
+                List<TreeNode?> list = [];
                 TraversePreOrder(this, list);
 
                 return list.GetEnumerator();
             }
 
-            private static void TraversePreOrder(TreeNode? node, List<TreeNode> list)
+            private static void TraversePreOrder(TreeNode? node, List<TreeNode?> list)
             {
                 if (node == null)
                 {
@@ -65,7 +64,7 @@ namespace leetcode.Lists.Top150
         [Theory, MemberData(nameof(MaxDepthData))]
         public void MaxDepth(TreeNode root, int expected)
         {
-            static int _MaxDepth(TreeNode node)
+            static int _MaxDepth(TreeNode? node)
             {
                 return node == null ? 0 : 1 + Math.Max(_MaxDepth(node?.left), _MaxDepth(node?.right));
             }
@@ -88,7 +87,7 @@ namespace leetcode.Lists.Top150
         [Theory, MemberData(nameof(IsSameTreeData))]
         public void IsSameTree(TreeNode p, TreeNode q, bool expected)
         {
-            static bool _IsSameTree(TreeNode p, TreeNode q)
+            static bool _IsSameTree(TreeNode? p, TreeNode? q)
             {
                 return (p == null && q == null) || ((p?.val == q?.val) && _IsSameTree(p?.left, q?.left) && _IsSameTree(p?.right, q?.right));
             }
@@ -104,17 +103,19 @@ namespace leetcode.Lists.Top150
             [
             [new TreeNode(4, new TreeNode(2, new TreeNode(1), new TreeNode(3)),new TreeNode(7, new TreeNode(6), new TreeNode(9))), new TreeNode(4, new TreeNode(7, new TreeNode(9), new TreeNode(6)), new TreeNode(2, new TreeNode(3), new TreeNode(1)))],
             [new TreeNode(2, new TreeNode(1), new TreeNode(3)), new TreeNode(2, new TreeNode(3), new TreeNode(1))],
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             [null, null],
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             ];
         [Theory, MemberData(nameof(InvertTreeData))]
         public void InvertTree(TreeNode root, TreeNode expected)
         {
-            static TreeNode _InvertTree(TreeNode node)
+            static TreeNode? _InvertTree(TreeNode? node)
             {
                 if (node == null) return null;
 
-                TreeNode newRight = _InvertTree(node.left);
-                TreeNode newLeft = _InvertTree(node.right);
+                TreeNode? newRight = _InvertTree(node.left);
+                TreeNode? newLeft = _InvertTree(node.right);
 
                 node.left = newLeft;
                 node.right = newRight;
@@ -122,7 +123,7 @@ namespace leetcode.Lists.Top150
                 return node;
             }
 
-            TreeNode actual = _InvertTree(root);
+            TreeNode? actual = _InvertTree(root);
 
             Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
         }
@@ -170,6 +171,50 @@ namespace leetcode.Lists.Top150
             bool interactiveResult = root == null || _IsMirrorInteractive(root?.left, root?.right);
 
             Assert.Equal(expected, recursiveResult);
+            Assert.Equal(expected, interactiveResult);
+        }
+
+        // 105. Construct Binary Tree from Preorder and Inorder Traversal
+        // Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and inorder is the inorder traversal of the same tree, construct and return the binary tree.
+        public static readonly IEnumerable<object[]> BuildTreeData =
+            [
+            ["[3, 9, 20, 15, 7]", "[9, 3, 15, 20, 7]", new TreeNode(3,new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)))],
+            ["[-1]","[-1]", new TreeNode(-1)],
+            ];
+
+        [Theory, MemberData(nameof(BuildTreeData))]
+
+        public void BuildTree(string preorderInput, string inorderInput, TreeNode expected)
+        {
+            int[] preorder = preorderInput.ParseArrayStringLC(int.Parse).ToArray();
+            int[] inorder = inorderInput.ParseArrayStringLC(int.Parse).ToArray();
+
+            static TreeNode? _BuildTree(int[] po, int[] io, int ipo, int lio, int rio)
+            {
+                if (lio == rio) return null;
+
+                // Find the pivot in the in-order array
+                int indexNode = -1;
+                for (int i = lio; i < rio; i++)
+                {
+                    if (io[i] == po[ipo])
+                    {
+                        indexNode = i;
+                        break;
+                    }
+                }
+
+                int nodesToLeft = indexNode - lio;
+
+                TreeNode? leftNode = _BuildTree(po, io, ipo + 1, lio, indexNode);
+                TreeNode? rightNode = _BuildTree(po, io, ipo + 1 + nodesToLeft, indexNode + 1, rio);
+
+                return new TreeNode(po[ipo], leftNode, rightNode);
+            }
+
+            TreeNode? actual = _BuildTree(preorder, inorder, 0, 0, preorder.Length);
+
+            Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
         }
     }
 }
