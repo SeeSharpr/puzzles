@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics.Contracts;
 
 namespace leetcode.Lists.Top150
 {
@@ -178,7 +179,7 @@ namespace leetcode.Lists.Top150
         // Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and inorder is the inorder traversal of the same tree, construct and return the binary tree.
         public static readonly IEnumerable<object[]> BuildTreeData =
             [
-            ["[3, 9, 20, 15, 7]", "[9, 3, 15, 20, 7]", new TreeNode(3,new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)))],
+            ["[3,9,20,15,7]", "[9,3,15,20,7]", new TreeNode(3,new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)))],
             ["[-1]","[-1]", new TreeNode(-1)],
             ];
 
@@ -213,6 +214,48 @@ namespace leetcode.Lists.Top150
             }
 
             TreeNode? actual = _BuildTree(preorder, inorder, 0, 0, preorder.Length);
+
+            Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
+        }
+
+        // 106. Construct Binary Tree from Inorder and Postorder Traversal
+        // Given two integer arrays inorder and postorder where inorder is the inorder traversal of a binary tree and postorder is the postorder traversal of the same tree, construct and return the binary tree.
+        public static readonly IEnumerable<object[]> BuildTree2Data =
+            [
+            ["[9,3,15,20,7]", "[9,15,7,20,3]", new TreeNode(3,new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)))],
+            ["[-1]","[-1]", new TreeNode(-1)],
+            ];
+
+        [Theory, MemberData(nameof(BuildTree2Data))]
+        public void BuildTree2(string inorderInput, string postorderInput, TreeNode expected)
+        {
+            int[] inorder = inorderInput.ParseArrayStringLC(int.Parse).ToArray();
+            int[] postorder = postorderInput.ParseArrayStringLC(int.Parse).ToArray();
+
+            static TreeNode? _BuildTree(int[] po, int[] io, int ipo, int lio, int rio)
+            {
+                if (lio == rio) return null;
+
+                // Find the pivot in the in-order array
+                int indexNode = -1;
+                for (int i = lio; i < rio; i++)
+                {
+                    if (io[i] == po[ipo])
+                    {
+                        indexNode = i;
+                        break;
+                    }
+                }
+
+                int nodesToRight = rio - indexNode - 1;
+
+                TreeNode? leftNode = _BuildTree(po, io, ipo - nodesToRight - 1, lio, indexNode);
+                TreeNode? rightNode = _BuildTree(po, io, ipo - 1, indexNode + 1, rio);
+
+                return new TreeNode(po[ipo], leftNode, rightNode);
+            }
+
+            TreeNode? actual = _BuildTree(postorder, inorder, postorder.Length - 1, 0, postorder.Length);
 
             Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
         }
