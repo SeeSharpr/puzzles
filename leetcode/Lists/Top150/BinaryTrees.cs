@@ -41,6 +41,27 @@ namespace leetcode.Lists.Top150
                 return list.GetEnumerator();
             }
 
+            public static void AssertEqual(TreeNode? x, TreeNode? y)
+            {
+                if (x == null && y == null) return;
+
+                if (x?.val != y?.val)
+                {
+                    throw new InvalidDataException($"val: {x?.val} != {y?.val}");
+                }
+
+                try
+                {
+                    AssertEqual(x?.left, y?.left);
+                    AssertEqual(x?.right, y?.right);
+                }
+                catch (InvalidDataException e)
+                {
+                    throw new InvalidDataException($"({x?.val}, {y?.val}), {e.Message}");
+                }
+            }
+
+
             private static void TraversePreOrder(TreeNode? node, List<TreeNode?> list)
             {
                 if (node == null)
@@ -407,7 +428,7 @@ namespace leetcode.Lists.Top150
                         rightMost.next = sibling.left;
                         rightMost = sibling.left;
                     }
-                    
+
                     if (sibling?.right != null)
                     {
                         rightMost.next = sibling.right;
@@ -421,6 +442,46 @@ namespace leetcode.Lists.Top150
 
             Node.AssertEqual(expected, rootBFS);
             Node.AssertEqual(expected, rootRec);
+        }
+
+        // 114. Flatten Binary Tree to Linked List
+        // Given the root of a binary tree, flatten the tree into a "linked list":
+        // The "linked list" should use the same TreeNode class where the right child pointer points to the next node in the list and the left child pointer is always null.
+        // The "linked list" should be in the same order as a pre-order traversal of the binary tree.
+        public static readonly IEnumerable<object[]> FlattenData =
+            [
+            [new TreeNode(1, new TreeNode(2, new TreeNode(3), new TreeNode(4)), new TreeNode(5, right: new TreeNode(6))), new TreeNode(1, right: new TreeNode(2, right: new TreeNode(3, right: new TreeNode(4, right: new TreeNode(5, right: new TreeNode(6))))))],
+            [null,null],
+            [new TreeNode(0), new TreeNode(0)]
+            ];
+        [Theory, MemberData(nameof(FlattenData))]
+        public void Flatten(TreeNode? root, TreeNode? expected)
+        {
+            static void _Flatten(TreeNode? node)
+            {
+                if (node == null) return;
+
+                if (node?.left != null) _Flatten(node?.left);
+                if (node?.right!= null) _Flatten(node?.right);
+
+                // Find the last element in the list
+                TreeNode? rightMost = node?.left;
+                while (rightMost?.right != null) rightMost = rightMost.right;
+                
+                // Splice the list before the right subtree
+                if (rightMost != null)
+                {
+                    rightMost.right = node?.right;
+                    node.right = node?.left;
+                }
+
+                // Kill the left subtree
+                node.left = null;
+            }
+
+            _Flatten(root);
+
+            TreeNode.AssertEqual(expected, root);
         }
     }
 }
