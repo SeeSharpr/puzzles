@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Diagnostics.Contracts;
+using static leetcode.Lists.Top150.BinaryTrees;
+using static System.Net.Mime.MediaTypeNames;
+using System.Reflection;
 
 namespace leetcode.Lists.Top150
 {
@@ -50,6 +53,89 @@ namespace leetcode.Lists.Top150
                     TraversePreOrder(node.left, list);
                     TraversePreOrder(node.right, list);
                 }
+            }
+        }
+
+        public class Node
+        {
+            public int val;
+            public Node? left;
+            public Node? right;
+            public Node? next;
+
+            public Node() { }
+
+            public Node(int _val)
+            {
+                val = _val;
+            }
+
+            public Node(int _val, Node? _left = null, Node? _right = null, Node? _next = null)
+            {
+                val = _val;
+                left = _left;
+                right = _right;
+                next = _next;
+            }
+
+            public override string ToString()
+            {
+                return $"{val}, [{left?.val}], [{right?.val}], [{next?.val}]";
+            }
+
+            public static void AssertEqual(Node? x, Node? y)
+            {
+                if (x == null && y == null) return;
+
+                if (x?.val != y?.val)
+                {
+                    throw new InvalidDataException($"val: {x?.val} != {y?.val}");
+                }
+
+                if (x?.next?.val != y?.next?.val)
+                {
+                    throw new InvalidDataException($"next: {x?.next?.val} != {y?.next?.val}");
+                }
+
+                try
+                {
+                    AssertEqual(x?.left, y?.left);
+                    AssertEqual(x?.right, y?.right);
+                }
+                catch (InvalidDataException e)
+                {
+                    throw new InvalidDataException($"({x?.val}, {y?.val}), {e.Message}");
+                }
+            }
+
+            public static Node? CloneExceptNext(Node? node)
+            {
+                return (node == null) ? null : new Node(node.val, CloneExceptNext(node.left), CloneExceptNext(node.right));
+            }
+
+            public static void MapNext(Node? root, int[][]? nextMap)
+            {
+                if (nextMap == null || nextMap.Length == 0) return;
+
+                Dictionary<int, Node> map = [];
+                BuildNodeMap(root, map);
+
+                foreach (int[] pair in nextMap)
+                {
+                    int src = pair[0];
+                    int dst = pair[1];
+
+                    map[src].next = map[dst];
+                }
+            }
+
+            private static void BuildNodeMap(Node? node, Dictionary<int, Node> map)
+            {
+                if (node == null) return;
+
+                map.Add(node.val, node);
+                BuildNodeMap(node.left, map);
+                BuildNodeMap(node.right, map);
             }
         }
 
@@ -258,6 +344,83 @@ namespace leetcode.Lists.Top150
             TreeNode? actual = _BuildTree(postorder, inorder, postorder.Length - 1, 0, postorder.Length);
 
             Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
+        }
+
+        // 117. Populating Next Right Pointers in Each Node II
+        // Populate each next pointer to point to its next right node.If there is no next right node, the next pointer should be set to NULL.
+        public static readonly IEnumerable<object[]> ConnectData =
+            [
+            [new Node(1, new Node(2, new Node(4), new Node(5)), new Node(3, _right: new Node(7))), (int[][])[[2,3],[4,5],[5,7]]],
+            [null, (int[][])[]],
+            ];
+
+        [Theory, MemberData(nameof(ConnectData))]
+        public void Connect(Node? root, int[][]? expectedMap)
+        {
+            Node? expected = Node.CloneExceptNext(root);
+            Node.MapNext(expected, expectedMap);
+
+            Node? rootBFS = Node.CloneExceptNext(root);
+            Node? rootRec = Node.CloneExceptNext(root);
+
+            static void _ConnectBFS(Node? node)
+            {
+                if (node == null) return;
+
+                Queue<Tuple<int, Node>> queue = new();
+                queue.Enqueue(new Tuple<int, Node>(0, node!));
+
+                while (queue.TryDequeue(out var currentTuple))
+                {
+                    int currentLevel = currentTuple.Item1;
+                    Node currentNode = currentTuple.Item2;
+
+                    // We only link nodes in the same level
+                    if (queue.TryPeek(out var nextTuple) && currentLevel == nextTuple.Item1)
+                    {
+                        currentNode.next = nextTuple.Item2;
+                    }
+
+                    if (currentNode.left != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode.left));
+                    if (currentNode.right != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode.right));
+                }
+            }
+
+            static void _ConnectRec(Node? node)
+            {
+                if (node == null) return;
+
+                // Connect the children
+                if (node.left != null) node.left.next = node.right;
+
+                _ConnectRec(node.right);
+                _ConnectRec(node.left);
+
+                // Connect the cousins
+                Node? rightMost = node?.right ?? node?.left;
+                if (rightMost == null) return;
+
+                for (Node? sibling = node?.next; sibling != null; sibling = sibling?.next)
+                {
+                    if (sibling?.left != null)
+                    {
+                        rightMost.next = sibling.left;
+                        rightMost = sibling.left;
+                    }
+                    
+                    if (sibling?.right != null)
+                    {
+                        rightMost.next = sibling.right;
+                        rightMost = sibling.right;
+                    }
+                }
+            }
+
+            _ConnectBFS(rootBFS);
+            _ConnectRec(rootRec);
+
+            Node.AssertEqual(expected, rootBFS);
+            Node.AssertEqual(expected, rootRec);
         }
     }
 }
