@@ -1,10 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Linq.Expressions;
-using System.Windows.Markup;
-using Xunit.Sdk;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace leetcode.Lists.Top150
+﻿namespace leetcode.Lists.Top150
 {
     public class Stack
     {
@@ -13,6 +7,7 @@ namespace leetcode.Lists.Top150
         // Open brackets must be closed by the same type of brackets.
         // Open brackets must be closed in the correct order.
         // Every close bracket has a corresponding open bracket of the same type.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("()", true)]
         [InlineData("()[]{}", true)]
@@ -62,6 +57,7 @@ namespace leetcode.Lists.Top150
         // The path must not end with a slash '/', unless it is the root directory.
         // The path must not have any single or double periods ('.' and '..') used to denote current or parent directories.
         // Return the simplified canonical path.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("/home/", "/home")]
         [InlineData("/home//foo/", "/home/foo")]
@@ -156,6 +152,7 @@ namespace leetcode.Lists.Top150
             }
         }
 
+        [Trait("List", "TopInterview150")]
         [Fact]
         public void MinStackTest()
         {
@@ -172,6 +169,7 @@ namespace leetcode.Lists.Top150
         // You are given an array of strings tokens that represents an arithmetic expression in a Reverse Polish Notation.
         // Evaluate the expression.Return an integer that represents the value of the expression.
 
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("2, 1, +, 3, *", 9)]
         [InlineData("4, 13, 5, /, +", 6)]
@@ -217,6 +215,7 @@ namespace leetcode.Lists.Top150
 
         // Given a string s representing a valid expression, implement a basic calculator to evaluate it, and return the result of the evaluation.
         // Note: You are not allowed to use any built-in function which evaluates strings as mathematical expressions, such as eval().
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("1 + 1", 2)]
         [InlineData(" 2-1 + 2 ", 3)]

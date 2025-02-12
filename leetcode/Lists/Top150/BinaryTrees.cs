@@ -1,8 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics.Contracts;
-using static leetcode.Lists.Top150.BinaryTrees;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
 
 namespace leetcode.Lists.Top150
 {
@@ -169,6 +165,7 @@ namespace leetcode.Lists.Top150
             [new TreeNode(1, null, new TreeNode(2)), 2]
             ];
 
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(MaxDepthData))]
         public void MaxDepth(TreeNode root, int expected)
         {
@@ -192,6 +189,7 @@ namespace leetcode.Lists.Top150
             [new TreeNode(1, new TreeNode(2), new TreeNode(1)), new TreeNode(1, new TreeNode(1), new TreeNode(2)), false],
             ];
 
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(IsSameTreeData))]
         public void IsSameTree(TreeNode p, TreeNode q, bool expected)
         {
@@ -215,6 +213,7 @@ namespace leetcode.Lists.Top150
             [null, null],
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
             ];
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(InvertTreeData))]
         public void InvertTree(TreeNode root, TreeNode expected)
         {
@@ -244,6 +243,7 @@ namespace leetcode.Lists.Top150
             [new TreeNode(1, new TreeNode(2, new TreeNode(3), new TreeNode(4)), new TreeNode(2, new TreeNode(4), new TreeNode(3))), true],
             [new TreeNode(1, new TreeNode(2, null, new TreeNode(3)), new TreeNode(2, null, new TreeNode(3))), false],
             ];
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(IsSymmetricData))]
         public void IsSymmetric(TreeNode root, bool expected)
         {
@@ -290,6 +290,7 @@ namespace leetcode.Lists.Top150
             ["[-1]","[-1]", new TreeNode(-1)],
             ];
 
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(BuildTreeData))]
 
         public void BuildTree(string preorderInput, string inorderInput, TreeNode expected)
@@ -333,6 +334,7 @@ namespace leetcode.Lists.Top150
             ["[-1]","[-1]", new TreeNode(-1)],
             ];
 
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(BuildTree2Data))]
         public void BuildTree2(string inorderInput, string postorderInput, TreeNode expected)
         {
@@ -375,6 +377,7 @@ namespace leetcode.Lists.Top150
             [null, (int[][])[]],
             ];
 
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(ConnectData))]
         public void Connect(Node? root, int[][]? expectedMap)
         {
@@ -454,6 +457,7 @@ namespace leetcode.Lists.Top150
             [null,null],
             [new TreeNode(0), new TreeNode(0)]
             ];
+        [Trait("List", "TopInterview150")]
         [Theory, MemberData(nameof(FlattenData))]
         public void Flatten(TreeNode? root, TreeNode? expected)
         {
@@ -462,12 +466,12 @@ namespace leetcode.Lists.Top150
                 if (node == null) return;
 
                 if (node?.left != null) _Flatten(node?.left);
-                if (node?.right!= null) _Flatten(node?.right);
+                if (node?.right != null) _Flatten(node?.right);
 
                 // Find the last element in the list
                 TreeNode? rightMost = node?.left;
                 while (rightMost?.right != null) rightMost = rightMost.right;
-                
+
                 // Splice the list before the right subtree
                 if (rightMost != null)
                 {

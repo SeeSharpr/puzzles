@@ -1,11 +1,10 @@
-﻿using System.Data.SqlTypes;
-
-namespace leetcode.Lists.Top150
+﻿namespace leetcode.Lists.Top150
 {
     public class SlidingWindow
     {
         // Given an array of positive integers nums and a positive integer target, return the minimal length of a subarray whose sum is greater than or equal to target.
         // If there is no such subarray, return 0 instead.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(7, new[] { 2, 3, 1, 2, 4, 3 }, 2)]
         [InlineData(4, new[] { 1, 4, 4 }, 1)]
@@ -38,6 +37,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given a string s, find the length of the longest substring without repeating characters.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("abcabcbb", 3)]
         [InlineData("bbbbb", 1)]

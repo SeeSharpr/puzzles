@@ -7,6 +7,7 @@ namespace leetcode.Lists.Top150
     {
         // A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.
         // Given a string s, return true if it is a palindrome, or false otherwise.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("A man, a plan, a canal: Panama", true)]
         [InlineData("race a car", false)]
@@ -41,6 +42,7 @@ namespace leetcode.Lists.Top150
 
         // Given two strings s and t, return true if s is a subsequence of t, or false otherwise.
         // A subsequence of a string is a new string that is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (i.e., "ace" is a subsequence of "abcde" while "aec" is not).
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("abc", "ahbgdc", true)]
         [InlineData("axc", "ahbgdc", false)]
@@ -68,6 +70,7 @@ namespace leetcode.Lists.Top150
         // Return the indices of the two numbers, index1 and index2, added by one as an integer array [index1, index2] of length 2.
         // The tests are generated such that there is exactly one solution. You may not use the same element twice.
         // Your solution must use only constant extra space.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 2, 7, 11, 15 }, 9, new[] { 1, 2 })]
         [InlineData(new[] { 2, 3, 4 }, 6, new[] { 1, 3 })]
@@ -106,6 +109,7 @@ namespace leetcode.Lists.Top150
         // You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
         // Find two lines that together with the x-axis form a container, such that the container contains the most water.
         // Return the maximum amount of water a container can store.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 1, 8, 6, 2, 5, 4, 8, 3, 7 }, 49)]
         [InlineData(new[] { 1, 1 }, 1)]
@@ -138,6 +142,7 @@ namespace leetcode.Lists.Top150
         // Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
         // Notice that the solution set must not contain duplicate triplets.
         // Notice that the order of the output and the order of the triplets does not matter.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { -1, 0, 1, 2, -1, -4 }, new[] { -1, -1, 2 }, new[] { -1, 0, 1 })]
         [InlineData(new[] { 0, 1, 1 })]

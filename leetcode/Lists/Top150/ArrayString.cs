@@ -1,8 +1,4 @@
-﻿using static System.Collections.Specialized.BitVector32;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System;
-using System.Text;
+﻿using System.Text;
 
 namespace leetcode.Lists.Top150
 {
@@ -11,6 +7,8 @@ namespace leetcode.Lists.Top150
         // You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
         // Merge nums1 and nums2 into a single array sorted in non-decreasing order.
         // The final sorted array should not be returned by the function, but instead be stored inside the array nums1. To accommodate this, nums1 has a length of m + n, where the first m elements denote the elements that should be merged, and the last n elements are set to 0 and should be ignored. nums2 has a length of n.
+        [Trait("List", "TopInterview150")]
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 1, 2, 3, 0, 0, 0 }, 3, new int[] { 2, 5, 6 }, 3, new int[] { 1, 2, 2, 3, 5, 6 })]
         [InlineData(new int[] { 1 }, 1, new int[] { }, 0, new int[] { 1 })]
@@ -52,6 +50,8 @@ namespace leetcode.Lists.Top150
         // Consider the number of elements in nums which are not equal to val be k, to get accepted, you need to do the following things:
         // Change the array nums such that the first k elements of nums contain the elements which are not equal to val.The remaining elements of nums are not important as well as the size of nums.
         // Return k.
+        [Trait("List", "TopInterview150")]
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 3, 2, 2, 3 }, 3, 2, new int[] { 2, 2 })]
         [InlineData(new int[] { 0, 1, 2, 2, 3, 0, 4, 2 }, 2, 5, new int[] { 0, 1, 3, 0, 4 })]
@@ -82,6 +82,8 @@ namespace leetcode.Lists.Top150
         // Consider the number of unique elements of nums to be k, to get accepted, you need to do the following things:
         // Change the array nums such that the first k elements of nums contain the unique elements in the order they were present in nums initially.The remaining elements of nums are not important as well as the size of nums.
         // Return k.
+        [Trait("List", "TopInterview150")]
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 1, 1, 2 }, 2, new int[] { 1, 2 })]
         [InlineData(new int[] { 0, 0, 1, 1, 1, 2, 2, 3, 3, 4 }, 5, new int[] { 0, 1, 2, 3, 4 })]
@@ -113,6 +115,7 @@ namespace leetcode.Lists.Top150
         // Since it is impossible to change the length of the array in some languages, you must instead have the result be placed in the first part of the array nums.More formally, if there are k elements after removing the duplicates, then the first k elements of nums should hold the final result. It does not matter what you leave beyond the first k elements.
         // Return k after placing the final result in the first k slots of nums.
         // Do not allocate extra space for another array. You must do this by modifying the input array in-place with O(1) extra memory.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 1, 1, 1, 2, 2, 3 }, 5, new int[] { 1, 1, 2, 2, 3 })]
         [InlineData(new int[] { 0, 0, 1, 1, 1, 1, 1, 2, 3, 3 }, 7, new int[] { 0, 0, 1, 1, 2, 3, 3 })]
@@ -154,6 +157,7 @@ namespace leetcode.Lists.Top150
 
         // Given an array nums of size n, return the majority element.
         // The majority element is the element that appears more than ⌊n / 2⌋ times.You may assume that the majority element always exists in the array.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 3, 2, 3 }, 3)]
         [InlineData(new int[] { 2, 2, 1, 1, 1, 2, 2 }, 2)]
@@ -215,6 +219,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given an integer array nums, rotate the array to the right by k steps, where k is non-negative.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 1, 2, 3, 4, 5, 6, 7 }, 3, new int[] { 5, 6, 7, 1, 2, 3, 4 })]
         [InlineData(new int[] { -1, -100, 3, 99 }, 2, new int[] { 3, 99, -1, -100 })]
@@ -248,6 +253,7 @@ namespace leetcode.Lists.Top150
         // You are given an array prices where prices[i] is the price of a given stock on the ith day.
         // You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
         // Return the maximum profit you can achieve from this transaction.If you cannot achieve any profit, return 0.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 7, 1, 5, 3, 6, 4 }, 5)]
         [InlineData(new int[] { 7, 6, 4, 3, 1 }, 0)]
@@ -277,6 +283,7 @@ namespace leetcode.Lists.Top150
         // You are given an integer array prices where prices[i] is the price of a given stock on the ith day.
         // On each day, you may decide to buy and/or sell the stock.You can only hold at most one share of the stock at any time.However, you can buy it then immediately sell it on the same day.
         // Find and return the maximum profit you can achieve.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { 7, 1, 5, 3, 6, 4 }, 7)]
         [InlineData(new int[] { 1, 2, 3, 4, 5 }, 4)]
@@ -301,6 +308,7 @@ namespace leetcode.Lists.Top150
 
         // You are given an integer array nums. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
         // Return true if you can reach the last index, or false otherwise.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 2, 3, 1, 1, 4 }, true)]
         [InlineData(new[] { 3, 2, 1, 0, 4 }, false)]
@@ -436,6 +444,7 @@ namespace leetcode.Lists.Top150
         // 0 <= j <= nums[i] and
         // i + j<n
         // Return the minimum number of jumps to reach nums[n - 1]. The test cases are generated such that you can reach nums[n - 1].
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 2, 3, 1, 1, 4 }, 2)]
         [InlineData(new[] { 2, 3, 0, 1, 4 }, 2)]
@@ -464,6 +473,7 @@ namespace leetcode.Lists.Top150
 
         // Given an array of integers citations where citations[i] is the number of citations a researcher received for their ith paper, return the researcher's h-index.
         // According to the definition of h-index on Wikipedia: The h-index is defined as the maximum value of h such that the given researcher has published at least h papers that have each been cited at least h times.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 3, 0, 6, 1, 5 }, 3)]
         [InlineData(new[] { 1, 3, 1 }, 1)]
@@ -549,6 +559,7 @@ namespace leetcode.Lists.Top150
             }
         }
 
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new int[] { })]
         [InlineData(10, 10)]
@@ -581,6 +592,7 @@ namespace leetcode.Lists.Top150
         // Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].
         // The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.
         // You must write an algorithm that runs in O(n) time and without using the division operation.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 1, 2, 3, 4 }, new[] { 24, 12, 8, 6 })]
         [InlineData(new[] { -1, 1, 0, -3, 3 }, new[] { 0, 0, 9, 0, 0 })]
@@ -612,6 +624,7 @@ namespace leetcode.Lists.Top150
         // There are n gas stations along a circular route, where the amount of gas at the ith station is gas[i].
         // You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from the ith station to its next(i + 1)th station.You begin the journey with an empty tank at one of the gas stations.
         // Given two integer arrays gas and cost, return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1. If there exists a solution, it is guaranteed to be unique.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 1, 2, 3, 4, 5 }, new[] { 3, 4, 5, 1, 2 }, 3)]
         [InlineData(new[] { 2, 3, 4 }, new[] { 3, 4, 3 }, -1)]
@@ -645,6 +658,7 @@ namespace leetcode.Lists.Top150
         // Each child must have at least one candy.
         // Children with a higher rating get more candies than their neighbors.
         // Return the minimum number of candies you need to have to distribute the candies to the children.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 1, 0, 2 }, 5)]
         [InlineData(new[] { 1, 2, 2 }, 4)]
@@ -676,6 +690,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new[] { 0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1 }, 6)]
         [InlineData(new[] { 4, 2, 0, 3, 2, 5 }, 9)]
@@ -717,6 +732,7 @@ namespace leetcode.Lists.Top150
         // And then read line by line: "PAHNAPLSIIGYIR"
         // 
         // Write the code that will take a string and make this conversion given a number of rows:
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("PAYPALISHIRING", 3, "PAHNAPLSIIGYIR")]
         [InlineData("PAYPALISHIRING", 4, "PINALSIGYAHRPI")]

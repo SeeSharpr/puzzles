@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Cryptography;
+﻿using System.Collections;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
@@ -29,6 +22,7 @@ namespace leetcode.Lists.Top150
     {
         // Given two strings ransomNote and magazine, return true if ransomNote can be constructed by using the letters from magazine and false otherwise.
         // Each letter in magazine can only be used once in ransomNote.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("a", "b", false)]
         [InlineData("aa", "ab", false)]
@@ -70,6 +64,7 @@ namespace leetcode.Lists.Top150
         // Given two strings s and t, determine if they are isomorphic.
         // Two strings s and t are isomorphic if the characters in s can be replaced to get t.
         // All occurrences of a character must be replaced with another character while preserving the order of characters.No two characters may map to the same character, but a character may map to itself.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("egg", "add", true)]
         [InlineData("foo", "bar", false)]
@@ -110,6 +105,7 @@ namespace leetcode.Lists.Top150
         // Each letter in pattern maps to exactly one unique word in s.
         // Each unique word in s maps to exactly one letter in pattern.
         // No two letters map to the same word, and no two words map to the same letter.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("abba", "dog cat cat dog", true)]
         [InlineData("abba", "dog cat cat fish", false)]
@@ -202,6 +198,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given two strings s and t, return true if t is an anagram of s, and false otherwise.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("anagram", "nagaram", true)]
         [InlineData("rat", "car", false)]
@@ -231,6 +228,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given an array of strings strs, group the anagrams together.You can return the answer in any order.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("eat,tea,tan,ate,nat,bat", "bat|nat,tan|ate,eat,tea")]
         [InlineData("", "")]
@@ -283,6 +281,7 @@ namespace leetcode.Lists.Top150
         // Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
         // You may assume that each input would have exactly one solution, and you may not use the same element twice.
         // You can return the answer in any order.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("2,7,11,15", 9, "0,1")]
         [InlineData("3,2,4", 6, "1,2")]
@@ -317,6 +316,7 @@ namespace leetcode.Lists.Top150
         // Repeat the process until the number equals 1 (where it will stay), or it loops endlessly in a cycle which does not include 1.
         // Those numbers for which this process ends in 1 are happy.
         // Return true if n is a happy number, and false if not.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(19, true)]
         [InlineData(2, false)]
@@ -352,6 +352,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given an integer array nums and an integer k, return true if there are two distinct indices i and j in the array such that nums[i] == nums[j] and abs(i - j) <= k.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("1, 2, 3, 1", 3, true)]
         [InlineData("1, 0, 1, 1", 1, true)]
@@ -389,6 +390,7 @@ namespace leetcode.Lists.Top150
 
         // Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
         // You must write an algorithm that runs in O(n) time.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("100, 4, 200, 1, 3, 2", 4)]
         [InlineData("0,3,7,2,5,8,4,6,0,1", 9)]

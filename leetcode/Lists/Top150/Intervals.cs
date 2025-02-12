@@ -10,6 +10,7 @@ namespace leetcode.Lists.Top150
         // Each range[a, b] in the list should be output as:
         // "a->b" if a != b
         // "a" if a == b
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("0, 1, 2, 4, 5, 7", "0->2, 4->5, 7")]
         [InlineData("0, 2, 3, 4, 6, 8, 9", "0, 2->4, 6, 8->9")]
@@ -48,6 +49,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("1, 3|2, 6|8, 10|15, 18", "1, 6|8, 10|15, 18")]
         [InlineData("1, 4|4, 5", "1, 5")]
@@ -95,6 +97,7 @@ namespace leetcode.Lists.Top150
         // Insert newInterval into intervals such that intervals is still sorted in ascending order by starti and intervals still does not have any overlapping intervals(merge overlapping intervals if necessary).
         // Return intervals after the insertion.
         // Note that you don't need to modify intervals in-place. You can make a new array and return it.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("1,3|6,9", "2,5", "1,5|6,9")]
         [InlineData("1,2|3,5|6,7|8,10|12,16", "4,8", "1,2|3,10|12,16")]
@@ -138,6 +141,7 @@ namespace leetcode.Lists.Top150
         // There are some spherical balloons taped onto a flat wall that represents the XY-plane.The balloons are represented as a 2D integer array points where points[i] = [xstart, xend] denotes a balloon whose horizontal diameter stretches between xstart and xend.You do not know the exact y-coordinates of the balloons.
         // Arrows can be shot up directly vertically (in the positive y-direction) from different points along the x-axis.A balloon with xstart and xend is burst by an arrow shot at x if xstart <= x <= xend.There is no limit to the number of arrows that can be shot.A shot arrow keeps traveling up infinitely, bursting any balloons in its path.
         // Given the array points, return the minimum number of arrows that must be shot to burst all balloons.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[[10, 16], [2, 8], [1, 6], [7, 12]]", 2)]
         [InlineData("[[1, 2], [3, 4], [5, 6], [7, 8]]", 4)]

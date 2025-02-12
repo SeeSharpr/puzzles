@@ -142,6 +142,7 @@ namespace leetcode.Lists.Top150
         // Given head, the head of a linked list, determine if the linked list has a cycle in it.
         // There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer.Internally, pos is used to denote the index of the node that tail's next pointer is connected to. Note that pos is not passed as a parameter.
         // Return true if there is a cycle in the linked list.Otherwise, return false.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[3, 2, 0, -4]", 1, true)]
         [InlineData("[1, 2]", 0, true)]
@@ -173,6 +174,7 @@ namespace leetcode.Lists.Top150
 
         // You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.
         // You may assume the two numbers do not contain any leading zero, except the number 0 itself.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[2, 4, 3]", "[5, 6, 4]", "[7, 0, 8]")]
         [InlineData("[0]", "[0]", "[0]")]
@@ -239,6 +241,7 @@ namespace leetcode.Lists.Top150
         // You are given the heads of two sorted linked lists list1 and list2.
         // Merge the two lists into one sorted list.The list should be made by splicing together the nodes of the first two lists.
         // Return the head of the merged linked list.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1,2,4]", "[1,3,4]", "[1,1,2,3,4,4]")]
         [InlineData("[]", "[]", "[]")]
@@ -305,6 +308,7 @@ namespace leetcode.Lists.Top150
         // val: an integer representing Node.val
         // random_index: the index of the node (range from 0 to n-1) that the random pointer points to, or null if it does not point to any node.
         // Your code will only be given the head of the original linked list.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[[7,-1],[13,0],[11,4],[10,2],[1,0]]")]
         [InlineData("[[1,1],[2,1]]")]
@@ -361,6 +365,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given the head of a singly linked list and two integers left and right where left <= right, reverse the nodes of the list from position left to position right, and return the reversed list.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1, 2, 3, 4, 5]", 2, 4, "[1,4,3,2,5]")]
         [InlineData("[5]", 1, 1, "[5]")]
@@ -398,6 +403,7 @@ namespace leetcode.Lists.Top150
         // Given the head of a linked list, reverse the nodes of the list k at a time, and return the modified list.
         // k is a positive integer and is less than or equal to the length of the linked list.If the number of nodes is not a multiple of k then left-out nodes, in the end, should remain as it is.
         // You may not alter the values in the list's nodes, only nodes themselves may be changed.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1,2,3,4,5]", 2, "[2,1,4,3,5]")]
         [InlineData("[1,2,3,4,5]", 3, "[3,2,1,4,5]")]
@@ -440,6 +446,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given the head of a linked list, remove the nth node from the end of the list and return its head.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1, 2, 3, 4, 5]", 2, "[1, 2, 3, 5]")]
         [InlineData("[1]", 1, "[]")]
@@ -468,6 +475,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given the head of a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list. Return the linked list sorted as well.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1,2,3,3,4,4,5]", "[1,2,5]")]
         [InlineData("[1,1,1,2,3]", "[2,3]")]
@@ -498,6 +506,7 @@ namespace leetcode.Lists.Top150
         }
 
         // Given the head of a linked list, rotate the list to the right by k places.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1,2,3,4,5]", 0, "[1,2,3,4,5]")]
         [InlineData("[1,2,3,4,5]", 1, "[5,1,2,3,4]")]
@@ -542,6 +551,7 @@ namespace leetcode.Lists.Top150
 
         // Given the head of a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
         // You should preserve the original relative order of the nodes in each of the two partitions.
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData("[1,4,3,2,5,2]", 3, "[1,2,2,4,3,5]")]
         [InlineData("[2,1]", 2, "[1,2]")]
@@ -712,6 +722,7 @@ namespace leetcode.Lists.Top150
             }
         }
 
+        [Trait("List", "TopInterview150")]
         [Fact]
         public void LRUCacheTest()
         {

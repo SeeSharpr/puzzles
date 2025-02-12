@@ -3,6 +3,7 @@
     public class Matrix
     {
 
+        [Trait("List", "TopInterview150")]
         [Theory]
         [InlineData(new string[] {
             "53..7....",
@@ -112,6 +113,7 @@
             Assert.Equal(expected, valid);
         }
 
+        [Trait("List", "TopInterview150")]
         [Fact]
         public void SpiralOrder()
         {
@@ -164,6 +166,7 @@
         }
 
         // You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+        [Trait("List", "TopInterview150")]
         [Fact]
         public void Rotate()
         {
@@ -214,6 +217,7 @@
         }
 
         // Given an m x n integer matrix matrix, if an element is 0, set its entire row and column to 0's.
+        [Trait("List", "TopInterview150")]
         [Fact]
         public void SetZeroes()
         {
@@ -303,6 +307,7 @@
             }
         }
 
+        [Trait("List", "TopInterview150")]
         [Fact]
         public void GameOfLife()
         {
