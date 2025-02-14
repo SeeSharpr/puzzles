@@ -1,11 +1,4 @@
-﻿using static leetcode.Lists.Top150.BinaryTrees;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.IO;
-
-namespace leetcode.Lists.Top150
+﻿namespace leetcode.Lists.Top150
 {
     public class Others
     {
