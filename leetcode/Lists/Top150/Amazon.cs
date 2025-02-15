@@ -36,23 +36,46 @@
 
             int[] pairs = map.Values.ToArray();
 
-            Comparison<int> comparer = new((a, b) => b - a);
-            for (int tail = pairs.Length - 1; tail > 0;)
-            {
-                Array.Sort(pairs, comparer);
+            Comparison<int> comparison = new((a, b) => b - a);
+            PriorityQueue<int, int> pq = new(map.Select(pair => (pair.Value, pair.Value)), Comparer<int>.Create(comparison));
 
-                if (tail > 1 && pairs[1] > pairs[2])
+            while (pq.Count > 1)
+            {
+                int count1 = pq.Dequeue();
+                int count2 = pq.Dequeue();
+
+                if (pq.TryPeek(out int _, out int count3) && count2 > count3)
                 {
-                    int diff = pairs[1] - pairs[2];
-                    if ((pairs[0] -= diff) == 0) tail--;
-                    if ((pairs[1] -= diff) == 0) tail--;
+                    int diff = count2 - count3;
+
+                    if ((count1 -= diff) > 0) pq.Enqueue(count1, count1);
+                    if ((count2 -= diff) > 0) pq.Enqueue(count2, count2);
                 }
                 else
                 {
-                    if (--pairs[0] == 0) tail--;
-                    if (--pairs[1] == 0) tail--;
+                    if (--count1 > 0) pq.Enqueue(count1, count1);
+                    if (--count2 > 0) pq.Enqueue(count2, count2);
                 }
             }
+
+            pq.TryDequeue(out int _, out int actual);
+
+            //for (int tail = pairs.Length - 1; tail > 0;)
+            //{
+            //    Array.Sort(pairs, comparison);
+
+            //    if (tail > 1 && pairs[1] > pairs[2])
+            //    {
+            //        int diff = pairs[1] - pairs[2];
+            //        if ((pairs[0] -= diff) == 0) tail--;
+            //        if ((pairs[1] -= diff) == 0) tail--;
+            //    }
+            //    else
+            //    {
+            //        if (--pairs[0] == 0) tail--;
+            //        if (--pairs[1] == 0) tail--;
+            //    }
+            //}
 
             //Comparison<int> comparer = new((a, b) => b - a);
             //for (int tail = pairs.Length - 1; tail > 0;)
@@ -63,7 +86,7 @@
             //    if (--pairs[1] == 0) tail--;
             //}
 
-            int actual = pairs.Sum();
+            //int actual = pairs.Sum();
 
             Assert.Equal(expected, actual);
         }
