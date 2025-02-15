@@ -54,13 +54,13 @@
                 }
             }
 
-            //int limit = pairs.Length - 1;
-            //for (int head = 0; head < limit;)
+            //Comparison<int> comparer = new((a, b) => b - a);
+            //for (int tail = pairs.Length - 1; tail > 0;)
             //{
-            //    Array.Sort(pairs);
+            //    Array.Sort(pairs, comparer);
 
-            //    if (--pairs[limit] == 0) head++;
-            //    if (--pairs[limit - 1] == 0) head++;
+            //    if (--pairs[0] == 0) tail--;
+            //    if (--pairs[1] == 0) tail--;
             //}
 
             int actual = pairs.Sum();
