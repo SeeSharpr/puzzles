@@ -1,4 +1,8 @@
-﻿namespace leetcode.Lists.Top150
+﻿using Newtonsoft.Json.Linq;
+using System.Collections;
+using Xunit.Abstractions;
+
+namespace leetcode.Lists.Top150
 {
     public class TreesGraphs
     {
@@ -130,5 +134,59 @@
             }
         }
 
+        // 112. Path Sum
+        // Given the root of a binary tree and an integer targetSum, return true if the tree has a root-to-leaf path such that adding up all the values along the path equals targetSum.
+        // A leaf is a node with no children.
+        public class HasPathSumData : IEnumerable<object[]>, IXunitSerializable
+        {
+            public IEnumerator<object[]> GetEnumerator()
+            {
+                return InternalGetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public void Deserialize(IXunitSerializationInfo info)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Serialize(IXunitSerializationInfo info)
+            {
+                throw new NotImplementedException();
+            }
+
+            private IEnumerator<object[]> InternalGetEnumerator()
+            {
+                yield return [new TreeNode(5, new TreeNode(4, left: new TreeNode(11, new TreeNode(7), new TreeNode(2))), new TreeNode(8, new TreeNode(13), new TreeNode(4, right: new TreeNode(1)))), 22, true];
+                yield return [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 5, false];
+                yield return [null, 0, false];
+            }
+        }
+
+        [Trait("Difficulty", "Easy")]
+        [Theory]
+        [ClassData(typeof(HasPathSumData))]
+        public void HasPathSum(TreeNode root, int targetSum, bool expected)
+        {
+            static bool InternalHasPathSum(TreeNode? node, int target, int current)
+            {
+                if (node == null)
+                {
+                    return target == current;
+                }
+
+                current += node.val;
+
+                return current <= target && (InternalHasPathSum(node.left, target, current) || InternalHasPathSum(node.right, target, current));
+            }
+
+            bool actual = root != null && InternalHasPathSum(root, targetSum, 0);
+
+            Assert.Equal(expected, actual);
+        }
     }
 }
