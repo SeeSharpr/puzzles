@@ -1,14 +1,16 @@
 ﻿using System.Collections;
+using Xunit.Abstractions;
 
 namespace leetcode.Lists.Top150
 {
     public class BinaryTrees
     {
-        public class TreeNode : IEnumerable<TreeNode>
+        public class TreeNode : IEnumerable<TreeNode>, IXunitSerializable
         {
             public int val;
             public TreeNode? left;
             public TreeNode? right;
+            public TreeNode() { }
             public TreeNode(int val = 0, TreeNode? left = null, TreeNode? right = null)
             {
                 this.val = val;
@@ -71,9 +73,23 @@ namespace leetcode.Lists.Top150
                     TraversePreOrder(node.right, list);
                 }
             }
+
+            public void Deserialize(IXunitSerializationInfo info)
+            {
+                val = info.GetValue<int>(nameof(val));
+                left = info.GetValue<TreeNode>(nameof(left));
+                right = info.GetValue<TreeNode>(nameof(right));
+            }
+
+            public void Serialize(IXunitSerializationInfo info)
+            {
+                info.AddValue(nameof(val), val);
+                info.AddValue(nameof(left), left);
+                info.AddValue(nameof(right), right);
+            }
         }
 
-        public class Node
+        public class Node : IXunitSerializable
         {
             public int val;
             public Node? left;
@@ -123,6 +139,22 @@ namespace leetcode.Lists.Top150
                 {
                     throw new InvalidDataException($"({x?.val}, {y?.val}), {e.Message}");
                 }
+            }
+
+            public void Deserialize(IXunitSerializationInfo info)
+            {
+                val = info.GetValue<int>(nameof(val));
+                left = info.GetValue<Node>(nameof(left));
+                right = info.GetValue<Node>(nameof(right));
+                next = info.GetValue<Node>(nameof(next));
+            }
+
+            public void Serialize(IXunitSerializationInfo info)
+            {
+                info.AddValue(nameof(val), val);
+                info.AddValue(nameof(left), left);
+                info.AddValue(nameof(right), right);
+                info.AddValue(nameof(next), next);
             }
 
             public static Node? CloneExceptNext(Node? node)

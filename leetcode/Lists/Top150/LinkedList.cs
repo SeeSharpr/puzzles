@@ -1,19 +1,29 @@
 ﻿using System.Collections;
+using Xunit.Abstractions;
 
 namespace leetcode.Lists.Top150
 {
     public class LinkedList
     {
-        private class ListNode(int x, ListNode? next = null) : IEnumerable<ListNode>
+        private class ListNode : IEnumerable<ListNode>, IXunitSerializable
         {
             private static int idGen = -1;
-            private readonly int id = Interlocked.Increment(ref idGen);
+            private int id = Interlocked.Increment(ref idGen);
 
-            public readonly int x = x;
+            public int x;
 
-            public readonly int val = x;
+            public int val;
 
-            public ListNode? next = next;
+            public ListNode? next;
+
+            public ListNode() { }
+
+            public ListNode(int x, ListNode? next = null)
+            {
+                this.x = x;
+                val = x;
+                this.next = next;
+            }
 
             public void CreateLoop(int index)
             {
@@ -52,6 +62,22 @@ namespace leetcode.Lists.Top150
             public static ListNode? ParseFromLC(string input)
             {
                 return input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            }
+
+            public void Deserialize(IXunitSerializationInfo info)
+            {
+                id = info.GetValue<int>(nameof(id));
+                x = info.GetValue<int>(nameof(x));
+                val = info.GetValue<int>(nameof(val));
+                next = info.GetValue<ListNode?>(nameof(next));
+            }
+
+            public void Serialize(IXunitSerializationInfo info)
+            {
+                info.AddValue(nameof(id), id);
+                info.AddValue(nameof(x), x);
+                info.AddValue(nameof(val), val);
+                info.AddValue(nameof(next), next);
             }
 
             private class NodeEnumerator(ListNode? head) : IEnumerator<ListNode>
