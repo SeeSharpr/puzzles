@@ -145,37 +145,5 @@ namespace leetcode.Lists.Top150
                 return result;
             }
         }
-
-        // 112. Path Sum
-        // Given the root of a binary tree and an integer targetSum, return true if the tree has a root-to-leaf path such that adding up all the values along the path equals targetSum.
-        // A leaf is a node with no children.
-        public static readonly IEnumerable<object[]> HasPathSumData =
-            [
-            [new TreeNode(5, new TreeNode(4, left: new TreeNode(11, new TreeNode(7), new TreeNode(2))), new TreeNode(8, new TreeNode(13), new TreeNode(4, right: new TreeNode(1)))), 22, true],
-            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 5, false],
-            [null, 0, false],
-            ];
-
-        [Trait("Difficulty", "Easy")]
-        [Theory]
-        [MemberData(nameof(HasPathSumData))]
-        public void HasPathSum(TreeNode root, int targetSum, bool expected)
-        {
-            static bool InternalHasPathSum(TreeNode? node, int target, int current)
-            {
-                if (node == null)
-                {
-                    return target == current;
-                }
-
-                current += node.val;
-
-                return current <= target && (InternalHasPathSum(node.left, target, current) || InternalHasPathSum(node.right, target, current));
-            }
-
-            bool actual = root != null && InternalHasPathSum(root, targetSum, 0);
-
-            Assert.Equal(expected, actual);
-        }
     }
 }
