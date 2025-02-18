@@ -90,5 +90,53 @@
 
             Assert.Equal(expected, actual);
         }
+
+
+        [Trait("Company", "Amazon")]
+        [Theory]
+        [InlineData("[1,4,4,2,5,3]", "[2,1,4,0,5,3]", 3, 3)]
+        public void Dominoes(string inputDomino, string inputRemove, int minOrder, int expected)
+        {
+            int[] domino = inputDomino.ParseArrayStringLC(int.Parse).ToArray();
+            int[] remove = inputRemove.ParseArrayStringLC(int.Parse).ToArray();
+
+            static int InternalGetOrder(int[] input)
+            {
+                Dictionary<int, int> map = [];
+
+                int result = 0;
+                foreach (int i in input)
+                {
+                    if (i == -1) continue;
+
+                    if (map.TryGetValue(i - 1, out int previous))
+                    {
+                        map[i] = Math.Max(previous + 1, map.TryGetValue(i, out int current) ? current : 1);
+                    }
+                    else if (!map.ContainsKey(i))
+                    {
+                        map[i] = 1;
+                    }
+
+                    result = Math.Max(result, map[i]);
+                }
+
+                return result;
+            }
+
+            int actual = 0;
+            for (int i = 0; i < remove.Length; i++)
+            {
+                if (InternalGetOrder(domino) < minOrder)
+                {
+                    actual = i - 1;
+                    break;
+                }
+
+                domino[remove[i]] = -1;
+            }
+
+            Assert.Equal(expected, actual);
+        }
     }
 }
