@@ -1,10 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Reflection;
+using System.Xml.Linq;
 using Xunit.Abstractions;
 using static leetcode.Lists.Top150.BinaryTrees;
 using static leetcode.Lists.Top150.TreesGraphs;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
@@ -639,6 +645,73 @@ namespace leetcode.Lists.Top150
             int actual = Math.Max(result, maxSum);
 
             Assert.Equal(expected, actual);
+        }
+
+        // 173. Binary Search Tree Iterator
+        // Implement the BSTIterator class that represents an iterator over the in-order traversal of a binary search tree(BST) :
+        // BSTIterator(TreeNode root) Initializes an object of the BSTIterator class. The root of the BST is given as part of the constructor.The pointer should be initialized to a non-existent number smaller than any element in the BST.
+        // boolean hasNext() Returns true if there exists a number in the traversal to the right of the pointer, otherwise returns false.
+        // int next() Moves the pointer to the right, then returns the number at the pointer.
+        // Notice that by initializing the pointer to a non-existent smallest number, the first call to next() will return the smallest element in the BST.
+        // You may assume that next() calls will always be valid. That is, there will be at least a next number in the in-order traversal when next() is called.
+        public class BSTIterator
+        {
+            private readonly Stack<TreeNode> stack = new();
+            private TreeNode? current;
+
+            public BSTIterator(TreeNode root)
+            {
+                this.current = root;
+            }
+
+            public int Next()
+            {
+                while (current != null)
+                {
+                    stack.Push(current);
+                    current = current.left;
+                }
+
+                int result = stack.Peek().val;
+
+                current = stack.Pop().right;
+
+                return result;
+            }
+
+            public bool HasNext()
+            {
+                return stack.Count > 0 || current != null;
+            }
+        }
+
+        public static readonly IEnumerable<object[]> BSTIteratorTestData =
+            [
+            [new TreeNode(7, new TreeNode(3), new TreeNode(15, new TreeNode(9), new TreeNode(20))), "next,next,hasNext,next,hasNext,next,hasNext,next,hasNext", "3,7,true,9,true,15,true,20,false"],
+            ];
+
+        [Trait("Difficulty", "Medium")]
+        [Theory, MemberData(nameof(BSTIteratorTestData))]
+        public void BSTIteratorTest(TreeNode root, string inputOperations, string inputExpectations)
+        {
+            string[] operations = inputOperations.ParseEnumerable(x => x).ToArray();
+            string[] expectations = inputExpectations.ParseEnumerable(x => x).ToArray();
+
+            BSTIterator it = new(root);
+            for (int i = 0; i < operations.Length; i++)
+            {
+                switch (operations[i])
+                {
+                    case "next":
+                        int expNext = int.Parse(expectations[i]);
+                        Assert.Equal(expNext, it.Next());
+                        break;
+                    case "hasNext":
+                        bool expHasNext = bool.Parse(expectations[i]);
+                        Assert.Equal(expHasNext, it.HasNext());
+                        break;
+                }
+            }
         }
     }
 }
