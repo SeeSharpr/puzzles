@@ -1,5 +1,11 @@
-﻿using System.Collections;
+﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System.Collections;
+using System.IO;
+using System.Numerics;
 using Xunit.Abstractions;
+using static leetcode.Lists.Top150.BinaryTrees;
+using static leetcode.Lists.Top150.TreesGraphs;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
@@ -528,26 +534,109 @@ namespace leetcode.Lists.Top150
             [new TreeNode(5, new TreeNode(4, left: new TreeNode(11, new TreeNode(7), new TreeNode(2))), new TreeNode(8, new TreeNode(13), new TreeNode(4, right: new TreeNode(1)))), 22, true],
             [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 5, false],
             [null, 0, false],
+            [new TreeNode(1, new TreeNode(2), null), 1, false],
             ];
 
         [Trait("Difficulty", "Easy")]
-        [Theory]
-        [MemberData(nameof(HasPathSumData))]
+        [Theory, MemberData(nameof(HasPathSumData))]
         public void HasPathSum(TreeNode root, int targetSum, bool expected)
         {
             static bool InternalHasPathSum(TreeNode? node, int target, int current)
             {
                 if (node == null)
                 {
-                    return target == current;
+                    return false;
                 }
+                else
+                {
+                    current += node.val;
 
-                current += node.val;
-
-                return current <= target && (InternalHasPathSum(node.left, target, current) || InternalHasPathSum(node.right, target, current));
+                    if (node?.left == null && node?.right == null)
+                    {
+                        return target == current;
+                    }
+                    else
+                    {
+                        return InternalHasPathSum(node.left, target, current) || InternalHasPathSum(node.right, target, current);
+                    }
+                }
             }
 
-            bool actual = root != null && InternalHasPathSum(root, targetSum, 0);
+            bool actual = InternalHasPathSum(root, targetSum, 0);
+
+            Assert.Equal(expected, actual);
+        }
+
+        // 129. Sum Root to Leaf Numbers
+        // You are given the root of a binary tree containing digits from 0 to 9 only.
+        // Each root-to-leaf path in the tree represents a number.
+        // For example, the root-to-leaf path 1 -> 2 -> 3 represents the number 123.
+        // Return the total sum of all root-to-leaf numbers.Test cases are generated so that the answer will fit in a 32-bit integer.
+        // A leaf node is a node with no children.
+        public static readonly IEnumerable<object[]> SumNumbersData =
+            [
+            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 25],
+            [new TreeNode(4, new TreeNode(9, new TreeNode(5), new TreeNode(1)), new TreeNode(0)), 1026],
+            ];
+
+        [Trait("Difficulty", "Medium")]
+        [Theory, MemberData(nameof(SumNumbersData))]
+        public void SumNumbers(TreeNode root, int expected)
+        {
+            static int InternalSumNumbers(TreeNode? node, int current)
+            {
+                int next = current * 10 + node.val;
+
+                if (node?.left == null && node?.right == null)
+                {
+                    return next;
+                }
+                else
+                {
+                    return (node?.left != null ? InternalSumNumbers(node.left, next) : 0) +
+                        (node?.right != null ? InternalSumNumbers(node.right, next) : 0);
+                }
+            }
+
+            int actual = root == null ? 0 : InternalSumNumbers(root, 0);
+
+            Assert.Equal(expected, actual);
+        }
+
+        // 124. Binary Tree Maximum Path Sum
+        // A path in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them.A node can only appear in the sequence at most once.Note that the path does not need to pass through the root.
+        // The path sum of a path is the sum of the node's values in the path.
+        // Given the root of a binary tree, return the maximum path sum of any non-empty path.
+        public static readonly IEnumerable<object[]> MaxPathSumData =
+            [
+            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 6],
+            [new TreeNode(-10, new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7))), 42],
+            [null, 0],
+            [new TreeNode(2, left: new TreeNode(-1)), 2],
+            [new TreeNode(2, new TreeNode(-1), new TreeNode(-2)), 2],
+            [new TreeNode(-3, new TreeNode(-1)), -1]
+            ];
+
+        [Trait("Difficulty", "Hard")]
+        [Theory, MemberData(nameof(MaxPathSumData))]
+        public void MaxPathSum(TreeNode root, int expected)
+        {
+            static int InternalMaxPathSum(TreeNode? node, ref int maxSum)
+            {
+                if (node == null) return 0;
+
+                int leftGain = Math.Max(InternalMaxPathSum(node.left, ref maxSum), 0);
+                int rightGain = Math.Max(InternalMaxPathSum(node.right, ref maxSum), 0);
+                int thisSum = node.val + leftGain + rightGain;
+
+                maxSum = Math.Max(maxSum, thisSum);
+
+                return node.val + Math.Max(leftGain, rightGain);
+            }
+
+            int maxSum = int.MinValue;
+            int result = InternalMaxPathSum(root, ref maxSum);
+            int actual = Math.Max(result, maxSum);
 
             Assert.Equal(expected, actual);
         }

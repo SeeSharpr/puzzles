@@ -1,7 +1,16 @@
-﻿namespace leetcode
+﻿using System.Xml;
+
+namespace leetcode
 {
     public static class LeetcodeExtensions
     {
+        public interface INode<T>
+        {
+            T Data { get; set; }
+            INode<T>? Left { get; set; }
+            INode<T>? Right { get; set; }
+        }
+
         public static IEnumerable<IEnumerable<T>> ParseNestedArrayStringLC<T>(this string input, Func<string, T> parse, char elementSeparator = ',', char entrySeparator = '|')
         {
             return input
