@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -748,6 +749,24 @@ namespace leetcode.Lists.Top150
             int actual = InternalCountNodes(root, 0, 0);
 
             Assert.Equal(expected, actual);
+        }
+
+
+        // 236. Lowest Common Ancestor of a Binary Tree
+        // Given a binary tree, find the lowest common ancestor(LCA) of two given nodes in the tree.
+        // According to the definition of LCA on Wikipedia: “The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself).”
+        public static readonly IEnumerable<object[]> LowestCommonAncestorData =
+            [
+            ["[3,5,1,6,2,0,8,null,null,7,4]", 5, 1, 3],
+            ["[3,5,1,6,2,0,8,null,null,7,4]", 5, 4, 5],
+            ["[1,2]", 1, 2, 1]
+            ];
+
+        [Trait("Difficulty", "Medium")]
+        [Theory, MemberData(nameof(LowestCommonAncestorData))]
+        public void LowestCommonAncestor(TreeNode root, int pVal, int qVal, int expectedVal)
+        {
+
         }
     }
 }
