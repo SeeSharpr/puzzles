@@ -1,6 +1,4 @@
-﻿using Xunit.Abstractions;
-
-namespace leetcode.Lists.Top150
+﻿namespace leetcode.Lists.Top150
 {
     public class TreesGraphs
     {
@@ -46,62 +44,6 @@ namespace leetcode.Lists.Top150
         // Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.
         // Design an algorithm to serialize and deserialize a binary tree.There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.
         // Clarification: The input/output format is the same as how LeetCode serializes a binary tree. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.
-        [Trait("Difficulty", "Hard")]
-        [Trait("Company", "Amazon")]
-        [Theory]
-        [MemberData(nameof(CodecData))]
-        public void CodecTest(TreeNode? root)
-        {
-            Codec codec = new();
-
-            TreeNode.AssertEqual(root, codec.deserialize(codec.serialize(root)));
-        }
-
-        public static IEnumerable<object[]> CodecData =
-            [
-            [new TreeNode(-11, new TreeNode(2), new TreeNode(3, new TreeNode(4), new TreeNode(5)))],
-            [new TreeNode(1, new TreeNode(2), new TreeNode(3, new TreeNode(4), new TreeNode(5)))],
-            [null],
-            ];
-
-        public class TreeNode : IXunitSerializable
-        {
-            public int val;
-            public TreeNode left;
-            public TreeNode right;
-            public TreeNode() { }
-            public TreeNode(int x, TreeNode left = null, TreeNode right = null) { val = x; this.left = left; this.right = right; }
-
-            public override string ToString()
-            {
-                return $"{val}[{left?.val}][{right?.val}]";
-            }
-
-            public static void AssertEqual(TreeNode? a, TreeNode? b)
-            {
-                if (a == null && b == null) return;
-
-                Assert.Equal(a?.val, b?.val);
-
-                AssertEqual(a?.left, b?.left);
-                AssertEqual(a?.right, b?.right);
-            }
-
-            public void Deserialize(IXunitSerializationInfo info)
-            {
-                val = info.GetValue<int>(nameof(val));
-                left = info.GetValue<TreeNode>(nameof(left));
-                right = info.GetValue<TreeNode>(nameof(right));
-            }
-
-            public void Serialize(IXunitSerializationInfo info)
-            {
-                info.AddValue(nameof(val), val);
-                info.AddValue(nameof(left), left);
-                info.AddValue(nameof(right), right);
-            }
-        }
-
         public class Codec
         {
             // Encodes a tree to a single string.
@@ -144,6 +86,21 @@ namespace leetcode.Lists.Top150
 
                 return result;
             }
+        }
+
+        [Trait("Difficulty", "Hard")]
+        [Trait("Company", "Amazon")]
+        [Theory]
+        [InlineData("[1,2,3,null,null,4,5]")]
+        [InlineData("[]")]
+        [InlineData("[-11,2,3,null,null,4,5]")]
+        public void CodecTest(string input)
+        {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
+            Codec codec = new();
+
+            TreeNode.AssertEqual(root, codec.deserialize(codec.serialize(root)));
         }
     }
 }

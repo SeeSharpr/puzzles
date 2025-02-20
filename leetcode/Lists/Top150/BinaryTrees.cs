@@ -1,111 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Linq;
 using Xunit.Abstractions;
-using static leetcode.LeetcodeExtensions;
-using static leetcode.Lists.Top150.BinaryTrees;
-using static leetcode.Lists.Top150.TreesGraphs;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
     public class BinaryTrees
     {
-        public class TreeNode : IEnumerable<TreeNode>, IXunitSerializable
-        {
-            public int val;
-            public TreeNode? left;
-            public TreeNode? right;
-            public TreeNode() { }
-            public TreeNode(int val = 0, TreeNode? left = null, TreeNode? right = null)
-            {
-                this.val = val;
-                this.left = left;
-                this.right = right;
-            }
-
-            public override string ToString()
-            {
-                return $"[{val}, [{left?.val}], [{right?.val}]";
-            }
-
-            public IEnumerator<TreeNode> GetEnumerator()
-            {
-                List<TreeNode?> list = [];
-                TraversePreOrder(this, list);
-
-                return list.GetEnumerator();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                List<TreeNode?> list = [];
-                TraversePreOrder(this, list);
-
-                return list.GetEnumerator();
-            }
-
-            public static void AssertEqual(TreeNode? x, TreeNode? y)
-            {
-                if (x == null && y == null) return;
-
-                if (x?.val != y?.val)
-                {
-                    throw new InvalidDataException($"val: {x?.val} != {y?.val}");
-                }
-
-                try
-                {
-                    AssertEqual(x?.left, y?.left);
-                    AssertEqual(x?.right, y?.right);
-                }
-                catch (InvalidDataException e)
-                {
-                    throw new InvalidDataException($"({x?.val}, {y?.val}), {e.Message}");
-                }
-            }
-
-
-            private static void TraversePreOrder(TreeNode? node, List<TreeNode?> list)
-            {
-                if (node == null)
-                {
-                    list.Add(null);
-                }
-                else
-                {
-                    list.Add(node);
-                    TraversePreOrder(node.left, list);
-                    TraversePreOrder(node.right, list);
-                }
-            }
-
-            public void Deserialize(IXunitSerializationInfo info)
-            {
-                val = info.GetValue<int>(nameof(val));
-                left = info.GetValue<TreeNode>(nameof(left));
-                right = info.GetValue<TreeNode>(nameof(right));
-            }
-
-            public void Serialize(IXunitSerializationInfo info)
-            {
-                info.AddValue(nameof(val), val);
-                info.AddValue(nameof(left), left);
-                info.AddValue(nameof(right), right);
-            }
-        }
-
         public class Node : IXunitSerializable
         {
             public int val;
@@ -208,16 +107,14 @@ namespace leetcode.Lists.Top150
         // 104. Maximum Depth of Binary Tree
         // Given the root of a binary tree, return its maximum depth.
         // A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
-        public static readonly IEnumerable<object[]> MaxDepthData =
-            [
-            [new TreeNode(3, new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7))), 3],
-            [new TreeNode(1, null, new TreeNode(2)), 2]
-            ];
-
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(MaxDepthData))]
-        public void MaxDepth(TreeNode root, int expected)
+        [Theory]
+        [InlineData("[3,9,20,null,null,15,7]", 3)]
+        [InlineData("[1,null,2]", 2)]
+        public void MaxDepth(string input, int expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static int _MaxDepth(TreeNode? node)
             {
                 return node == null ? 0 : 1 + Math.Max(_MaxDepth(node?.left), _MaxDepth(node?.right));
@@ -231,17 +128,16 @@ namespace leetcode.Lists.Top150
         // 100. Same Tree
         // Given the roots of two binary trees p and q, write a function to check if they are the same or not.
         // Two binary trees are considered the same if they are structurally identical, and the nodes have the same value.
-        public static readonly IEnumerable<object[]> IsSameTreeData =
-            [
-            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), new TreeNode(1, new TreeNode(2), new TreeNode(3)), true],
-            [new TreeNode(1, new TreeNode(2)), new TreeNode(1,null, new TreeNode(2)), false],
-            [new TreeNode(1, new TreeNode(2), new TreeNode(1)), new TreeNode(1, new TreeNode(1), new TreeNode(2)), false],
-            ];
-
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(IsSameTreeData))]
-        public void IsSameTree(TreeNode p, TreeNode q, bool expected)
+        [Theory]
+        [InlineData("[1,2,3]", "[1,2,3]", true)]
+        [InlineData("[1,2]", "[1,null,2]", false)]
+        [InlineData("[1,2,1]", "[1,1,2]", false)]
+        public void IsSameTree(string pStr, string qStr, bool expected)
         {
+            TreeNode? p = pStr.ParseLCTree(TreeNode.Create, TreeNode.Update);
+            TreeNode? q = qStr.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static bool _IsSameTree(TreeNode? p, TreeNode? q)
             {
                 return (p == null && q == null) || ((p?.val == q?.val) && _IsSameTree(p?.left, q?.left) && _IsSameTree(p?.right, q?.right));
@@ -254,18 +150,16 @@ namespace leetcode.Lists.Top150
 
         // 226. Invert Binary Tree
         // Given the root of a binary tree, invert the tree, and return its root.
-        public static readonly IEnumerable<object[]> InvertTreeData =
-            [
-            [new TreeNode(4, new TreeNode(2, new TreeNode(1), new TreeNode(3)),new TreeNode(7, new TreeNode(6), new TreeNode(9))), new TreeNode(4, new TreeNode(7, new TreeNode(9), new TreeNode(6)), new TreeNode(2, new TreeNode(3), new TreeNode(1)))],
-            [new TreeNode(2, new TreeNode(1), new TreeNode(3)), new TreeNode(2, new TreeNode(3), new TreeNode(1))],
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            [null, null],
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-            ];
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(InvertTreeData))]
-        public void InvertTree(TreeNode root, TreeNode expected)
+        [Theory]
+        [InlineData("[4,2,7,1,3,6,9]", "[4,7,2,9,6,3,1]")]
+        [InlineData("[2,1,3]", "[2,3,1]")]
+        [InlineData("[]", "[]")]
+        public void InvertTree(string input, string output)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+            TreeNode? expected = output.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static TreeNode? _InvertTree(TreeNode? node)
             {
                 if (node == null) return null;
@@ -281,21 +175,20 @@ namespace leetcode.Lists.Top150
 
             TreeNode? actual = _InvertTree(root);
 
-            Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
+            TreeNode.AssertEqual(expected, actual);
         }
 
 
         // 101. Symmetric Tree
         // Given the root of a binary tree, check whether it is a mirror of itself(i.e., symmetric around its center).
-        public static readonly IEnumerable<object[]> IsSymmetricData =
-            [
-            [new TreeNode(1, new TreeNode(2, new TreeNode(3), new TreeNode(4)), new TreeNode(2, new TreeNode(4), new TreeNode(3))), true],
-            [new TreeNode(1, new TreeNode(2, null, new TreeNode(3)), new TreeNode(2, null, new TreeNode(3))), false],
-            ];
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(IsSymmetricData))]
-        public void IsSymmetric(TreeNode root, bool expected)
+        [Theory]
+        [InlineData("[1,2,2,3,4,4,3]", true)]
+        [InlineData("[1,2,2,null,3,null,3]", false)]
+        public void IsSymmetric(string input, bool expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static bool _IsMirrorRecursive(TreeNode? left, TreeNode? right)
             {
                 return (left == null && right == null) ||
@@ -333,17 +226,13 @@ namespace leetcode.Lists.Top150
 
         // 105. Construct Binary Tree from Preorder and Inorder Traversal
         // Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and inorder is the inorder traversal of the same tree, construct and return the binary tree.
-        public static readonly IEnumerable<object[]> BuildTreeData =
-            [
-            ["[3,9,20,15,7]", "[9,3,15,20,7]", new TreeNode(3,new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)))],
-            ["[-1]","[-1]", new TreeNode(-1)],
-            ];
-
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(BuildTreeData))]
-
-        public void BuildTree(string preorderInput, string inorderInput, TreeNode expected)
+        [Theory]
+        [InlineData("[3,9,20,15,7]", "[9,3,15,20,7]", "[3,9,20,null,null,15,7]")]
+        [InlineData("[-1]", "[-1]", "[-1]")]
+        public void BuildTree(string preorderInput, string inorderInput, string output)
         {
+            TreeNode? expected = output.ParseLCTree(TreeNode.Create, TreeNode.Update);
             int[] preorder = preorderInput.ParseArrayStringLC(int.Parse).ToArray();
             int[] inorder = inorderInput.ParseArrayStringLC(int.Parse).ToArray();
 
@@ -372,21 +261,18 @@ namespace leetcode.Lists.Top150
 
             TreeNode? actual = _BuildTree(preorder, inorder, 0, 0, preorder.Length);
 
-            Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
+            TreeNode.AssertEqual(expected, actual);
         }
 
         // 106. Construct Binary Tree from Inorder and Postorder Traversal
         // Given two integer arrays inorder and postorder where inorder is the inorder traversal of a binary tree and postorder is the postorder traversal of the same tree, construct and return the binary tree.
-        public static readonly IEnumerable<object[]> BuildTree2Data =
-            [
-            ["[9,3,15,20,7]", "[9,15,7,20,3]", new TreeNode(3,new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)))],
-            ["[-1]","[-1]", new TreeNode(-1)],
-            ];
-
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(BuildTree2Data))]
-        public void BuildTree2(string inorderInput, string postorderInput, TreeNode expected)
+        [Theory]
+        [InlineData("[9,3,15,20,7]", "[9,15,7,20,3]", "[3,9,20,null,null,15,7]")]
+        [InlineData("[-1]", "[-1]", "[-1]")]
+        public void BuildTree2(string inorderInput, string postorderInput, string output)
         {
+            TreeNode? expected = output.ParseLCTree(TreeNode.Create, TreeNode.Update);
             int[] inorder = inorderInput.ParseArrayStringLC(int.Parse).ToArray();
             int[] postorder = postorderInput.ParseArrayStringLC(int.Parse).ToArray();
 
@@ -415,7 +301,7 @@ namespace leetcode.Lists.Top150
 
             TreeNode? actual = _BuildTree(postorder, inorder, postorder.Length - 1, 0, postorder.Length);
 
-            Assert.Equal(expected?.Select(n => n?.val), actual?.Select(n => n?.val));
+            TreeNode.AssertEqual(expected, actual);
         }
 
         // 117. Populating Next Right Pointers in Each Node II
@@ -500,16 +386,16 @@ namespace leetcode.Lists.Top150
         // Given the root of a binary tree, flatten the tree into a "linked list":
         // The "linked list" should use the same TreeNode class where the right child pointer points to the next node in the list and the left child pointer is always null.
         // The "linked list" should be in the same order as a pre-order traversal of the binary tree.
-        public static readonly IEnumerable<object[]> FlattenData =
-            [
-            [new TreeNode(1, new TreeNode(2, new TreeNode(3), new TreeNode(4)), new TreeNode(5, right: new TreeNode(6))), new TreeNode(1, right: new TreeNode(2, right: new TreeNode(3, right: new TreeNode(4, right: new TreeNode(5, right: new TreeNode(6))))))],
-            [null,null],
-            [new TreeNode(0), new TreeNode(0)]
-            ];
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(FlattenData))]
-        public void Flatten(TreeNode? root, TreeNode? expected)
+        [Theory]
+        [InlineData("[1,2,5,3,4,null,6]", "[1,null,2,null,3,null,4,null,5,null,6]")]
+        [InlineData("[]", "[]")]
+        [InlineData("[0]", "[0]")]
+        public void Flatten(string input, string output)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+            TreeNode? expected = output.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static void _Flatten(TreeNode? node)
             {
                 if (node == null) return;
@@ -549,9 +435,15 @@ namespace leetcode.Lists.Top150
             ];
 
         [Trait("Difficulty", "Easy")]
-        [Theory, MemberData(nameof(HasPathSumData))]
-        public void HasPathSum(TreeNode root, int targetSum, bool expected)
+        [Theory]
+        [InlineData("[5,4,8,11,null,13,4,7,2,null,null,null,1]", 22, true)]
+        [InlineData("[1,2,3]", 5, false)]
+        [InlineData("[]", 0, false)]
+        [InlineData("[1,2]", 1, false)]
+        public void HasPathSum(string input, int targetSum, bool expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static bool InternalHasPathSum(TreeNode? node, int target, int current)
             {
                 if (node == null)
@@ -584,16 +476,14 @@ namespace leetcode.Lists.Top150
         // For example, the root-to-leaf path 1 -> 2 -> 3 represents the number 123.
         // Return the total sum of all root-to-leaf numbers.Test cases are generated so that the answer will fit in a 32-bit integer.
         // A leaf node is a node with no children.
-        public static readonly IEnumerable<object[]> SumNumbersData =
-            [
-            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 25],
-            [new TreeNode(4, new TreeNode(9, new TreeNode(5), new TreeNode(1)), new TreeNode(0)), 1026],
-            ];
-
         [Trait("Difficulty", "Medium")]
-        [Theory, MemberData(nameof(SumNumbersData))]
-        public void SumNumbers(TreeNode root, int expected)
+        [Theory]
+        [InlineData("[1,2,3]", 25)]
+        [InlineData("[4,9,0,5,1]", 1026)]
+        public void SumNumbers(string input, int expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static int InternalSumNumbers(TreeNode? node, int current)
             {
                 int next = current * 10 + node.val;
@@ -618,20 +508,18 @@ namespace leetcode.Lists.Top150
         // A path in a binary tree is a sequence of nodes where each pair of adjacent nodes in the sequence has an edge connecting them.A node can only appear in the sequence at most once.Note that the path does not need to pass through the root.
         // The path sum of a path is the sum of the node's values in the path.
         // Given the root of a binary tree, return the maximum path sum of any non-empty path.
-        public static readonly IEnumerable<object[]> MaxPathSumData =
-            [
-            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 6],
-            [new TreeNode(-10, new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7))), 42],
-            [null, 0],
-            [new TreeNode(2, left: new TreeNode(-1)), 2],
-            [new TreeNode(2, new TreeNode(-1), new TreeNode(-2)), 2],
-            [new TreeNode(-3, new TreeNode(-1)), -1]
-            ];
-
         [Trait("Difficulty", "Hard")]
-        [Theory, MemberData(nameof(MaxPathSumData))]
-        public void MaxPathSum(TreeNode root, int expected)
+        [Theory]
+        [InlineData("[1,2,3]", 6)]
+        [InlineData("[-10,9,20,null,null,15,7]", 42)]
+        [InlineData("[]", 0)]
+        [InlineData("[2,-1]", 2)]
+        [InlineData("[2,-1,-2]", 2)]
+        [InlineData("[-3,-1]", -1)]
+        public void MaxPathSum(string input, int expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static int InternalMaxPathSum(TreeNode? node, ref int maxSum)
             {
                 if (node == null) return 0;
@@ -690,15 +578,12 @@ namespace leetcode.Lists.Top150
             }
         }
 
-        public static readonly IEnumerable<object[]> BSTIteratorTestData =
-            [
-            [new TreeNode(7, new TreeNode(3), new TreeNode(15, new TreeNode(9), new TreeNode(20))), "next,next,hasNext,next,hasNext,next,hasNext,next,hasNext", "3,7,true,9,true,15,true,20,false"],
-            ];
-
         [Trait("Difficulty", "Medium")]
-        [Theory, MemberData(nameof(BSTIteratorTestData))]
-        public void BSTIteratorTest(TreeNode root, string inputOperations, string inputExpectations)
+        [Theory]
+        [InlineData("[7,3,15,null,null,9,20]", "next,next,hasNext,next,hasNext,next,hasNext,next,hasNext", "3,7,true,9,true,15,true,20,false")]
+        public void BSTIteratorTest(string inputRoot, string inputOperations, string inputExpectations)
         {
+            TreeNode? root = inputRoot.ParseLCTree(TreeNode.Create, TreeNode.Update);
             string[] operations = inputOperations.ParseEnumerable(x => x).ToArray();
             string[] expectations = inputExpectations.ParseEnumerable(x => x).ToArray();
 
@@ -731,9 +616,14 @@ namespace leetcode.Lists.Top150
             ];
 
         [Trait("Difficulty", "Easy")]
-        [Theory, MemberData(nameof(CountNodesData))]
-        public void CountNodes(TreeNode root, int expected)
+        [Theory]
+        [InlineData("[1,2,3,4,5,6]", 6)]
+        [InlineData("[1]", 1)]
+        [InlineData("[]", 0)]
+        public void CountNodes(string input, int expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+
             static int InternalCountNodes(TreeNode? node, int heightLeft, int heightRight)
             {
                 if (node == null) return 0;
@@ -755,18 +645,18 @@ namespace leetcode.Lists.Top150
         // 236. Lowest Common Ancestor of a Binary Tree
         // Given a binary tree, find the lowest common ancestor(LCA) of two given nodes in the tree.
         // According to the definition of LCA on Wikipedia: “The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself).”
-        public static readonly IEnumerable<object[]> LowestCommonAncestorData =
-            [
-            ["[3,5,1,6,2,0,8,null,null,7,4]", 5, 1, 3],
-            ["[3,5,1,6,2,0,8,null,null,7,4]", 5, 4, 5],
-            ["[1,2]", 1, 2, 1]
-            ];
-
         [Trait("Difficulty", "Medium")]
-        [Theory, MemberData(nameof(LowestCommonAncestorData))]
-        public void LowestCommonAncestor(TreeNode root, int pVal, int qVal, int expectedVal)
+        [Theory]
+        [InlineData("[3,5,1,6,2,0,8,null,null,7,4]", 5, 1, 3)]
+        [InlineData("[3,5,1,6,2,0,8,null,null,7,4]", 5, 4, 5)]
+        [InlineData("[1,2]", 1, 2, 1)]
+        public void LowestCommonAncestor(string input, int p, int q, int expected)
         {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
 
+            int actual = int.MinValue;
+
+            Assert.Equal(expected, actual);
         }
     }
 }
