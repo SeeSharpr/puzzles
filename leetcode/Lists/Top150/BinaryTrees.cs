@@ -6,8 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Security.Cryptography;
+using System.Text;
 using System.Xml.Linq;
 using Xunit.Abstractions;
+using static leetcode.LeetcodeExtensions;
 using static leetcode.Lists.Top150.BinaryTrees;
 using static leetcode.Lists.Top150.TreesGraphs;
 using static System.Net.Mime.MediaTypeNames;
@@ -712,6 +716,38 @@ namespace leetcode.Lists.Top150
                         break;
                 }
             }
+        }
+
+        // 222. Count Complete Tree Nodes
+        // Given the root of a complete binary tree, return the number of the nodes in the tree.
+        // According to Wikipedia, every level, except possibly the last, is completely filled in a complete binary tree, and all nodes in the last level are as far left as possible.It can have between 1 and 2h nodes inclusive at the last level h.
+        // Design an algorithm that runs in less than O(n) time complexity.
+        public static readonly IEnumerable<object[]> CountNodesData =
+            [
+            [new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3, left: new TreeNode(6))), 6],
+            [new TreeNode(1), 1],
+            [null, 0]
+            ];
+
+        [Trait("Difficulty", "Easy")]
+        [Theory, MemberData(nameof(CountNodesData))]
+        public void CountNodes(TreeNode root, int expected)
+        {
+            static int InternalCountNodes(TreeNode? node, int heightLeft, int heightRight)
+            {
+                if (node == null) return 0;
+
+                if (heightLeft == 0) for (TreeNode? curr = node?.left; curr != null; curr = curr.left) heightLeft++;
+                if (heightRight == 0) for (TreeNode? curr = node?.right; curr != null; curr = curr.right) heightRight++;
+
+                if (heightLeft == heightRight) return (1 << (heightLeft + 1)) - 1;
+
+                return 1 + InternalCountNodes(node?.left, heightLeft - 1, 0) + InternalCountNodes(node?.right, 0, heightRight - 1);
+            }
+
+            int actual = InternalCountNodes(root, 0, 0);
+
+            Assert.Equal(expected, actual);
         }
     }
 }
