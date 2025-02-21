@@ -206,18 +206,17 @@ namespace leetcode.Lists.Top150
 
         // 117. Populating Next Right Pointers in Each Node II
         // Populate each next pointer to point to its next right node.If there is no next right node, the next pointer should be set to NULL.
-        public static readonly IEnumerable<object[]> ConnectData =
-            [
-            [new Node(1, new Node(2, new Node(4), new Node(5)), new Node(3, right: new Node(7))), (int[][])[[2,3],[4,5],[5,7]]],
-            [null, (int[][])[]],
-            ];
-
         [Trait("List", "TopInterview150")]
-        [Theory, MemberData(nameof(ConnectData))]
-        public void Connect(Node? root, int[][]? expectedMap)
+        [Theory]
+        [InlineData("[1,2,3,4,5,null,7]", "[[2,3],[4,5],[5,7]]")]
+        [InlineData("[]", "[]")]
+        public void Connect(string input, string output)
         {
+            Node? root = input.ParseLCTree(Node.Create, Node.Update);
+            int[][]? expectedNext = output.Replace("],[", "|").ParseNestedArrayStringLC(int.Parse).Select(x => x.ToArray()).ToArray();
+
             Node? expected = Node.CloneExceptNext(root);
-            Node.MapNext(expected, expectedMap);
+            Node.MapNext(expected, expectedNext);
 
             Node? rootBFS = Node.CloneExceptNext(root);
             Node? rootRec = Node.CloneExceptNext(root);
