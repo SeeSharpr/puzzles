@@ -1,5 +1,5 @@
 ﻿using leetcode.Types.BinaryTree;
-using Newtonsoft.Json.Linq;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace leetcode.Lists.Top150
 {
@@ -83,6 +83,40 @@ namespace leetcode.Lists.Top150
             }
 
             Assert.Equal(expected, actual);
+        }
+
+        // 102. Binary Tree Level Order Traversal
+        // Given the root of a binary tree, return the level order traversal of its nodes' values. (i.e., from left to right, level by level).
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[3,9,20,null,null,15,7]", "[[3],[9,20],[15,7]]")]
+        [InlineData("[1]", "[[1]]")]
+        [InlineData("[]", "[]")]
+        public void LevelOrder(string input, string output)
+        {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+            IList<IList<int>> expected = output.ParseNestedArrayStringLC(int.Parse).Select(x => (IList<int>)x.ToList()).ToList();
+
+            static void InternalLevelOrder(TreeNode? node, int level, List<IList<int>> list)
+            {
+                if (node == null) return;
+
+                while (list.Count <= level) list.Add([]);
+
+                list[level].Add(node.val);
+
+                InternalLevelOrder(node?.left, level + 1, list);
+                InternalLevelOrder(node?.right, level + 1, list);
+            }
+
+            List<IList<int>> actual = [];
+            InternalLevelOrder(root, 0, actual);
+
+            Assert.Equal(expected.Count, actual.Count);
+            for (int i = 0; i < expected.Count; i++)
+            {
+                Assert.Equal(expected[i], actual[i]);
+            }
         }
     }
 }
