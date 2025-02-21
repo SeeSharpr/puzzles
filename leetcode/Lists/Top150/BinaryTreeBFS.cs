@@ -118,5 +118,47 @@ namespace leetcode.Lists.Top150
                 Assert.Equal(expected[i], actual[i]);
             }
         }
+
+        // 103. Binary Tree Zigzag Level Order Traversal
+        // Given the root of a binary tree, return the zigzag level order traversal of its nodes' values. (i.e., from left to right, then right to left for the next level and alternate between).
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[3,9,20,null,null,15,7]", "[[3],[20,9],[15,7]]")]
+        [InlineData("[1]", "[[1]]")]
+        [InlineData("[]", "[]")]
+        public void ZigzagLevelOrder(string input, string output)
+        {
+            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+            IList<IList<int>> expected = output.ParseNestedArrayStringLC(int.Parse).Select(x => (IList<int>)x.ToList()).ToList();
+
+            static void InternalLevelOrder(TreeNode? node, int level, List<IList<int>> list)
+            {
+                if (node == null) return;
+
+                while (list.Count <= level) list.Add([]);
+
+                if (level % 2 == 0)
+                {
+                    list[level].Add(node.val);
+                }
+                else
+                {
+                    list[level].Insert(0, node.val);
+                }
+
+                InternalLevelOrder(node?.left, level + 1, list);
+                InternalLevelOrder(node?.right, level + 1, list);
+            }
+
+            List<IList<int>> actual = [];
+            InternalLevelOrder(root, 0, actual);
+
+            Assert.Equal(expected.Count, actual.Count);
+            for (int i = 0; i < expected.Count; i++)
+            {
+                Assert.Equal(expected[i], actual[i]);
+            }
+        }
     }
 }
+
