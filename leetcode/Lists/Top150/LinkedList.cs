@@ -1,169 +1,9 @@
-﻿using System.Collections;
-using Xunit.Abstractions;
+﻿using leetcode.Types.LinkedList;
 
 namespace leetcode.Lists.Top150
 {
     public class LinkedList
     {
-        private class ListNode : IEnumerable<ListNode>, IXunitSerializable
-        {
-            private static int idGen = -1;
-            private int id = Interlocked.Increment(ref idGen);
-
-            public int x;
-
-            public int val;
-
-            public ListNode? next;
-
-            public ListNode() { }
-
-            public ListNode(int x, ListNode? next = null)
-            {
-                this.x = x;
-                val = x;
-                this.next = next;
-            }
-
-            public void CreateLoop(int index)
-            {
-                if (index == -1) return;
-
-                ListNode? ptr = this;
-                while (index-- > 0)
-                {
-                    ptr = ptr!.next;
-                }
-
-                ListNode? last = ptr!.next;
-                while (last!.next != null)
-                {
-                    last = last!.next;
-                }
-
-                last.next = ptr;
-            }
-
-            public override string ToString()
-            {
-                return $"(id:{id}, val:{val}, next:{next?.id ?? 0}[{next?.val ?? 0}])";
-            }
-
-            public IEnumerator<ListNode> GetEnumerator()
-            {
-                return new NodeEnumerator(this);
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new NodeEnumerator(this);
-            }
-
-            public static ListNode? ParseFromLC(string input)
-            {
-                return input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
-            }
-
-            public void Deserialize(IXunitSerializationInfo info)
-            {
-                id = info.GetValue<int>(nameof(id));
-                x = info.GetValue<int>(nameof(x));
-                val = info.GetValue<int>(nameof(val));
-                next = info.GetValue<ListNode?>(nameof(next));
-            }
-
-            public void Serialize(IXunitSerializationInfo info)
-            {
-                info.AddValue(nameof(id), id);
-                info.AddValue(nameof(x), x);
-                info.AddValue(nameof(val), val);
-                info.AddValue(nameof(next), next);
-            }
-
-            private class NodeEnumerator(ListNode? head) : IEnumerator<ListNode>
-            {
-                private readonly int limit = 20;
-                private int count = 0;
-                private readonly ListNode? head = head;
-
-                private ListNode? prev = null;
-
-                public ListNode Current => prev ?? throw new InvalidOperationException();
-
-                object IEnumerator.Current => prev ?? throw new InvalidOperationException();
-
-                public void Dispose()
-                {
-                    // Nothing to dispose
-                }
-
-                public bool MoveNext()
-                {
-                    prev = (prev == null) ? head : prev?.next;
-                    count++;
-
-                    return prev != null && count < limit;
-                }
-
-                public void Reset()
-                {
-                    prev = null;
-                    count = 0;
-                }
-            }
-        }
-
-        private class Node(int val, Node? next = null) : IEnumerable<Node>
-        {
-            private static int idGen = -1;
-
-            public readonly int id = Interlocked.Increment(ref idGen);
-            public int val = val;
-            public Node? next = next;
-            public Node? random = null;
-
-            public IEnumerator<Node> GetEnumerator()
-            {
-                return new NodeEnumerator(this);
-            }
-
-            public override string ToString()
-            {
-                return $"(id:{id}, val:{val}, next:{next?.id ?? 0}, random: {random?.id ?? 0})";
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return new NodeEnumerator(this);
-            }
-
-            private class NodeEnumerator(Node head) : IEnumerator<Node>
-            {
-                private readonly Node head = head;
-                Node? prev = null;
-
-                public Node Current => prev!;
-
-                object IEnumerator.Current => prev!;
-
-                public void Dispose()
-                {
-                    // Do nothing
-                }
-
-                public bool MoveNext()
-                {
-                    prev = (prev == null) ? head : prev?.next;
-
-                    return prev?.next != null;
-                }
-
-                public void Reset()
-                {
-                    prev = null;
-                }
-            }
-        }
 
         // Given head, the head of a linked list, determine if the linked list has a cycle in it.
         // There is a cycle in a linked list if there is some node in the list that can be reached again by continuously following the next pointer.Internally, pos is used to denote the index of the node that tail's next pointer is connected to. Note that pos is not passed as a parameter.
@@ -342,7 +182,17 @@ namespace leetcode.Lists.Top150
         public void CopyRandomList(string input)
         {
             int[][] data = input.ParseNestedArrayStringLC(int.Parse).Select(s => s.ToArray()).ToArray();
-            Node? head = data.Select(d => d[0]).Reverse().Aggregate((Node?)null, (next, val) => { Node? node = new(val); node.next = next; return node; });
+            Node? head = data
+                .Select(d => d[0])
+                .Reverse()
+                .Aggregate(
+                    (Node?)null,
+                    (next, val) =>
+                    {
+                        Node? node = new(val);
+                        node.next = next;
+                        return node;
+                    });
 
             Node? ptr = head;
             foreach (int index in data.Select(d => d[1]))

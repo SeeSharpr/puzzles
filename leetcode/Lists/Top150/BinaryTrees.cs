@@ -1,109 +1,9 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Xunit.Abstractions;
+﻿using leetcode.Types.BinaryTree;
 
 namespace leetcode.Lists.Top150
 {
     public class BinaryTrees
     {
-        public class Node : IXunitSerializable
-        {
-            public int val;
-            public Node? left;
-            public Node? right;
-            public Node? next;
-
-            public Node() { }
-
-            public Node(int _val)
-            {
-                val = _val;
-            }
-
-            public Node(int _val, Node? _left = null, Node? _right = null, Node? _next = null)
-            {
-                val = _val;
-                left = _left;
-                right = _right;
-                next = _next;
-            }
-
-            public override string ToString()
-            {
-                return $"{val}, [{left?.val}], [{right?.val}], [{next?.val}]";
-            }
-
-            public static void AssertEqual(Node? x, Node? y)
-            {
-                if (x == null && y == null) return;
-
-                if (x?.val != y?.val)
-                {
-                    throw new InvalidDataException($"val: {x?.val} != {y?.val}");
-                }
-
-                if (x?.next?.val != y?.next?.val)
-                {
-                    throw new InvalidDataException($"next: {x?.next?.val} != {y?.next?.val}");
-                }
-
-                try
-                {
-                    AssertEqual(x?.left, y?.left);
-                    AssertEqual(x?.right, y?.right);
-                }
-                catch (InvalidDataException e)
-                {
-                    throw new InvalidDataException($"({x?.val}, {y?.val}), {e.Message}");
-                }
-            }
-
-            public void Deserialize(IXunitSerializationInfo info)
-            {
-                val = info.GetValue<int>(nameof(val));
-                left = info.GetValue<Node>(nameof(left));
-                right = info.GetValue<Node>(nameof(right));
-                next = info.GetValue<Node>(nameof(next));
-            }
-
-            public void Serialize(IXunitSerializationInfo info)
-            {
-                info.AddValue(nameof(val), val);
-                info.AddValue(nameof(left), left);
-                info.AddValue(nameof(right), right);
-                info.AddValue(nameof(next), next);
-            }
-
-            public static Node? CloneExceptNext(Node? node)
-            {
-                return (node == null) ? null : new Node(node.val, CloneExceptNext(node.left), CloneExceptNext(node.right));
-            }
-
-            public static void MapNext(Node? root, int[][]? nextMap)
-            {
-                if (nextMap == null || nextMap.Length == 0) return;
-
-                Dictionary<int, Node> map = [];
-                BuildNodeMap(root, map);
-
-                foreach (int[] pair in nextMap)
-                {
-                    int src = pair[0];
-                    int dst = pair[1];
-
-                    map[src].next = map[dst];
-                }
-            }
-
-            private static void BuildNodeMap(Node? node, Dictionary<int, Node> map)
-            {
-                if (node == null) return;
-
-                map.Add(node.val, node);
-                BuildNodeMap(node.left, map);
-                BuildNodeMap(node.right, map);
-            }
-        }
-
         // 104. Maximum Depth of Binary Tree
         // Given the root of a binary tree, return its maximum depth.
         // A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
@@ -308,7 +208,7 @@ namespace leetcode.Lists.Top150
         // Populate each next pointer to point to its next right node.If there is no next right node, the next pointer should be set to NULL.
         public static readonly IEnumerable<object[]> ConnectData =
             [
-            [new Node(1, new Node(2, new Node(4), new Node(5)), new Node(3, _right: new Node(7))), (int[][])[[2,3],[4,5],[5,7]]],
+            [new Node(1, new Node(2, new Node(4), new Node(5)), new Node(3, right: new Node(7))), (int[][])[[2,3],[4,5],[5,7]]],
             [null, (int[][])[]],
             ];
 
@@ -340,8 +240,8 @@ namespace leetcode.Lists.Top150
                         currentNode.next = nextTuple.Item2;
                     }
 
-                    if (currentNode.left != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode.left));
-                    if (currentNode.right != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode.right));
+                    if (currentNode.left != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode?.left));
+                    if (currentNode.right != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode?.right));
                 }
             }
 
@@ -352,8 +252,8 @@ namespace leetcode.Lists.Top150
                 // Connect the children
                 if (node.left != null) node.left.next = node.right;
 
-                _ConnectRec(node.right);
-                _ConnectRec(node.left);
+                _ConnectRec(node?.right);
+                _ConnectRec(node?.left);
 
                 // Connect the cousins
                 Node? rightMost = node?.right ?? node?.left;

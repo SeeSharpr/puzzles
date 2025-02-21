@@ -1,4 +1,6 @@
-﻿namespace leetcode.Lists.Top150
+﻿using leetcode.Types.BinaryTree;
+
+namespace leetcode.Lists.Top150
 {
     public class TreesGraphs
     {
