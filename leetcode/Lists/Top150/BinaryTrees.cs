@@ -549,13 +549,33 @@ namespace leetcode.Lists.Top150
         [InlineData("[3,5,1,6,2,0,8,null,null,7,4]", 5, 1, 3)]
         [InlineData("[3,5,1,6,2,0,8,null,null,7,4]", 5, 4, 5)]
         [InlineData("[1,2]", 1, 2, 1)]
-        public void LowestCommonAncestor(string input, int p, int q, int expected)
+        public void LowestCommonAncestor(string input, int pVal, int qVal, int expected)
         {
             TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+            TreeNode? p = new TreeNode(pVal);
+            TreeNode? q = new TreeNode(qVal);
 
-            int actual = int.MinValue;
+            static bool InternalSearchCommonAncestor(TreeNode? node, TreeNode? p, TreeNode? q, ref TreeNode? commonAncestor)
+            {
+                if (node == null) return false;
 
-            Assert.Equal(expected, actual);
+                int left = InternalSearchCommonAncestor(node?.left, p, q, ref commonAncestor) ? 1 : 0;
+                int right = InternalSearchCommonAncestor(node?.right, p, q, ref commonAncestor) ? 1 : 0;
+                int mid = (node?.val == p?.val || node?.val == q?.val) ? 1 : 0;
+
+                if ((left + mid + right) > 1)
+                {
+                    commonAncestor = node;
+                }
+
+                return (left + mid + right) > 0;
+            }
+
+            TreeNode? actual = null;
+
+            if (!InternalSearchCommonAncestor(root, p, q, ref actual)) throw new InvalidOperationException();
+
+            Assert.Equal(expected, actual?.val);
         }
     }
 }
