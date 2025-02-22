@@ -159,41 +159,6 @@ namespace leetcode.Lists.Top150
                 Assert.Equal(expected[i], actual[i]);
             }
         }
-
-        // 530. Minimum Absolute Difference in BST
-        // Given the root of a Binary Search Tree (BST), return the minimum absolute difference between the values of any two different nodes in the tree.
-        [Trait("Difficulty", "Easy")]
-        [Theory]
-        [InlineData("[4,2,6,1,3]", 1)]
-        [InlineData("[1,0,48,null,null,12,49]", 1)]
-        public void GetMinimumDifference(string input, int expected)
-        {
-            TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
-
-            static void InternalTraverseTree(TreeNode? node, List<int> values)
-            {
-                if (node == null) return;
-
-                InternalTraverseTree(node?.left, values);
-                if (values.Count == 0 || values[values.Count - 1] != node.val) values.Add(node.val);
-                InternalTraverseTree(node?.right, values);
-            }
-
-            List<int> list = [];
-            InternalTraverseTree(root, list);
-
-            int actual = list.Count < 1 ? 0 : int.MaxValue;
-
-            if (list.Count > 1)
-            {
-                for (int i = 1; i < list.Count; i++)
-                {
-                    actual = Math.Min(actual, Math.Abs(list[i] - list[i - 1]));
-                }
-            }
-
-            Assert.Equal(expected, actual);
-        }
     }
 }
 
