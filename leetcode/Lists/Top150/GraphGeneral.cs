@@ -6,7 +6,7 @@
         // Given an m x n 2D binary grid grid which represents a map of '1's(land) and '0's(water)| return the number of islands.
         // An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
         [Trait("Company", "Amazon")]
-        [Trait("Difficulty","Medium")]
+        [Trait("Difficulty", "Medium")]
         [Theory]
         [InlineData("1,1,1,1,0|1,1,0,1,0|1,1,0,0,0|0,0,0,0,0", 1)]
         [InlineData("1,1,0,0,0|1,1,0,0,0|0,0,1,0,0|0,0,0,1,1", 3)]
@@ -41,5 +41,97 @@
             Assert.Equal(expected, actual);
         }
 
+        // 130. Surrounded Regions
+        // You are given an m x n matrix board containing letters 'X' and 'O', capture regions that are surrounded:
+        // Connect: A cell is connected to adjacent cells horizontally or vertically.
+        // Region: To form a region connect every 'O' cell.
+        // Surround: The region is surrounded with 'X' cells if you can connect the region with 'X' cells and none of the region cells are on the edge of the board.
+        // To capture a surrounded region, replace all 'O's with 'X's in-place within the original board.You do not need to return anything.
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"O\",\"O\",\"X\"],[\"X\",\"X\",\"O\",\"X\"],[\"X\",\"O\",\"X\",\"X\"]]", "[[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"X\",\"X\",\"X\"],[\"X\",\"O\",\"X\",\"X\"]]")]
+        [InlineData("[[\"X\"]]", "[[\"X\"]]")]
+        [InlineData("[[\"O\",\"O\",\"O\"],[\"O\",\"O\",\"O\"],[\"O\",\"O\",\"O\"]]", "[[\"O\",\"O\",\"O\"],[\"O\",\"O\",\"O\"],[\"O\",\"O\",\"O\"]]")]
+        public void Solve(string input, string output)
+        {
+            char[][] board = input.ParseNestedArrayStringLC(x => x.Contains('X') ? 'X' : 'O').Select(x => x.ToArray()).ToArray();
+            char[][] expected = output.ParseNestedArrayStringLC(x => x.Contains('X') ? 'X' : 'O').Select(x => x.ToArray()).ToArray();
+
+            static void MarkSafeInteractive(char[][] a, int x, int y)
+            {
+                if (a[y][x] != 'O') return;
+
+                int jl = a.Length - 1;
+                int il = a[0].Length - 1;
+
+                Queue<int> iq = new([x]);
+                Queue<int> jq = new([y]);
+
+                while (iq.TryDequeue(out int i) && jq.TryDequeue(out int j))
+                {
+                    if (a[j][i] == 'S') continue;
+
+                    a[j][i] = 'S';
+
+                    if (i > 0 && a[j][i - 1] == 'O') { iq.Enqueue(i - 1); jq.Enqueue(j); }
+                    if (i < il && a[j][i + 1] == 'O') { iq.Enqueue(i + 1); jq.Enqueue(j); }
+                    if (j > 0 && a[j - 1][i] == 'O') { iq.Enqueue(i); jq.Enqueue(j - 1); }
+                    if (j < jl && a[j + 1][i] == 'O') { iq.Enqueue(i); jq.Enqueue(j + 1); }
+                }
+            }
+
+            static void MarkSafeRecursive(char[][] a, int x, int y)
+            {
+                if (a[y][x] != 'O') return;
+
+                if (a[y][x] == 'O') a[y][x] = 'S';
+
+                if (y > 0) MarkSafeRecursive(a, x, y - 1);
+                if (x > 0) MarkSafeRecursive(a, x - 1, y);
+                if (x < a[0].Length - 1) MarkSafeRecursive(a, x + 1, y);
+                if (y < a.Length - 1) MarkSafeRecursive(a, x, y + 1);
+
+            }
+
+            if (board.Length > 0)
+            {
+                for (int y = 0; y < board.Length; y++)
+                {
+                    MarkSafeInteractive(board, 0, y);
+                    MarkSafeInteractive(board, board[0].Length - 1, y);
+                    //if (board[y][0] == 'O') MarkSafeRecursive(board, 0, y);
+                    //if (board[y][board[0].Length - 1] == 'O') MarkSafeRecursive(board, board[0].Length - 1, y);
+                }
+
+                for (int x = 0; x < board[0].Length - 1; x++)
+                {
+                    MarkSafeInteractive(board, x, 0);
+                    MarkSafeInteractive(board, x, board.Length - 1);
+                    //if (board[0][x] == 'O') MarkSafeRecursive(board, x, 0);
+                    //if (board[board.Length - 1][x] == 'O') MarkSafeRecursive(board, x, board.Length - 1);
+                }
+
+                for (int y = 0; y < board.Length; y++)
+                {
+                    for (int x = 0; x < board[0].Length; x++)
+                    {
+                        switch (board[y][x])
+                        {
+                            case 'S':
+                                board[y][x] = 'O';
+                                break;
+                            case 'O':
+                                board[y][x] = 'X';
+                                break;
+                        }
+                    }
+                }
+            }
+
+            for (int y = 0; y < board.Length; y++)
+            {
+                Assert.Equal(expected[y], board[y]);
+            }
+        }
     }
 }
