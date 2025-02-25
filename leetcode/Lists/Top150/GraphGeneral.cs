@@ -1,4 +1,6 @@
-﻿namespace leetcode.Lists.Top150
+﻿using leetcode.Types.Graph;
+
+namespace leetcode.Lists.Top150
 {
     public class GraphGeneral
     {
@@ -132,6 +134,73 @@
             {
                 Assert.Equal(expected[y], board[y]);
             }
+        }
+
+        // 133. Clone Graph
+        // Given a reference of a node in a connected undirected graph.
+        // Return a deep copy (clone) of the graph.
+        // Each node in the graph contains a value (int) and a list (List[Node]) of its neighbors.
+        // Test case format:
+        // For simplicity, each node's value is the same as the node's index(1-indexed). For example, the first node with val == 1, the second node with val == 2, and so on.The graph is represented in the test case using an adjacency list.
+        // An adjacency list is a collection of unordered lists used to represent a finite graph.Each list describes the set of neighbors of a node in the graph.
+        // The given node will always be the first node with val = 1.You must return the copy of the given node as a reference to the cloned graph.
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[[2,4],[1,3],[2,4],[1,3]]", "[[2,4],[1,3],[2,4],[1,3]]")]
+        [InlineData("[[]]", "[[]]")]
+        [InlineData("[]", "[]")]
+        public void CloneGraph(string input, string output)
+        {
+            Node? node = Node.CreateGraph(input.Parse2DArray(int.Parse).Select(e => e.ToArray()).ToArray());
+            Node? expected = Node.CreateGraph(output.Parse2DArray(int.Parse).Select(e => e.ToArray()).ToArray());
+
+            static SortedDictionary<int, Node> InternalDiscoverNodes(Node node)
+            {
+                SortedDictionary<int, Node> result = new();
+                Queue<Node> queue = new([node]);
+
+                while (queue.TryDequeue(out Node? queueNode))
+                {
+                    _= result.TryAdd(queueNode.val, queueNode);
+
+                    foreach (Node queueNeighbor in queueNode.neighbors)
+                    {
+                        if (result.TryAdd(queueNeighbor.val, queueNeighbor))
+                        {
+                            queue.Enqueue(queueNeighbor);
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+            static Node? InternalCloneGraph(Node? node)
+            {
+                if (node == null) return null;
+
+                SortedDictionary<int, Node> oldNodes = InternalDiscoverNodes(node);
+                SortedDictionary<int, Node> newNodes = new();
+
+                foreach (Node oldNode in oldNodes.Values)
+                {
+                    newNodes.Add(oldNode.val, new Node(oldNode.val));
+                }
+
+                foreach (Node oldNode in oldNodes.Values)
+                {
+                    foreach (var oldNeighbor in oldNode.neighbors)
+                    {
+                        newNodes[oldNode.val].neighbors.Add(newNodes[oldNeighbor.val]);
+                    }
+                }
+
+                return newNodes.Values.FirstOrDefault();
+            }
+
+            Node? actual = InternalCloneGraph(node);
+
+            Assert.Equal(Node.ToEdgeArray(expected), Node.ToEdgeArray(actual));
         }
     }
 }

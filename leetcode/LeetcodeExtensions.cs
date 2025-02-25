@@ -1,4 +1,6 @@
-﻿namespace leetcode
+﻿using System.Text;
+
+namespace leetcode
 {
     public static class LeetcodeExtensions
     {
@@ -7,6 +9,43 @@
             T Data { get; set; }
             INode<T>? Left { get; set; }
             INode<T>? Right { get; set; }
+        }
+
+        public static IEnumerable<T> Parse1DArray<T>(this string input, Func<string, T> parse)
+        {
+            StringBuilder sb = new(Math.Min(256, input.Length));
+
+            foreach (char c in input)
+            {
+                if (c == '[') continue;
+
+                if (c == ',' || c == ']')
+                {
+                    if (sb.Length == 0) break;
+
+                    yield return parse.Invoke(sb.ToString());
+                    sb.Clear();
+
+                    if (c == ']') break;
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+        }
+
+        public static IEnumerable<IEnumerable<T>> Parse2DArray<T>(this string input, Func<string, T> parse)
+        {
+            for (int start = input.IndexOf('[', input.IndexOf('[') + 1); start > 0; )
+            {
+                int end = input.IndexOf(']', start + 1);
+                int length = end - start + 1;
+
+                yield return Parse1DArray(input.Substring(start, length), parse);
+                
+                start = input.IndexOf('[', end + 1);
+            }
         }
 
         public static IEnumerable<IEnumerable<T>> ParseNestedArrayStringLC<T>(this string input, Func<string, T> parse, char elementSeparator = ',', char entrySeparator = '|')
@@ -210,6 +249,48 @@
             Assert.Equal(preOrder, TestNode.Traverse(actual, TestNode.TraversalOrder.PreOrder));
             Assert.Equal(inOrder, TestNode.Traverse(actual, TestNode.TraversalOrder.InOrder));
             Assert.Equal(postOrder, TestNode.Traverse(actual, TestNode.TraversalOrder.PostOrder));
+        }
+
+        [Fact]
+        public void Parse1DArray_int()
+        {
+            foreach (var pair in new Dictionary<string, IEnumerable<int>?>()
+            {
+                { "[]", []},
+                { "[1]", [1]},
+                { "[1,22]", [1,22]},
+            })
+            {
+                var input = pair.Key;
+                var expected = pair.Value;
+                var actual = input.Parse1DArray(int.Parse);
+
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        [Fact]
+        public void Parse2DArray_int()
+        {
+            foreach (var pair in new Dictionary<string, IEnumerable<IEnumerable<int>>>()
+            {
+                { "[]", [] },
+                { "[[]]", [[]] },
+                { "[[1]]", [[1]] },
+                { "[[1,22],[1,22,333]]", [[1,22],[1,22,333]] },
+            })
+            {
+                string input = pair.Key;
+                var expected = pair.Value.ToArray();
+                var actual = input.Parse2DArray(int.Parse).ToArray();
+
+                Assert.Equal(expected?.Length, actual.Length);
+
+                for (int i = 0; i < expected?.Length; i++)
+                {
+                    Assert.Equal(expected[i], actual[i]);
+                }
+            }
         }
     }
 }
