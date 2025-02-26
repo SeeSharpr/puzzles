@@ -1,4 +1,8 @@
 ﻿using leetcode.Types.Graph;
+using System.Runtime.InteropServices;
+using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Reflection.Emit;
 
 namespace leetcode.Lists.Top150
 {
@@ -161,7 +165,7 @@ namespace leetcode.Lists.Top150
 
                 while (queue.TryDequeue(out Node? queueNode))
                 {
-                    _= result.TryAdd(queueNode.val, queueNode);
+                    _ = result.TryAdd(queueNode.val, queueNode);
 
                     foreach (Node queueNeighbor in queueNode.neighbors)
                     {
@@ -201,6 +205,189 @@ namespace leetcode.Lists.Top150
             Node? actual = InternalCloneGraph(node);
 
             Assert.Equal(Node.ToEdgeArray(expected), Node.ToEdgeArray(actual));
+        }
+
+        // 399. Evaluate Division
+        // You are given an array of variable pairs equations and an array of real numbers values, where equations[i] = [Ai, Bi] and values[i] represent the equation Ai / Bi = values[i]. Each Ai or Bi is a string that represents a single variable.
+        // You are also given some queries, where queries[j] = [Cj, Dj] represents the jth query where you must find the answer for Cj / Dj = ?.
+        // Return the answers to all queries.If a single answer cannot be determined, return -1.0.
+        // Note: The input is always valid. You may assume that evaluating the queries will not result in division by zero and that there is no contradiction.
+        // Note: The variables that do not occur in the list of equations are undefined, so the answer cannot be determined for them.
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[[\"a\",\"b\"],[\"b\",\"c\"]]", "[2.0,3.0]", "[[\"a\",\"c\"],[\"b\",\"a\"],[\"a\",\"e\"],[\"a\",\"a\"],[\"x\",\"x\"]]", "[6.00000,0.50000,-1.00000,1.00000,-1.00000]")]
+        [InlineData("[[\"a\",\"b\"],[\"b\",\"c\"],[\"bc\",\"cd\"]]", "[1.5,2.5,5.0]", "[[\"a\",\"c\"],[\"c\",\"b\"],[\"bc\",\"cd\"],[\"cd\",\"bc\"]]", "[3.75000,0.40000,5.00000,0.20000]")]
+        [InlineData("[[\"a\",\"b\"]]", "[0.5]", "[[\"a\",\"b\"],[\"b\",\"a\"],[\"a\",\"c\"],[\"x\",\"y\"]]", "[0.50000,2.00000,-1.00000,-1.00000]")]
+        public void CalcEquation(string inputEquations, string inputValues, string inputQueries, string output)
+        {
+            IList<IList<string>> equations = inputEquations.Parse2DArray(s => s.Replace("\"", "")).Select(e => (IList<string>)e.ToList()).ToList();
+            double[] values = inputValues.Parse1DArray(double.Parse).ToArray();
+            IList<IList<string>> queries = inputQueries.Parse2DArray(s => s.Replace("\"", "")).Select(e => (IList<string>)e.ToList()).ToList();
+            double[] expected = output.Parse1DArray(double.Parse).ToArray();
+
+            static Dictionary<string, Dictionary<string, double>> InternalBuild(IList<IList<string>> equations, double[] values)
+            {
+                Dictionary<string, Dictionary<string, double>> nodes = new();
+
+                for (int i = 0; i < values.Length; i++)
+                {
+                    string num = equations[i][0];
+                    string den = equations[i][1];
+                    Dictionary<string, double>? edges;
+
+                    if (!nodes.TryGetValue(num, out edges))
+                    {
+                        edges = new Dictionary<string, double>();
+                        nodes[num] = edges;
+                    }
+
+                    edges[den] = values[i];
+
+                    if (!nodes.TryGetValue(den, out edges))
+                    {
+                        edges = new Dictionary<string, double>();
+                        nodes[den] = edges;
+                    }
+
+                    edges[num] = 1 / values[i];
+                }
+
+                return nodes;
+            }
+
+            static double[] InternalEval(Dictionary<string, Dictionary<string, double>> nodes, IList<IList<string>> queries)
+            {
+                List<double> result = [];
+
+                foreach (var q in queries)
+                {
+                    string src = q[0];
+                    string tgt = q[1];
+
+                    // If the variable is undefined, bail out
+                    if (!nodes.ContainsKey(src) || !nodes.ContainsKey(tgt))
+                    {
+                        result.Add(-1);
+                        continue;
+                    }
+
+                    // Traverse the nodes
+                    Queue<KeyValuePair<string, double>> queue = new([new(src, 1)]);
+                    HashSet<string> attempted = new([src]);
+                    bool found = false;
+                    while (queue.TryDequeue(out KeyValuePair<string, double> queueNode))
+                    {
+                        // If we found the target node, bail out
+                        if (queueNode.Key == tgt)
+                        {
+                            found = true;
+                            result.Add(queueNode.Value);
+                            break;
+                        }
+
+                        foreach (var neighbor in nodes[queueNode.Key])
+                        {
+                            // If we have already attempted this node, skip it
+                            if (attempted.Contains(neighbor.Key)) continue;
+
+                            // Keep track of attempted nodes
+                            attempted.Add(neighbor.Key);
+
+                            // Accumulates the result of the search
+                            queue.Enqueue(new(neighbor.Key, queueNode.Value * neighbor.Value));
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        result.Add(-1);
+                    }
+                }
+
+                return result.ToArray();
+            }
+
+            double[] actual = InternalEval(InternalBuild(equations, values), queries);
+
+            Assert.Equal(expected, actual);
+        }
+
+        // 207. Course Schedule
+        // There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
+        // For example, the pair [0, 1], indicates that to take course 0 you have to first take course 1.
+        // Return true if you can finish all courses.Otherwise, return false.
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData(1, "[]", true)]
+        [InlineData(2, "[[1,0]]", true)]
+        [InlineData(2, "[[1,0],[0,1]]", false)]
+        [InlineData(5, "[[1,4],[2,4],[3,1],[3,2]]", true)]
+        public void CanFinish(int numCourses, string inputPrereq, bool expected)
+        {
+            int[][] prerequisites = inputPrereq.Parse2DArray(int.Parse).Select(e => e.ToArray()).ToArray();
+
+            static Dictionary<int, HashSet<int>> InternalBuildGraph(int[][] prereqs)
+            {
+                Dictionary<int, HashSet<int>> inbound = new();
+
+                for (int i = 0; i < prereqs.Length; i++)
+                {
+                    int from = prereqs[i][1];
+                    int to = prereqs[i][0];
+
+                    if (!inbound.TryGetValue(to, out HashSet<int>? predecessors))
+                    {
+                        predecessors = new();
+                        inbound.Add(to, predecessors);
+                    }
+
+                    predecessors.Add(from);
+                }
+
+                return inbound;
+            }
+
+            static bool InternalHasCycles(int numCourses, Dictionary<int, HashSet<int>> inbound)
+            {
+                if (inbound.Count == 0) return false;
+
+                // Find all the possible starting nodes
+                Queue<int> queue = new();
+                for (int i = 0; i < numCourses; i++)
+                {
+                    if (inbound.ContainsKey(i)) continue;
+
+                    queue.Enqueue(i);
+                }
+
+                // Eliminate each possible starting node
+                while (queue.TryDequeue(out int node))
+                {
+                    List<int> removes = new();
+
+                    // Remove node as a predecessor of all nodes
+                    foreach (var predPair in inbound)
+                    {
+                        if (predPair.Value.Remove(node) && predPair.Value.Count == 0)
+                        {
+                            queue.Enqueue(predPair.Key);
+                            removes.Add(predPair.Key);
+                        }
+                    }
+
+                    // Remove nodes that have been disconnected
+                    foreach (var remove in removes)
+                    {
+                        inbound.Remove(remove);
+                    }
+                }
+
+                return !inbound.Values.All(pred => pred.Count == 0);
+            }
+
+            bool actual = !InternalHasCycles(numCourses, InternalBuildGraph(prerequisites));
+
+            Assert.Equal(expected, actual);
         }
     }
 }
