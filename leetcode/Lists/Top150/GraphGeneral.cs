@@ -1,8 +1,4 @@
 ﻿using leetcode.Types.Graph;
-using System.Runtime.InteropServices;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Reflection.Emit;
 
 namespace leetcode.Lists.Top150
 {
@@ -386,6 +382,73 @@ namespace leetcode.Lists.Top150
             }
 
             bool actual = !InternalHasCycles(numCourses, InternalBuildGraph(prerequisites));
+
+            Assert.Equal(expected, actual);
+        }
+
+        // 210. Course Schedule II
+        // There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
+        // For example, the pair [0, 1], indicates that to take course 0 you have to first take course 1.
+        // Return the ordering of courses you should take to finish all courses. If there are many valid answers, return any of them.If it is impossible to finish all courses, return an empty array.
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData(2, "[[1,0]]", "[0,1]")]
+        [InlineData(4, "[[1,0],[2,0],[3,1],[3,2]]", "[0,1,2,3]")]
+        [InlineData(1, "[]", "[0]")]
+        public void FindOrder(int numCourses, string inputPrereqs, string output)
+        {
+            int[][] prerequisites = inputPrereqs.Parse2DArray(int.Parse).Select(e => e.ToArray()).ToArray();
+            int[] expected = output.Parse1DArray(int.Parse).ToArray();
+
+            static Dictionary<int, HashSet<int>> InternalBuildInboundGraph(int[][] prereqs)
+            {
+                Dictionary<int, HashSet<int>> inbound = new();
+
+                foreach (int[] prereq in prereqs)
+                {
+                    int from = prereq[1];
+                    int to = prereq[0];
+
+                    if (!inbound.TryGetValue(to, out HashSet<int>? pred))
+                    {
+                        pred = new();
+                        inbound[to] = pred;
+                    }
+
+                    pred.Add(from);
+                }
+
+                return inbound;
+            }
+
+            static int[] InternalFindOrder(int numCourses, Dictionary<int, HashSet<int>> inbound)
+            {
+                List<int> result = [];
+                Queue<int> queue = new();
+                for (int i = 0; i < numCourses; i++)
+                {
+                    if (!inbound.ContainsKey(i)) queue.Enqueue(i);
+                }
+
+                while (queue.TryDequeue(out int node))
+                {
+                    result.Add(node);
+
+                    foreach (var inboundPair in inbound)
+                    {
+                        int to = inboundPair.Key;
+                        HashSet<int> from = inboundPair.Value;
+
+                        if (from.Remove(node) && from.Count == 0) queue.Enqueue(to);
+                    }
+                }
+
+                int remainingNodes = inbound.Values.Select(set => set.Count).Sum();
+
+                return remainingNodes == 0 ? result.ToArray() : [];
+            }
+
+            int[] actual = InternalFindOrder(numCourses, InternalBuildInboundGraph(prerequisites));
 
             Assert.Equal(expected, actual);
         }
