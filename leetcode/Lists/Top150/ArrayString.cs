@@ -13,37 +13,63 @@ namespace leetcode.Lists.Top150
         [InlineData(new int[] { 1, 2, 3, 0, 0, 0 }, 3, new int[] { 2, 5, 6 }, 3, new int[] { 1, 2, 2, 3, 5, 6 })]
         [InlineData(new int[] { 1 }, 1, new int[] { }, 0, new int[] { 1 })]
         [InlineData(new int[] { 0 }, 0, new int[] { 1 }, 1, new int[] { 1 })]
+        [InlineData(new int[] { 2, 0 }, 1, new int[] { 1 }, 1, new int[] { 1, 2 })]
         public void Merge(int[] nums1, int m, int[] nums2, int n, int[] expected)
         {
-            int i = 0;
-            int j = 0;
-            int p = 0;
-            int t = m + n;
-            int[] result = new int[t];
-            while (p < t)
+            static void InternalMerge(int[] nums1, int m, int[] nums2, int n)
             {
-                if (i < m && j < n)
+                if (m == 0 || n == 0)
                 {
-                    if (nums1[i] < nums2[j])
-                    {
-                        result[p++] = nums1[i++];
-                    }
-                    else
-                    {
-                        result[p++] = nums2[j++];
-                    }
+                    Array.Copy(nums2, nums1, n);
+                    return;
                 }
-                else if (i < m)
+
+                int dst = m + n;
+
+                while (dst > m)
                 {
-                    result[p++] = nums1[i++];
-                }
-                else // j < n
-                {
-                    result[p++] = nums2[j++];
+                    if (m == 0 || nums1[m - 1] < nums2[n - 1])
+                    {
+                        nums1[--dst] = nums2[--n];
+                    }
+                    else if (n == 0 || nums1[m - 1] >= nums2[n - 1])
+                    {
+                        nums1[--dst] = nums1[--m];
+                    }
                 }
             }
-            Array.Copy(result, nums1, t);
-            Assert.True(expected.SequenceEqual(nums1));
+
+            //int i = 0;
+            //int j = 0;
+            //int p = 0;
+            //int t = m + n;
+            //int[] result = new int[t];
+            //while (p < t)
+            //{
+            //    if (i < m && j < n)
+            //    {
+            //        if (nums1[i] < nums2[j])
+            //        {
+            //            result[p++] = nums1[i++];
+            //        }
+            //        else
+            //        {
+            //            result[p++] = nums2[j++];
+            //        }
+            //    }
+            //    else if (i < m)
+            //    {
+            //        result[p++] = nums1[i++];
+            //    }
+            //    else // j < n
+            //    {
+            //        result[p++] = nums2[j++];
+            //    }
+            //}
+            //Array.Copy(result, nums1, t);
+
+            InternalMerge(nums1, m, nums2, n);
+            Assert.Equal(expected, nums1);
         }
 
         // Given an integer array nums and an integer val, remove all occurrences of val in nums in-place. The order of the elements may be changed. Then return the number of elements in nums which are not equal to val.
