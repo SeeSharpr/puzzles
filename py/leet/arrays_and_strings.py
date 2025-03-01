@@ -58,19 +58,16 @@ class TestArraysAndStrings(unittest.TestCase):
     def removeDuplicates(self, nums: List[int]) -> int:
         limit = len(nums)
 
-        if (limit == 0):
-            return 0
-
         left = 0
-        right = 1
-
-        while (right < limit):
+        for right in range(1,limit):
             if (nums[left] != nums[right]):
                 left += 1
                 nums[left] = nums[right]
-            right += 1
 
-        return left+1
+        if (limit > 0):
+            left += 1
+
+        return left
 
     def test_removeDuplicates(self):
         nums = [1,1,2]
@@ -84,6 +81,37 @@ class TestArraysAndStrings(unittest.TestCase):
         nums = []
         self.assertEqual(self.removeDuplicates(nums), 0)
         self.assertSequenceEqual(nums, [])
+
+    # 80. Remove Duplicates from Sorted Array II
+    def removeDuplicatesII(self, nums: List[int]) -> int:
+        limit = len(nums)
+
+        copies=1
+        left = 0
+        for right in range(1,limit):
+            is_different = nums[left] != nums[right]
+            if (is_different or copies < 2):
+                if (is_different):
+                    copies = 1
+                else:
+                    copies += 1
+                left +=1
+                nums[left] = nums[right]
+            right += 1
+
+        if (limit > 0):
+            left += 1
+
+        return left
+    
+    def test_removeDuplicatesII(self):
+        nums=[1,1,1,2,2,3]
+        self.assertEqual(self.removeDuplicatesII(nums), 5)
+        self.assertSequenceEqual(nums[:5], [1,1,2,2,3])
+
+        nums=[0,0,1,1,1,1,2,3,3]
+        self.assertEqual(self.removeDuplicatesII(nums), 7)
+        self.assertSequenceEqual(nums[:7], [0,0,1,1,2,3,3])
 
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
