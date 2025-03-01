@@ -18,9 +18,8 @@ namespace leetcode.Lists.Top150
         {
             static void InternalMerge(int[] nums1, int m, int[] nums2, int n)
             {
-                if (m == 0 || n == 0)
+                if (n == 0)
                 {
-                    Array.Copy(nums2, nums1, n);
                     return;
                 }
 
@@ -83,25 +82,25 @@ namespace leetcode.Lists.Top150
         [InlineData(new int[] { 0, 1, 2, 2, 3, 0, 4, 2 }, 2, 5, new int[] { 0, 1, 3, 0, 4 })]
         public void RemoveElement(int[] nums, int val, int n, int[] expected)
         {
-            int i = 0;
-            int j = 0;
-            int c = 0;
-            int t = nums.Length;
-            while (j < t)
+            int left = 0;
+            int right = 0;
+            int actual = 0;
+            int limit = nums.Length;
+            while (right < limit)
             {
-                if (nums[j] != val)
+                if (nums[right] != val)
                 {
-                    nums[i++] = nums[j++];
-                    c++;
+                    nums[left++] = nums[right++];
+                    actual++;
                 }
                 else
                 {
-                    j++;
+                    right++;
                 }
             }
 
-            Assert.Equal(n, c);
-            Assert.True(expected.SequenceEqual(nums.Take(c).ToArray()));
+            Assert.Equal(n, actual);
+            Assert.True(expected.SequenceEqual(nums.Take(actual).ToArray()));
         }
 
         // Given an integer array nums sorted in non-decreasing order, remove the duplicates in-place such that each unique element appears only once.The relative order of the elements should be kept the same.Then return the number of unique elements in nums.
