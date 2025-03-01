@@ -38,35 +38,6 @@ namespace leetcode.Lists.Top150
                 }
             }
 
-            //int i = 0;
-            //int j = 0;
-            //int p = 0;
-            //int t = m + n;
-            //int[] result = new int[t];
-            //while (p < t)
-            //{
-            //    if (i < m && j < n)
-            //    {
-            //        if (nums1[i] < nums2[j])
-            //        {
-            //            result[p++] = nums1[i++];
-            //        }
-            //        else
-            //        {
-            //            result[p++] = nums2[j++];
-            //        }
-            //    }
-            //    else if (i < m)
-            //    {
-            //        result[p++] = nums1[i++];
-            //    }
-            //    else // j < n
-            //    {
-            //        result[p++] = nums2[j++];
-            //    }
-            //}
-            //Array.Copy(result, nums1, t);
-
             InternalMerge(nums1, m, nums2, n);
             Assert.Equal(expected, nums1);
         }
