@@ -113,6 +113,125 @@ class TestArraysAndStrings(unittest.TestCase):
         self.assertEqual(self.removeDuplicatesII(nums), 7)
         self.assertSequenceEqual(nums[:7], [0,0,1,1,2,3,3])
 
+    # 169. Majority Element
+    def majorityElement(self, nums: List[int]) -> int:
+        solution="sorting"
+        match solution:
+            case "voting":
+                # Boyer-Moore Voting Algorithm
+                cand = None
+                count = 0
+
+                for num in nums:
+                    if (count == 0):
+                        cand = num
+
+                    count += 1 if cand == num else -1
+                    
+            case "sorting":
+                # Sort input, the majority element will necessarily be in the center
+                nums.sort()
+                cand = nums[len(nums)//2]
+
+            case _:
+                cand = None
+
+        return cand
+
+    def test_majorityElement(self):
+        self.assertEqual(self.majorityElement([3,2,3]), 3)
+        self.assertEqual(self.majorityElement([2,2,1,1,1,2,2]), 2)
+
+    # 189. Rotate Array
+    def rotate(self, nums: List[int], k: int) -> None:
+        limit = len(nums)
+        k = k % limit
+        if (k == 0):
+            return
+        
+        # Reverse the first K elements
+        left = 0
+        right = limit - k - 1
+        while (left < right):
+            nums[left], nums[right] = nums[right], nums[left]
+            left, right = left+1, right-1
+
+        # Reverse the last limit-K elements
+        left = limit - k
+        right = limit-1
+        while (left < right):
+            nums[left], nums[right] = nums[right], nums[left]
+            left, right = left+1, right-1
+
+        # Reverse the whole thing
+        left = 0
+        right = limit-1
+        while (left < right):
+            nums[left], nums[right] = nums[right], nums[left]
+            left, right = left+1, right-1
+
+    def test_rotate(self):
+        nums = [1,2,3,4,5,6,7]
+        k = 3
+        self.rotate(nums, k)
+        self.assertSequenceEqual(nums, [5,6,7,1,2,3,4])
+
+        nums = [-1,-100,3,99]
+        k = 2
+        self.rotate(nums, k)
+        self.assertSequenceEqual(nums, [3,99,-1,-100])
+
+    # 121. Best Time to Buy and Sell Stock
+    def maxProfit(self, prices: List[int]) -> int:
+        minPrice=-1
+        maxProfit=0
+        for i in range(len(prices)):
+            if (minPrice == -1 or prices[i] < minPrice):
+                minPrice = prices[i]
+            
+            if (prices[i] - minPrice > maxProfit):
+                maxProfit = prices[i] - minPrice
+        
+        return 0 if maxProfit == None else maxProfit
+
+    def test_maxProfit(self):
+        self.assertEqual(self.maxProfit([7,1,5,3,6,4]), 5)
+        self.assertEqual(self.maxProfit([7,6,4,3,1]), 0)
+
+    # 122. Best Time to Buy and Sell Stock II
+    def maxProfit2(self, prices: List[int]) -> int:
+        if (len(prices) < 1):
+            return 0
+        
+        profit = 0
+        i = 1
+        solution="daytrader"
+
+        match solution:
+            case "peaksandvalleys":
+                while (i < len(prices)):
+                    while (i < len(prices) and prices[i] <= prices[i-1]):
+                        i += 1
+                    valley = i-1
+                    
+                    while ( i < len(prices) and prices[i] >= prices[i-1]):
+                        i += 1
+                    peak = i-1
+
+                    if (peak < len(prices) and valley < len(prices)):
+                        profit += prices[peak] - prices[valley]
+            case "daytrader":
+                for i in range(1,len(prices)):
+                    profit += max(0, prices[i]-prices[i-1])
+
+        return profit
+
+    def test_maxProfit2(self):
+        self.assertEqual(self.maxProfit2([7,1,5,3,6,4]), 7)
+        self.assertEqual(self.maxProfit2([1,2,3,4,5]), 4)
+        self.assertEqual(self.maxProfit2([7,6,4,3,1]), 0)
+        self.assertEqual(self.maxProfit2([3,3]), 0)
+
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         map = {}
