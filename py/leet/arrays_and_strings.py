@@ -232,6 +232,32 @@ class TestArraysAndStrings(unittest.TestCase):
         self.assertEqual(self.maxProfit2([7,6,4,3,1]), 0)
         self.assertEqual(self.maxProfit2([3,3]), 0)
 
+    # 55. Jump Game
+    def canJump(self, nums: List[int]) -> bool:
+        result = True
+        remainingJumps=0
+        for i in range(len(nums)-1):
+            # Greedy approach - We are not trying to optimize the number of jumps, so all we care is whether we can avoid landing on a 0 with no jumps
+            # To do so, all we need to do is to take a jump of a distance that is the maximum between what the current place allows and what we have left minus the current place
+            # We also don't care about the last place, since it's the destination, all we care is whether we don't stop at a 0 right before the last
+            remainingJumps = max(remainingJumps-1, nums[i])
+            if (remainingJumps == 0):
+                result = False
+                break
+        return result
+
+    def test_canJump(self):
+        self.assertEqual(self.canJump([2,3,1,1,4]), True)
+        self.assertEqual(self.canJump([3,2,1,0,4]), False)
+
+    # 45. Jump Game II
+    def jump(self, nums: List[int]) -> int:
+        return 0
+
+    def test_jump(self):
+        self.assertAlmostEqual(self.jump([2,3,1,1,4]),2)
+        self.assertAlmostEqual(self.jump([2,3,0,1,4]),2)
+
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         map = {}
