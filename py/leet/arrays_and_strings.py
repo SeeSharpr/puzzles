@@ -299,6 +299,24 @@ class TestArraysAndStrings(unittest.TestCase):
         self.assertEqual(self.jump([1,2]), 1)
         self.assertEqual(self.jump([5,4,3,2,2,0,0]), 2)
 
+    # 274. H-Index
+    def hIndex(self, citations: List[int]) -> int:
+        citations.sort()
+        total = len(citations)
+        for index, count in enumerate(citations):
+            pubs = total - index
+            if (count >= pubs):
+                return pubs
+
+        return 0
+
+    def test_hIndex(self):
+        self.assertEqual(self.hIndex([3,0,6,1,5]), 3)
+        self.assertEqual(self.hIndex([1,3,1]), 1)
+        self.assertEqual(self.hIndex([100]), 1)
+        self.assertEqual(self.hIndex([]), 0)
+        self.assertEqual(self.hIndex([0,0,2]), 1)
+
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         map = {}
