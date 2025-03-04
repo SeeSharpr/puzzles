@@ -252,11 +252,52 @@ class TestArraysAndStrings(unittest.TestCase):
 
     # 45. Jump Game II
     def jump(self, nums: List[int]) -> int:
-        return 0
+        solution="greedy"
+        match solution:
+            case "mine":
+                map = {}
+                map[0] = 0
+                target = len(nums)-1
+                for curr in range(target):
+                    # Skip over bad jumping points
+                    if (nums[curr] == 0):
+                        continue
+
+                    jump_count = map[curr]
+                    maxJump=min(nums[curr], target-curr)
+                    for length in range(maxJump, 0, -1):
+                        next = curr + length
+
+                        # Skip over bad landing points
+                        if (next != target and nums[next] == 0):
+                            continue
+
+                        if (next in map):
+                            # We can reach dst from src with a certain cost that is either the previous or the current+1
+                            map[next] = min(map[next], jump_count + 1)
+                        else:
+                            # We can reach dst from src for the first time
+                            map[next] = jump_count + 1
+                
+                return map[target] if target in map else 0
+            case "greedy":
+                jump_count, window_start, window_end, goal = 0, 0, 0, len(nums) - 1
+                for i in range(goal):
+                    window_end = max(window_end, i + nums[i])
+                    if (i == window_start):
+                        jump_count += 1
+                        window_start = window_end
+                return jump_count if window_end >= goal else 0
+            case _:
+                raise NotImplementedError(solution)
 
     def test_jump(self):
-        self.assertAlmostEqual(self.jump([2,3,1,1,4]),2)
-        self.assertAlmostEqual(self.jump([2,3,0,1,4]),2)
+        self.assertEqual(self.jump([2,3,1,1,4]),2)
+        self.assertEqual(self.jump([2,3,0,1,4]),2)
+        self.assertEqual(self.jump([0]), 0)
+        self.assertEqual(self.jump([5,9,3,2,1,0,2,3,3,1,0,0]), 3)
+        self.assertEqual(self.jump([1,2]), 1)
+        self.assertEqual(self.jump([5,4,3,2,2,0,0]), 2)
 
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
