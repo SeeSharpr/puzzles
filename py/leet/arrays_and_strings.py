@@ -1,4 +1,5 @@
 from typing import List
+import random
 import unittest
 
 class TestArraysAndStrings(unittest.TestCase):
@@ -317,6 +318,55 @@ class TestArraysAndStrings(unittest.TestCase):
         self.assertEqual(self.hIndex([]), 0)
         self.assertEqual(self.hIndex([0,0,2]), 1)
 
+    # 380. Insert Delete GetRandom O(1)
+    class RandomizedSet:
+        def __init__(self):
+            self.map = {}
+            self.list = []
+            return
+
+        def insert(self, val: int) -> bool:
+            if (val in self.map):
+                return False
+        
+            self.map[val] = len(self.list)
+            self.list.append(val)
+            return True
+
+        def remove(self, val: int) -> bool:
+            if (val not in self.map):
+                return False
+
+            curr = self.map.pop(val)
+            last = len(self.list) - 1
+
+            if (curr != last):
+                self.list[curr] = self.list.pop()
+                self.map[self.list[curr]] = curr
+            else:
+                self.list.pop()
+
+            return True
+
+        def getRandom(self) -> int:
+            return self.list[random.randint(0, len(self.list)-1)]
+
+    def test_randomizedSet(self):
+        inputCmd = ["RandomizedSet", "insert", "remove", "insert", "getRandom", "remove", "insert", "getRandom"]
+        inputPar = [[], [1], [2], [2], [], [1], [2], []]
+        output = [None, True, False, True, 2, True, False, 2]
+
+        for i, cmd in enumerate(inputCmd):
+            match cmd:
+                case "RandomizedSet":
+                    rs = self.RandomizedSet()
+                case "insert":
+                    self.assertEqual(rs.insert(inputPar[i][0]), output[i])
+                case "remove":
+                    self.assertEqual(rs.remove(inputPar[i][0]), output[i])
+                case "getRandom":
+                    rs.getRandom()
+
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         map = {}
@@ -331,6 +381,7 @@ class TestArraysAndStrings(unittest.TestCase):
         self.assertEqual(self.twoSum([3,2,4], 6),[1,2])
         self.assertEqual(self.twoSum([2,7,11,15], 9), [0,1])
         self.assertEqual(self.twoSum([3,3], 6), [0,1])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
