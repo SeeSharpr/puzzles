@@ -367,6 +367,43 @@ class TestArraysAndStrings(unittest.TestCase):
                 case "getRandom":
                     rs.getRandom()
 
+    # 238. Product of Array Except Self
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        solution="twolists"
+        match solution:
+            case "twolists":
+                left = [1] * len(nums)
+                for i in reversed(range(len(nums)-1)):
+                    left[i] = left[i+1]*nums[i+1]
+
+                right = [1] * len(nums)
+                for i in range(1,len(nums)):
+                    right[i] = right[i-1]*nums[i-1]
+
+                result = [0] * len(nums)
+                for i in range(len(nums)):
+                    result[i] = left[i] * right[i]
+
+                return result               
+
+            case "nostorage":
+                result = [0] * len(nums)
+                result[0] = 1
+
+                for i in range(1,len(nums)):
+                    result[i] = result[i-1]*nums[i-1]
+
+                product = 1
+                for i in reversed(range(len(nums))):
+                    result[i] *= product
+                    product *= nums[i]
+
+                return result
+
+    def test_productExceptSelf(self):
+        self.assertEqual(self.productExceptSelf([1,2,3,4]),[24,12,8,6])
+        self.assertEqual(self.productExceptSelf([-1,1,0,-3,3]),[0,0,9,0,0])
+
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         map = {}
