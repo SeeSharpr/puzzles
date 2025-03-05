@@ -309,10 +309,14 @@ namespace leetcode.Lists.Top150
         [InlineData(new[] { 2, 3, 1, 1, 4 }, true)]
         [InlineData(new[] { 3, 2, 1, 0, 4 }, false)]
         [InlineData(new[] { 2, 0 }, true)]
+        [InlineData(new[] { 5, 0, 0, 0, 0, 0 }, true)]
         [InlineData(new[] { 0 }, true)]
         [InlineData(new[] { 0, 1 }, false)]
         public void CanJump(int[] nums, bool expected)
         {
+            // Greedy approach - We are not trying to optimize the number of steps, so all we care is whether we can avoid landing on a 0 with no steps left
+            // To do so, all we need to do is to take the maximum number of steps from the current position or previous position
+            // We also don't care about the last place, since it's the destination, all we care is whether we don't stop at a 0 right before the last
             int target = nums.Length - 1;
             bool canJump = true;
 
