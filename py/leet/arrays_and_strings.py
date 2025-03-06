@@ -451,44 +451,91 @@ class TestArraysAndStrings(unittest.TestCase):
                 l2r = [1] * len(ratings)
                 r2l = [1] * len(ratings)
 
-                for i in range(1,len(ratings)):
-                    if (ratings[i] > ratings[i-1]):
-                        l2r[i] = l2r[i-1]+1
+                for i in range(1, len(ratings)):
+                    if ratings[i] > ratings[i - 1]:
+                        l2r[i] = l2r[i - 1] + 1
 
-                for i in reversed(range(len(ratings)-1)):
-                    if (ratings[i] > ratings[i+1]):
-                        r2l[i] = r2l[i+1]+1
+                for i in reversed(range(len(ratings) - 1)):
+                    if ratings[i] > ratings[i + 1]:
+                        r2l[i] = r2l[i + 1] + 1
 
                 total = 0
                 for i in range(len(ratings)):
                     total += max(l2r[i], r2l[i])
 
                 return total
-            
+
             case "onearray":
                 total = [1] * len(ratings)
-                for i in range(1,len(ratings)):
-                    if (ratings[i] > ratings[i-1]):
-                        total[i] = total[i-1]+1
+                for i in range(1, len(ratings)):
+                    if ratings[i] > ratings[i - 1]:
+                        total[i] = total[i - 1] + 1
 
-                for i in reversed(range(len(ratings)-1)):
-                    if (ratings[i] > ratings[i+1]):
-                        total[i] = max(total[i], total[i+1]+1)
+                for i in reversed(range(len(ratings) - 1)):
+                    if ratings[i] > ratings[i + 1]:
+                        total[i] = max(total[i], total[i + 1] + 1)
 
                 return sum(total)
 
     def test_candy(self):
-        ratings = [12,4,3,11,34,34,1,67]
+        ratings = [12, 4, 3, 11, 34, 34, 1, 67]
         output = 16
         self.assertEqual(self.candy(ratings), output)
 
-        ratings = [1,0,2]
+        ratings = [1, 0, 2]
         output = 5
         self.assertEqual(self.candy(ratings), output)
 
-        ratings = [1,2,2]
+        ratings = [1, 2, 2]
         output = 4
         self.assertEqual(self.candy(ratings), output)
+
+    # 42. Trapping Rain Water
+    def trap(self, height: List[int]) -> int:
+        solution = "twoarrays"
+
+        water = 0
+        match solution:
+            case "twoarrays":
+                l2r = [0] * len(height)
+                l2r[0] = height[0]
+
+                for i in range(1, len(height)):
+                    l2r[i] = max(l2r[i - 1], height[i])
+
+                r2l = [0] * len(height)
+                r2l[-1] = height[-1]
+                for i in reversed(range(len(height) - 1)):
+                    r2l[i] = max(r2l[i + 1], height[i + 1])
+
+                for i in range(len(height)):
+                    water += max(0, min(l2r[i], r2l[i]) - height[i])
+
+            case "twopointers":
+                water = 0
+                left = 0
+                right = len(height)-1
+                leftmax, rightmax = 0,0
+                while (left < right):
+                    if (height[left] < height[right]):
+                        leftmax = max(leftmax, height[left])
+                        water += leftmax - height[left]
+                        left += 1
+                    else:
+                        rightmax = max(rightmax, height[right])
+                        water += rightmax - height[right]
+                        right -= 1
+        
+        return water
+
+    def test_trap(self):
+        height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
+        output = 6
+        self.assertEqual(self.trap(height), output)
+
+        height = [4, 2, 0, 3, 2, 5]
+        output = 9
+        self.assertEqual(self.trap(height), output)
 
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
