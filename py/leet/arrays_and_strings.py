@@ -537,6 +537,40 @@ class TestArraysAndStrings(unittest.TestCase):
         output = 9
         self.assertEqual(self.trap(height), output)
 
+    # 6. Zigzag Conversion
+    def convert(self, s: str, numRows: int) -> str:
+        rows = ["" for _ in range(numRows)]
+        row = 0
+        delta = 1
+        for i in range(len(s)):
+            rows[row] += s[i]
+            if (row + delta < 0):
+                delta = 1
+            elif (row + delta == numRows):
+                delta = -1
+
+            row += delta
+
+        output = "".join(rows)
+
+        return output
+
+    def test_convert(self):
+        s = "PAYPALISHIRING"
+        numRows = 3
+        output = "PAHNAPLSIIGYIR"
+        self.assertEqual(self.convert(s, numRows), output)
+
+        s = "PAYPALISHIRING"
+        numRows = 4
+        output = "PINALSIGYAHRPI"
+        self.assertEqual(self.convert(s, numRows), output)
+
+        s = "A"
+        numRows = 1
+        output = "A"
+        self.assertEqual(self.convert(s, numRows), output)
+
     # 1. Two-sum
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         map = {}
