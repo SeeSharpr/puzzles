@@ -11,15 +11,15 @@ namespace leetcode.Lists.Top150
         public class Codec
         {
             // Encodes a tree to a single string.
-            public string serialize(TreeNode root)
+            public string serialize(TreeNode? root)
             {
                 return root == null ? "#" : serialize(root.right) + "|" + serialize(root.left) + "|" + root.val;
             }
 
             // Decodes your encoded data to tree.
-            public TreeNode deserialize(string data)
+            public TreeNode? deserialize(string data)
             {
-                Stack<TreeNode> stack = new();
+                Stack<TreeNode?> stack = new();
 
                 int sign = 1;
                 for (int i = 0; i < data.Length; i++)
@@ -35,7 +35,7 @@ namespace leetcode.Lists.Top150
                         val *= sign;
                         sign = 1;
 
-                        TreeNode n = new TreeNode(val);
+                        TreeNode n = new(val);
                         stack.TryPop(out n.left);
                         stack.TryPop(out n.right);
                         stack.Push(n);

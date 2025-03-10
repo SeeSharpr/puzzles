@@ -23,7 +23,7 @@ namespace leetcode.Lists.Top150
                 if (node == null) return;
 
                 InternalTraverseTree(node?.left, values);
-                if (values.Count == 0 || values[values.Count - 1] != node.val) values.Add(node.val);
+                if (values.Count == 0 || values[^1] != node?.val) values.Add(node!.val);
                 InternalTraverseTree(node?.right, values);
             }
 

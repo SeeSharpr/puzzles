@@ -58,7 +58,7 @@ namespace leetcode.Types.LinkedList
 
         public static ListNode? ParseFromLC(string input)
         {
-            return input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node.next = next, node => node?.next, int.Parse);
+            return input.ParseLinkedListLC(data => new ListNode(data), (node, next) => node!.next = next, node => node?.next, int.Parse);
         }
 
         private class NodeEnumerator(ListNode? head) : IEnumerator<ListNode>

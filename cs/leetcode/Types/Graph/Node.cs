@@ -49,7 +49,7 @@ namespace leetcode.Types.Graph
             return nodes.Values.FirstOrDefault();
         }
 
-        public static int[][] ToEdgeArray(Node? node)
+        public static int[][]? ToEdgeArray(Node? node)
         {
             if (node == null) return null;
 

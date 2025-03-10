@@ -127,23 +127,23 @@ namespace leetcode.Lists.Top150
                 {
                     if (list1.val < list2.val)
                     {
-                        next = (result == null) ? (result = new ListNode(list1.val)) : (next.next = new ListNode(list1.val));
+                        next = (result == null) ? (result = new ListNode(list1.val)) : (next!.next = new ListNode(list1.val));
                         list1 = list1.next;
                     }
                     else
                     {
-                        next = (result == null) ? (next = result = new ListNode(list2.val)) : (next.next = new ListNode(list2.val));
+                        next = (result == null) ? (next = result = new ListNode(list2.val)) : (next!.next = new ListNode(list2.val));
                         list2 = list2.next;
                     }
                 }
                 else if (list1 != null)
                 {
-                    next = (result == null) ? (result = new ListNode(list1.val)) : (next.next = new ListNode(list1.val));
+                    next = (result == null) ? (result = new ListNode(list1.val)) : (next!.next = new ListNode(list1.val));
                     list1 = list1.next;
                 }
                 else if (list2 != null)
                 {
-                    next = (result == null) ? (next = result = new ListNode(list2.val)) : (next.next = new ListNode(list2.val));
+                    next = (result == null) ? (next = result = new ListNode(list2.val)) : (next!.next = new ListNode(list2.val));
                     list2 = list2.next;
                 }
                 else
@@ -205,7 +205,7 @@ namespace leetcode.Lists.Top150
                         random = random?.next;
                     }
 
-                    ptr.random = random;
+                    ptr!.random = random;
                 }
 
                 ptr = ptr?.next;
@@ -230,12 +230,20 @@ namespace leetcode.Lists.Top150
             // Values match
             Assert.Equal(head?.Select(n => n.val) ?? [], newHead?.Select(n => n.val) ?? []);
             // No IDs match for next
-            Assert.Empty(head?.Select(x => x.id)?.Where(x => x != null)?.Intersect(newHead?.Select(y => y.id)?.Where(x => x != null)));
+            int[]? nextIdLeft = head?.Select(n => n.id)?.ToArray();
+            int[]? nextIdRight = newHead?.Select(n => n.id)?.ToArray();
+            Assert.NotNull(nextIdLeft);
+            Assert.NotNull(nextIdRight);
+            Assert.Empty(nextIdLeft.Intersect(nextIdRight));
             // No IDs match for random
-            Assert.Empty(head.Select(x => x.random?.id).Where(x => x != null).Intersect(newHead?.Select(y => y.random?.id)?.Where(x => x != null)));
+            int?[]? randomIdLeft = head?.Where(n => n.random != null).Select(n => n.random?.id)?.ToArray();
+            int?[]? randomIdRight = newHead?.Where(n => n.random != null).Select(n => n.random?.id)?.ToArray();
+            Assert.NotNull(randomIdLeft);
+            Assert.NotNull(randomIdRight);
+            Assert.Empty(randomIdLeft.Intersect(randomIdRight));
             // Index of random matches
-            int[] oldRandomIndex = head.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = head; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
-            int[] newRandomIndex = newHead.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = newHead; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
+            int[]? oldRandomIndex = head?.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = head; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
+            int[]? newRandomIndex = newHead?.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = newHead; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
 
             Assert.Equal(oldRandomIndex, newRandomIndex);
         }
@@ -253,20 +261,20 @@ namespace leetcode.Lists.Top150
             if (head != null && left < right)
             {
                 ListNode dummy = new(0, head);
-                ListNode predNode = dummy;
+                ListNode? predNode = dummy;
                 for (int i = 1; i < left; i++)
                 {
-                    predNode = predNode.next;
+                    predNode = predNode?.next;
                 }
 
-                ListNode leftSwap = predNode.next;
-                ListNode rightSwap = leftSwap.next;
+                ListNode? leftSwap = predNode?.next;
+                ListNode? rightSwap = leftSwap?.next;
 
                 for (int i = left; i < right; i++)
                 {
-                    leftSwap.next = rightSwap.next;
-                    rightSwap.next = predNode.next;
-                    predNode.next = rightSwap;
+                    leftSwap!.next = rightSwap?.next;
+                    rightSwap!.next = predNode?.next;
+                    predNode!.next = rightSwap;
                     rightSwap = leftSwap.next;
                 }
 
@@ -303,9 +311,9 @@ namespace leetcode.Lists.Top150
                 ListNode? rightSwap = leftSwap?.next;
                 for (int i = 1; i < k; i++)
                 {
-                    leftSwap.next = rightSwap?.next;
-                    rightSwap.next = predNode?.next;
-                    predNode.next = rightSwap;
+                    leftSwap!.next = rightSwap?.next;
+                    rightSwap!.next = predNode?.next;
+                    predNode!.next = rightSwap;
                     rightSwap = leftSwap.next;
                 }
 
@@ -372,7 +380,7 @@ namespace leetcode.Lists.Top150
                 }
                 else
                 {
-                    pred.next = skipper?.next;
+                    pred!.next = skipper?.next;
                 }
             }
 
@@ -416,7 +424,7 @@ namespace leetcode.Lists.Top150
 
                 if (newTail != null)
                 {
-                    oldTail.next = head;
+                    oldTail!.next = head;
                     newTail.next = null;
                     head = newHead;
                 }
@@ -455,12 +463,12 @@ namespace leetcode.Lists.Top150
 
                 // Remove the node from where it was...
                 // [predFrom]->[node]->[rest] => [predFrom]->[rest]
-                predFrom.next = predFrom?.next?.next;
+                predFrom!.next = predFrom?.next?.next;
 
                 // Inject the node where it needs to be
                 // [predTo]->[rest] => [predTo]->[node]->[rest]
-                node.next = predTo?.next;
-                predTo.next = node;
+                node!.next = predTo?.next;
+                predTo!.next = node;
 
                 // Advance to the next injection point
                 predTo = predTo.next;
@@ -468,7 +476,7 @@ namespace leetcode.Lists.Top150
 
             head = dummy.next;
 
-            Assert.Equal(expected.Select(n => n.val) ?? [], head.Select(n => n.val) ?? []);
+            Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []);
         }
 
         // Design a data structure that follows the constraints of a Least Recently Used(LRU) cache.

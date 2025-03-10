@@ -239,8 +239,8 @@ namespace leetcode.Lists.Top150
                         currentNode.next = nextTuple.Item2;
                     }
 
-                    if (currentNode.left != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode?.left));
-                    if (currentNode.right != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode?.right));
+                    if (currentNode.left != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode.left));
+                    if (currentNode.right != null) queue.Enqueue(new Tuple<int, Node>(currentLevel + 1, currentNode.right));
                 }
             }
 
@@ -310,11 +310,11 @@ namespace leetcode.Lists.Top150
                 if (rightMost != null)
                 {
                     rightMost.right = node?.right;
-                    node.right = node?.left;
+                    node!.right = node?.left;
                 }
 
                 // Kill the left subtree
-                node.left = null;
+                node!.left = null;
             }
 
             _Flatten(root);
@@ -325,14 +325,6 @@ namespace leetcode.Lists.Top150
         // 112. Path Sum
         // Given the root of a binary tree and an integer targetSum, return true if the tree has a root-to-leaf path such that adding up all the values along the path equals targetSum.
         // A leaf is a node with no children.
-        public static readonly IEnumerable<object[]> HasPathSumData =
-            [
-            [new TreeNode(5, new TreeNode(4, left: new TreeNode(11, new TreeNode(7), new TreeNode(2))), new TreeNode(8, new TreeNode(13), new TreeNode(4, right: new TreeNode(1)))), 22, true],
-            [new TreeNode(1, new TreeNode(2), new TreeNode(3)), 5, false],
-            [null, 0, false],
-            [new TreeNode(1, new TreeNode(2), null), 1, false],
-            ];
-
         [Trait("Difficulty", "Easy")]
         [Theory]
         [InlineData("[5,4,8,11,null,13,4,7,2,null,null,null,1]", 22, true)]
@@ -385,7 +377,7 @@ namespace leetcode.Lists.Top150
 
             static int InternalSumNumbers(TreeNode? node, int current)
             {
-                int next = current * 10 + node.val;
+                int next = current * 10 + node!.val;
 
                 if (node?.left == null && node?.right == null)
                 {
@@ -451,7 +443,7 @@ namespace leetcode.Lists.Top150
             private readonly Stack<TreeNode> stack = new();
             private TreeNode? current;
 
-            public BSTIterator(TreeNode root)
+            public BSTIterator(TreeNode? root)
             {
                 this.current = root;
             }
@@ -507,13 +499,6 @@ namespace leetcode.Lists.Top150
         // Given the root of a complete binary tree, return the number of the nodes in the tree.
         // According to Wikipedia, every level, except possibly the last, is completely filled in a complete binary tree, and all nodes in the last level are as far left as possible.It can have between 1 and 2h nodes inclusive at the last level h.
         // Design an algorithm that runs in less than O(n) time complexity.
-        public static readonly IEnumerable<object[]> CountNodesData =
-            [
-            [new TreeNode(1, new TreeNode(2, new TreeNode(4), new TreeNode(5)), new TreeNode(3, left: new TreeNode(6))), 6],
-            [new TreeNode(1), 1],
-            [null, 0]
-            ];
-
         [Trait("Difficulty", "Easy")]
         [Theory]
         [InlineData("[1,2,3,4,5,6]", 6)]
