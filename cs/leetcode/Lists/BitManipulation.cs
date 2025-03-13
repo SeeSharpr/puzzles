@@ -3,6 +3,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using Xunit;
 using System.Collections.Immutable;
+using Xunit.Sdk;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -67,6 +68,7 @@ namespace leetcode.Lists
                         {
                             // Take the rightmost bit 1
                             int right = n & (-n);
+
                             // Zero that bit
                             n ^= right;
 
@@ -94,6 +96,36 @@ namespace leetcode.Lists
             Assert.Equal(expected, actual);
         }
 
+
+        /// <summary>
+        /// 1009. Complement of Base 10 Integer
+        /// 
+        /// The complement of an integer is the integer you get when you flip all the 0's to 1's and all the 1's to 0's in its binary representation.
+        /// For example, The integer 5 is "101" in binary and its complement is "010" which is the integer 2.
+        /// Given an integer n, return its complement.
+        /// </summary>
+        [Theory]
+        [InlineData(5, 2)]
+        [InlineData(7, 0)]
+        [InlineData(10, 5)]
+        [InlineData(0, 1)]
+        public void BitwiseComplement(int n, int expected)
+        {
+            int mask = n;
+
+            for (int lsb = n; lsb != 0; lsb &= (lsb - 1))
+            {
+                mask = lsb;
+            }
+
+            mask = (mask << 1) - 1;
+
+            int actual = n == 0 ? 1 : n ^ mask;
+
+            Assert.Equal(expected, actual);
+        }
+
+
         /// <summary>
         /// 3314. Construct the Minimum Bitwise Array I
         /// 
@@ -102,6 +134,7 @@ namespace leetcode.Lists
         /// Additionally, you must minimize each value of ans[i] in the resulting array.
         /// If it is not possible to find such a value for ans[i] that satisfies the condition, then set ans[i] = -1.
         /// </summary>
+        /// <see cref="https://leetcode.com/problems/construct-the-minimum-bitwise-array-i/description/?envType=problem-list-v2&envId=bit-manipulation"/>
         [Theory]
         [InlineData("[2,3,5,7]", "[-1,1,4,3]")]
         [InlineData("[11,13,31]", "[9,12,15]")]
