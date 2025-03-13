@@ -2,6 +2,7 @@
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using Xunit;
+using System.Collections.Immutable;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -89,6 +90,85 @@ namespace leetcode.Lists
             }
 
             int actual = InternalBinaryGap(n);
+
+            Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// 3314. Construct the Minimum Bitwise Array I
+        /// 
+        /// You are given an array nums consisting of n prime integers.
+        /// You need to construct an array ans of length n, such that, for each index i, the bitwise OR of ans[i] and ans[i] + 1 is equal to nums[i], i.e. ans[i] OR (ans[i] + 1) == nums[i].
+        /// Additionally, you must minimize each value of ans[i] in the resulting array.
+        /// If it is not possible to find such a value for ans[i] that satisfies the condition, then set ans[i] = -1.
+        /// </summary>
+        [Theory]
+        [InlineData("[2,3,5,7]", "[-1,1,4,3]")]
+        [InlineData("[11,13,31]", "[9,12,15]")]
+        [InlineData("[41,5,7,47,47,43]", "[40,4,3,39,39,41]")]
+        public void MinBitwiseArray(string input, string output)
+        {
+            IList<int> nums = input.Parse1DArray(int.Parse).ToList();
+            int[] expected = output.Parse1DArray(int.Parse).ToArray();
+
+            static int[] InternalMinBitwiseArray(IList<int> nums)
+            {
+                string solution = "brute";
+                List<int> ans = new();
+
+                switch (solution)
+                {
+                    case "brute":
+                        foreach (int num in nums)
+                        {
+                            bool found = false;
+                            for (int i = 0; i < num; i++)
+                            {
+                                int value = i | (i + 1);
+                                if (value == num)
+                                {
+                                    found = true;
+                                    ans.Add(i);
+                                    break;
+                                }
+                            }
+
+                            if (!found)
+                            {
+                                ans.Add(-1);
+                            }
+                        }
+
+                        break;
+
+                    case "memo":
+                        Dictionary<int, int> memo = new();
+                        int[] sorted = nums.ToHashSet().ToArray();
+                        Array.Sort(sorted);
+
+                        for (int n = 0; n < sorted.Length; n++)
+                        {
+                            if (!memo.TryGetValue(sorted[n], out int i))
+                            {
+                                for (i = (n == 0 ? 0 : sorted[n - 1]); i < sorted[n]; i++)
+                                {
+                                    memo.TryAdd(i | (i + 1), i);
+                                }
+                            }
+                        }
+
+                        foreach (int num in nums)
+                        {
+                            ans.Add(memo.TryGetValue(num, out int i) ? i : -1);
+                        }
+
+                        break;
+                }
+
+                return ans.ToArray();
+            }
+
+            int[] actual = InternalMinBitwiseArray(nums);
 
             Assert.Equal(expected, actual);
         }
