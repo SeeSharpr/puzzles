@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Xunit;
 using System.Collections.Immutable;
 using Xunit.Sdk;
+using System;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -125,6 +126,44 @@ namespace leetcode.Lists
             Assert.Equal(expected, actual);
         }
 
+        /// <summary>
+        /// 1018. Binary Prefix Divisible By 5
+        /// You are given a binary array nums (0-indexed).
+        /// We define xi as the number whose binary representation is the subarray nums[0..i] (from most-significant-bit to least-significant-bit).
+        /// For example, if nums = [1, 0, 1], then x0 = 1, x1 = 2, and x2 = 5.
+        /// eturn an array of booleans answer where answer[i] is true if xi is divisible by 5.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/binary-prefix-divisible-by-5/description/?envType=problem-list-v2&envId=bit-manipulation"/>
+        [Theory]
+        [InlineData("[0,1,1]", "[true,false,false]")]
+        [InlineData("[1,1,1]", "[false,false,false]")]
+        [InlineData("[1,0,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,1,0,0,0,0,1,1,0,1,0,0,0,1]", "[false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false,true,true,true,true,false]")]
+        public void PrefixesDivBy5(string input, string output)
+        {
+            int[] nums = input.Parse1DArray(int.Parse).ToArray();
+            IList<bool> expected = output.Parse1DArray(bool.Parse).ToList();
+
+            static IList<bool> InternalPrefixesDivBy5(int[] nums)
+            {
+                List<bool> result = new();
+
+                int cand = 0;
+                foreach (int n in nums)
+                {
+                    cand <<= 1;
+                    cand |= n;
+                    cand %= 10;
+
+                    result.Add(cand % 5 == 0);
+                }
+
+                return result;
+            }
+
+            IList<bool> actual = InternalPrefixesDivBy5(nums);
+
+            Assert.Equal(expected, actual);
+        }
 
         /// <summary>
         /// 3314. Construct the Minimum Bitwise Array I
