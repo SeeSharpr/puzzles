@@ -176,8 +176,8 @@ namespace leetcode.Lists
         /// </summary>
         /// <see cref="https://leetcode.com/problems/xor-operation-in-an-array/description/?envType=problem-list-v2&envId=bit-manipulation"/>
         [Theory]
-        [InlineData(5,0,8)]
-        [InlineData(4,3,8)]
+        [InlineData(5, 0, 8)]
+        [InlineData(4, 3, 8)]
         public void XorOperation(int n, int start, int expected)
         {
             int actual = 0;
@@ -266,6 +266,28 @@ namespace leetcode.Lists
             }
 
             int[] actual = InternalMinBitwiseArray(nums);
+
+            Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// 3370. Smallest Number With All Set Bits
+        /// You are given a positive number n.
+        /// Return the smallest number x greater than or equal to n, such that the binary representation of x contains only set bits
+        /// </summary>
+        [Theory]
+        [InlineData(5, 7)]
+        [InlineData(10, 15)]
+        [InlineData(3, 3)]
+        public void SmallestNumber(int n, int expected)
+        {
+            int msb = 0;
+            for (; n > 0; n &= (n - 1))
+            {
+                msb = (n & (-n));
+            }
+
+            int actual = (msb << 1) - 1;
 
             Assert.Equal(expected, actual);
         }
