@@ -5,6 +5,8 @@ using Xunit;
 using System.Collections.Immutable;
 using Xunit.Sdk;
 using System;
+using System.Collections;
+using System.Xml.Linq;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -161,6 +163,29 @@ namespace leetcode.Lists
             }
 
             IList<bool> actual = InternalPrefixesDivBy5(nums);
+
+            Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// 1486. XOR Operation in an Array
+        /// 
+        /// You are given an integer n and an integer start.
+        /// Define an array nums where nums[i] = start + 2 * i(0 - indexed) and n == nums.length.
+        /// Return the bitwise XOR of all elements of nums.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/xor-operation-in-an-array/description/?envType=problem-list-v2&envId=bit-manipulation"/>
+        [Theory]
+        [InlineData(5,0,8)]
+        [InlineData(4,3,8)]
+        public void XorOperation(int n, int start, int expected)
+        {
+            int actual = 0;
+
+            for (int value = start, i = 0; i < n; i++, value += 2)
+            {
+                actual ^= value;
+            }
 
             Assert.Equal(expected, actual);
         }
