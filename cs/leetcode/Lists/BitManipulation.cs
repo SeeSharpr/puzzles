@@ -7,6 +7,9 @@ using Xunit.Sdk;
 using System;
 using System.Collections;
 using System.Xml.Linq;
+using System.Diagnostics.Tracing;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -185,6 +188,30 @@ namespace leetcode.Lists
             for (int value = start, i = 0; i < n; i++, value += 2)
             {
                 actual ^= value;
+            }
+
+            Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// 2595. Number of Even and Odd Bits
+        /// You are given a positive integer n.
+        /// Let even denote the number of even indices in the binary representation of n with value 1.
+        /// Let odd denote the number of odd indices in the binary representation of n with value 1.
+        /// Note that bits are indexed from right to left in the binary representation of a number.
+        /// Return the array [even, odd].
+        /// </summary>
+        [Theory]
+        [InlineData(50, "[1,2]")]
+        [InlineData(2, "[0,1]")]
+        public void EvenOddBit(int n, string output)
+        {
+            int[] expected = output.Parse1DArray(int.Parse).ToArray();
+
+            int[] actual = new int[2];
+            for (int j = 0; n != 0; n >>= 1, j = 1 - j)
+            {
+                actual[j] += n & 1;
             }
 
             Assert.Equal(expected, actual);
