@@ -16,9 +16,49 @@ using System.Security.Cryptography;
 /// </summary>
 namespace leetcode.Lists
 {
-    [Trait("Difficulty", "Medium")]
-    public class BitManipulation_Medium
+    public class BitManipulation
     {
+        /// <summary>
+        /// 190. Reverse Bits
+        /// Reverse bits of a given 32 bits unsigned integer.
+        /// Note:
+        /// Note that in some languages, such as Java, there is no unsigned integer type.In this case, both input and output will be given as a signed integer type. They should not affect your implementation, as the integer's internal binary representation is the same, whether it is signed or unsigned.
+        /// In Java, the compiler represents the signed integers using 2's complement notation. Therefore, in Example 2 above, the input represents the signed integer -3 and the output represents the signed integer -1073741825.
+        /// </summary>
+        [Theory]
+        [InlineData(0b00000010100101000001111010011100, 0b00111001011110000010100101000000)]
+        [InlineData(0b11111111111111111111111111111101, 0b10111111111111111111111111111111)]
+        public void reverseBits(uint n, uint expected)
+        {
+            uint actual = 0;
+
+            string solution = "bitmask";
+
+            switch (solution)
+            {
+                case "shift":
+                    for (int i = 0; i < 32; i++)
+                    {
+                        actual <<= 1;
+                        actual |= (n & 0b1);
+                        n >>= 1;
+                    }
+                    break;
+                case "bitmask":
+                    actual = n;
+                    actual = (actual << 16) | (actual >> 16);
+                    actual = ((actual & 0x00ff00ff) << 8) | ((actual & 0xff00ff00) >> 8);
+                    actual = ((actual & 0x0f0f0f0f) << 4) | ((actual & 0xf0f0f0f0) >> 4);
+                    actual = ((actual & 0x33333333) << 2) | ((actual & 0xcccccccc) >> 2);
+                    actual = ((actual & 0x55555555) << 1) | ((actual & 0xaaaaaaaa) >> 1);
+                    break;
+                default:
+                    throw new NotImplementedException(solution);
+            }
+
+            Assert.Equal(expected, actual);
+        }
+
         /// <summary>
         /// 868. Binary Gap
         /// 
