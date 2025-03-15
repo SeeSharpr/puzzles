@@ -4,6 +4,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Xml;
 using System.Xml.Linq;
 using System;
+using System.Diagnostics.Contracts;
+using System.Drawing;
+using System.Text;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -492,6 +497,49 @@ namespace leetcode.Lists
                         nums[j] ^= nums[j - 1];
                         nums[j - 1] ^= nums[j];
                     }
+                }
+
+                Assert.Equal(expected, actual);
+            }
+
+            /// <summary>
+            /// 3133. Minimum Array End
+            /// You are given two integers n and x.You have to construct an array of positive integers nums of size n where for every 0 <= i<n - 1, nums[i + 1] is greater than nums[i], and the result of the bitwise AND operation between all elements of nums is x.
+            /// Return the minimum possible value of nums[n - 1].
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/minimum-array-end/description/?envType=problem-list-v2&envId=bit-manipulation"/>
+            [Theory]
+            [InlineData(3, 4, 6)]
+            [InlineData(2, 7, 15)]
+            [InlineData(6715154, 7193485, 55012476815)]
+            public void MinEnd(int n, int x, long expected)
+            {
+                long actual;
+
+                string solution = "merge";
+                switch (solution)
+                {
+                    case "loop":
+                        actual = x;
+                        while (--n > 0) actual = (actual + 1) | x;
+                        break;
+                    case "merge":
+                        actual = x;
+                        long merge = n - 1;
+                        long mask = ~x;
+                        while (merge > 0)
+                        {
+                            long bit = mask & (-mask);
+
+                            if ((merge & 1) == 1) actual |= bit;
+
+                            merge >>= 1;
+                            mask &= mask - 1;
+                        }
+
+                        break;
+                    default:
+                        throw new NotImplementedException(solution);
                 }
 
                 Assert.Equal(expected, actual);
