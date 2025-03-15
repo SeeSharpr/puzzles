@@ -2,6 +2,8 @@
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 using System.Xml;
+using System.Xml.Linq;
+using System;
 
 /// <summary>
 /// <see cref="https://leetcode.com/problem-list/bit-manipulation/"/>
@@ -428,6 +430,68 @@ namespace leetcode.Lists
                     actual |= (actual_inv & (-actual_inv)); // add inv's lsb to actual
                     actual_inv &= actual_inv - 1; // clear inv's lsb
                     popx--;
+                }
+
+                Assert.Equal(expected, actual);
+            }
+
+            /// <summary>
+            /// 3011. Find if Array Can Be Sorted
+            /// You are given a 0-indexed array of positive integers nums.
+            /// In one operation, you can swap any two adjacent elements if they have the same number of set bits. You are allowed to do this operation any number of times (including zero).
+            /// Return true if you can sort the array in ascending order, else return false.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/find-if-array-can-be-sorted/?envType=problem-list-v2&envId=bit-manipulation"/>
+            [Theory]
+            [InlineData("[8,4,2,30,15]", true)]
+            [InlineData("[1,2,3,4,5]", true)]
+            [InlineData("[3,16,8,4,2]", false)]
+            public void CanSortArray(string input, bool expected)
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+
+                static int popc(int n)
+                {
+                    int result = 0;
+
+                    for (; n != 0; n &= n - 1) result++;
+
+                    return result;
+                }
+
+                Dictionary<int, int> map = new();
+
+                bool actual = true;
+                for (int i = 1; actual && i < nums.Length; i++)
+                {
+                    // If numbers are in order, no need to do anything
+                    if (nums[i - 1] <= nums[i]) continue;
+
+                    // Okay, numbers are out of order, let's try to swap them until they are in order
+                    if (!map.TryGetValue(nums[i], out int curr))
+                    {
+                        map[nums[i]] = curr = popc(nums[i]);
+                    }
+
+                    for (int j = i; j > 0 && nums[j - 1] > nums[j]; j--)
+                    {
+                        // Numbers are still out of order and they cannot be swapped, bail out with failure
+                        if (!map.TryGetValue(nums[j - 1], out int prev))
+                        {
+                            map[nums[j - 1]] = prev = popc(nums[j - 1]);
+                        }
+
+                        if (prev != curr)
+                        {
+                            actual = false;
+                            break;
+                        }
+
+                        // Swap
+                        nums[j - 1] ^= nums[j];
+                        nums[j] ^= nums[j - 1];
+                        nums[j - 1] ^= nums[j];
+                    }
                 }
 
                 Assert.Equal(expected, actual);
