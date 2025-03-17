@@ -1,7 +1,4 @@
-﻿using static leetcode.Lists.BitManipulation;
-using System;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Drawing;
+﻿using System.ComponentModel.Design;
 
 namespace leetcode.Lists.Top150
 {
@@ -31,6 +28,59 @@ namespace leetcode.Lists.Top150
             int actual = dp[dp.Length - 1];
 
             Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// 198. House Robber
+        /// You are a professional robber planning to rob houses along a street.
+        /// Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and it will automatically contact the police if two adjacent houses were broken into on the same night.
+        /// Given an integer array nums representing the amount of money of each house, return the maximum amount of money you can rob tonight without alerting the police.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/house-robber/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[1,2,3,1]", 4)]
+        [InlineData("[2,7,9,3,1]", 12)]
+        [InlineData("[2,1,1,2]", 4)]
+        [InlineData("[1]", 1)]
+        [InlineData("[1,2]", 2)]
+        public void Rob(string input, int expected)
+        {
+            foreach (string solution in new string[] { "left2right", "right2left", })
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+
+                int actual;
+                switch (solution)
+                {
+                    case "left2right":
+                        for (int i = 1; i < nums.Length; i++)
+                        {
+                            nums[i] = Math.Max(nums[i - 1], nums[i] + (i > 1 ? nums[i - 2] : 0));
+                        }
+
+                        actual = nums.Length < 2 ? nums[0] : Math.Max(nums[^1], nums[^2]);
+
+                        break;
+                    case "right2left":
+                        int[] maxValue = new int[nums.Length + 1];
+                        maxValue[^1] = 0;
+                        maxValue[^2] = nums[^1];
+
+                        for (int i = nums.Length - 2; i >= 0; i--)
+                        {
+                            maxValue[i] = Math.Max(maxValue[i + 1], maxValue[i + 2] + nums[i]);
+                        }
+
+                        actual = maxValue[0];
+                        break;
+
+                    default:
+                        throw new NotImplementedException(solution);
+                }
+
+                Assert.Equal(expected, actual);
+            }
         }
 
         // 322. Coin Change
