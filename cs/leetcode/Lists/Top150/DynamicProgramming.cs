@@ -1,9 +1,36 @@
-﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using static leetcode.Lists.BitManipulation;
+using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
     public class DynamicProgramming
     {
+        /// <summary>
+        /// 70. Climbing Stairs
+        /// You are climbing a staircase. It takes n steps to reach the top.
+        /// Each time you can either climb 1 or 2 steps.In how many distinct ways can you climb to the top?
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/climbing-stairs/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Theory]
+        [InlineData(2, 2)]
+        [InlineData(3, 3)]
+        public void ClimbStairs(int n, int expected)
+        {
+            int[] dp = new int[n];
+            if (n > 0) dp[0] = 1;
+            if (n > 1) dp[1] = 2;
+
+            for (int i = 2; i < n; i++)
+            {
+                dp[i] = dp[i - 1] + dp[i - 2];
+            }
+
+            int actual = dp[dp.Length - 1];
+
+            Assert.Equal(expected, actual);
+        }
+
         // 322. Coin Change
         // You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
         // Return the fewest number of coins that you need to make up that amount.If that amount of money cannot be made up by any combination of the coins, return -1.
@@ -44,5 +71,50 @@ namespace leetcode.Lists.Top150
 
             Assert.Equal(expected, actual);
         }
+
+        /// <summary>
+        /// 509. Fibonacci Number
+        /// The Fibonacci numbers, commonly denoted F(n) form a sequence, called the Fibonacci sequence, such that each number is the sum of the two preceding ones, starting from 0 and 1. That is,
+        /// F(0) = 0, F(1) = 1
+        /// F(n) = F(n - 1) + F(n - 2), for n > 1.
+        /// Given n, calculate F(n).
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/fibonacci-number/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Theory]
+        [InlineData(2,1)]
+        [InlineData(3,2)]
+        [InlineData(4,3)]
+        [InlineData(5,5)]
+        [InlineData(6,8)]
+        public void Fib(int n, int expected)
+        {
+            int fib2Behind = 0;
+            int fib1Behind = 1;
+            int actual = 0;
+
+            if (n == 0)
+            {
+                actual = fib2Behind;
+            }
+            else if (n == 1)
+            {
+                actual = fib1Behind;
+            }
+            else
+            {
+                actual = fib2Behind + fib1Behind;
+
+                for (int i = 2; i <= n; i++)
+                {
+                    actual = fib2Behind + fib1Behind;
+                    fib2Behind = fib1Behind;
+                    fib1Behind = actual;
+                }
+            }
+
+            Assert.Equal(expected, actual);
+        }
+
+
     }
 }
