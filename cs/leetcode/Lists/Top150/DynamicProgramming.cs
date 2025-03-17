@@ -12,6 +12,7 @@ namespace leetcode.Lists.Top150
         /// Each time you can either climb 1 or 2 steps.In how many distinct ways can you climb to the top?
         /// </summary>
         /// <see cref="https://leetcode.com/problems/climbing-stairs/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Easy")]
         [Theory]
         [InlineData(2, 2)]
         [InlineData(3, 3)]
@@ -80,12 +81,13 @@ namespace leetcode.Lists.Top150
         /// Given n, calculate F(n).
         /// </summary>
         /// <see cref="https://leetcode.com/problems/fibonacci-number/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Easy")]
         [Theory]
-        [InlineData(2,1)]
-        [InlineData(3,2)]
-        [InlineData(4,3)]
-        [InlineData(5,5)]
-        [InlineData(6,8)]
+        [InlineData(2, 1)]
+        [InlineData(3, 2)]
+        [InlineData(4, 3)]
+        [InlineData(5, 5)]
+        [InlineData(6, 8)]
         public void Fib(int n, int expected)
         {
             int fib2Behind = 0;
@@ -115,6 +117,39 @@ namespace leetcode.Lists.Top150
             Assert.Equal(expected, actual);
         }
 
+        /// <summary>
+        /// 1137. N-th Tribonacci Number
+        /// The Tribonacci sequence Tn is defined as follows: 
+        /// T0 = 0, T1 = 1, T2 = 1, and Tn+3 = Tn + Tn+1 + Tn+2 for n >= 0.
+        /// Given n, return the value of Tn.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="expected"></param>
+        [Trait("Difficulty", "Easy")]
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(1, 1)]
+        [InlineData(2, 1)]
+        [InlineData(3, 2)]
+        [InlineData(4, 4)]
+        [InlineData(25, 1389537)]
+        public void Tribonacci(int n, int expected)
+        {
+            int actual = n < 1 ? 0 : n < 3 ? 1 : 2;
 
+            int t1 = 0;
+            int t2 = 1;
+            int t3 = 1;
+
+            for (int i = 3; i <= n; i++)
+            {
+                actual = t1 + t2 + t3;
+                t1 = t2;
+                t2 = t3;
+                t3 = actual;
+            }
+
+            Assert.Equal(expected, actual);
+        }
     }
 }
