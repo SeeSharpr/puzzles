@@ -1,6 +1,7 @@
 ﻿using static leetcode.Lists.BitManipulation;
 using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Drawing;
 
 namespace leetcode.Lists.Top150
 {
@@ -116,6 +117,35 @@ namespace leetcode.Lists.Top150
 
             Assert.Equal(expected, actual);
         }
+
+        /// <summary>
+        /// 746. Min Cost Climbing Stairs
+        /// You are given an integer array cost where cost[i] is the cost of ith step on a staircase.Once you pay the cost, you can either climb one or two steps.
+        /// You can either start from the step with index 0, or the step with index 1.
+        /// Return the minimum cost to reach the top of the floor.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/min-cost-climbing-stairs/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Easy")]
+        [Theory]
+        [InlineData("[10,15,20]", 15)]
+        [InlineData("[1,100,1,1,1,100,1,1,100,1]", 6)]
+        public void MinCostClimbingStairs(string input, int expected)
+        {
+            int[] cost = input.Parse1DArray(int.Parse).ToArray();
+
+            Dictionary<int, int> dp = new() { { 0, cost[0] }, { 1, cost[1] }, };
+
+            for (int i = 2; i < cost.Length; i++)
+            {
+                int current = cost[i] + Math.Min(dp[i - 2], dp[i - 1]);
+                dp[i] = current;
+            }
+
+            int actual = Math.Min(dp[cost.Length - 1], dp[cost.Length - 2]);
+
+            Assert.Equal(expected, actual);
+        }
+
 
         /// <summary>
         /// 1137. N-th Tribonacci Number
