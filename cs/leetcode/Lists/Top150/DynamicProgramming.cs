@@ -1,4 +1,8 @@
 ﻿using System.ComponentModel.Design;
+using static leetcode.Lists.BitManipulation;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace leetcode.Lists.Top150
 {
@@ -164,6 +168,45 @@ namespace leetcode.Lists.Top150
                     fib1Behind = actual;
                 }
             }
+
+            Assert.Equal(expected, actual);
+        }
+
+        /// <summary>
+        /// 740. Delete and Earn
+        /// You are given an integer array nums.You want to maximize the number of points you get by performing the following operation any number of times:
+        /// Pick any nums[i] and delete it to earn nums[i] points.Afterwards, you must delete every element equal to nums[i] - 1 and every element equal to nums[i] + 1.
+        /// Return the maximum number of points you can earn by applying the above operation some number of times.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/delete-and-earn/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("[3,4,2]", 6)]
+        [InlineData("[2,2,3,3,3,4]", 9)]
+        [InlineData("[1,1,1,2,4,5,5,5,6]", 18)]
+        public void DeleteAndEarn(string input, int expected)
+        {
+            int[] nums = input.Parse1DArray(int.Parse).ToArray();
+
+            Dictionary<int, int> points = new();
+
+            int limit = int.MinValue;
+            foreach (int num in nums)
+            {
+                points[num] = num + points.GetValueOrDefault(num);
+                limit = Math.Max(limit, num);
+            }
+
+            int twoBehind = 0;
+            int oneBehind = points.GetValueOrDefault(1);
+            for (int i = 2; i <= limit; i++)
+            {
+                int temp = oneBehind;
+                oneBehind = Math.Max(oneBehind, twoBehind + points.GetValueOrDefault(i));
+                twoBehind = temp;
+            }
+
+            int actual = oneBehind;
 
             Assert.Equal(expected, actual);
         }
