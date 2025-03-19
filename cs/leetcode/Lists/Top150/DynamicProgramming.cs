@@ -24,19 +24,20 @@ namespace leetcode.Lists.Top150
         {
             HashSet<string> expected = output.Parse1DArray(x => x).ToHashSet();
 
-            int limit = s.Length;
+            int limit = s.Length - 1;
             int maxStart = 0;
             int maxEnd = 0;
 
             Queue<Tuple<int, int>> queue = new();
 
-            for (int i = 0; i < limit; i++)
+            for (int i = 0; i <= limit;)
             {
-                // All single-characters are palyndromes
-                queue.Enqueue(new Tuple<int, int>(i, i));
+                // Find the longest repeating letter and treat it as the center of a palyndrome
+                int j = i;
+                while (j < limit && s[i] == s[j + 1]) j++;
 
-                // All equal double-characters are also palyndromes
-                if (i != 0 && s[i - 1] == s[i]) queue.Enqueue(new Tuple<int, int>(i - 1, i));
+                queue.Enqueue(new Tuple<int, int>(i, j));
+                i = j + 1;
             }
 
             while (queue.TryDequeue(out var tuple))
@@ -51,13 +52,12 @@ namespace leetcode.Lists.Top150
                     maxEnd = end;
                 }
 
-                // Try to expand the palyndrome
-                int newStart = start - 1;
-                int newEnd = end + 1;
-                if (newStart >= 0 && newEnd < limit && s[newStart] == s[newEnd])
-                {
-                    queue.Enqueue(new Tuple<int, int>(newStart, newEnd));
-                }
+                // Try to expand the palyndrome as far as possible from the center
+                int i = 1;
+                for (; start - i >= 0 && end + i <= limit && s[start - i] == s[end + i]; i++) ;
+
+                // If we managed to expand (i is one ahead), enqueue the new palyndrome
+                if (--i > 0) queue.Enqueue(new Tuple<int, int>(start - i, end + i));
             }
 
             string actual = s.Substring(maxStart, maxEnd - maxStart + 1);
