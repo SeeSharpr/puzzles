@@ -9,6 +9,64 @@ namespace leetcode.Lists.Top150
     public class DynamicProgramming
     {
         /// <summary>
+        /// 5. Longest Palindromic Substring
+        /// Given a string s, return the longest palindromic substring in s.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/longest-palindromic-substring/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("babad", "[bab,aba]")]
+        [InlineData("cbbd", "[bb]")]
+        [InlineData("bb", "[bb]")]
+        [InlineData("a", "[a]")]
+        [InlineData("aaaaa", "[aaaaa]")]
+        public void LongestPalindrome(string s, string output)
+        {
+            HashSet<string> expected = output.Parse1DArray(x => x).ToHashSet();
+
+            int limit = s.Length;
+            int maxStart = 0;
+            int maxEnd = 0;
+
+            Queue<Tuple<int, int>> queue = new();
+
+            for (int i = 0; i < limit; i++)
+            {
+                // All single-characters are palyndromes
+                queue.Enqueue(new Tuple<int, int>(i, i));
+
+                // All equal double-characters are also palyndromes
+                if (i != 0 && s[i - 1] == s[i]) queue.Enqueue(new Tuple<int, int>(i - 1, i));
+            }
+
+            while (queue.TryDequeue(out var tuple))
+            {
+                int start = tuple.Item1;
+                int end = tuple.Item2;
+
+                // Keep track of the longest so far
+                if (end - start > maxEnd - maxStart)
+                {
+                    maxStart = start;
+                    maxEnd = end;
+                }
+
+                // Try to expand the palyndrome
+                int newStart = start - 1;
+                int newEnd = end + 1;
+                if (newStart >= 0 && newEnd < limit && s[newStart] == s[newEnd])
+                {
+                    queue.Enqueue(new Tuple<int, int>(newStart, newEnd));
+                }
+            }
+
+            string actual = s.Substring(maxStart, maxEnd - maxStart + 1);
+
+            Assert.Contains(actual, expected);
+        }
+
+
+        /// <summary>
         /// 70. Climbing Stairs
         /// You are climbing a staircase. It takes n steps to reach the top.
         /// Each time you can either climb 1 or 2 steps.In how many distinct ways can you climb to the top?
