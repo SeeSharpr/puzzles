@@ -3,6 +3,10 @@ using static leetcode.Lists.BitManipulation;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.VisualBasic;
+using System.Collections.Generic;
+using System.Text;
+using System;
 
 namespace leetcode.Lists.Top150
 {
@@ -91,6 +95,78 @@ namespace leetcode.Lists.Top150
 
             Assert.Equal(expected, actual);
         }
+
+        /// <summary>
+        /// 139. Word Break
+        /// Given a string s and a dictionary of strings wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words.
+        /// Note that the same word in the dictionary may be reused multiple times in the segmentation.
+        /// </summary>
+        /// <see cref="https://leetcode.com/problems/word-break/description/?envType=study-plan-v2&envId=dynamic-programming"/>
+        [Trait("Difficulty", "Medium")]
+        [Theory]
+        [InlineData("leetcode", "[leet,code]", true)]
+        [InlineData("applepenapple", "[apple,pen]", true)]
+        [InlineData("catsandog", "[cats,dog,sand,and,cat]", false)]
+        [InlineData("a", "[b]", false)]
+        [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab", "[a,aa,aaa,aaaa,aaaaa,aaaaaa,aaaaaaa,aaaaaaaa,aaaaaaaaa,aaaaaaaaaa]", false)]
+        [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "[a,aa,aaa,aaaa,aaaaa,aaaaaa,aaaaaaa,aaaaaaaa,aaaaaaaaa,aaaaaaaaaa]", true)]
+        public void WordBreak(string s, string inputWordDict, bool expected)
+        {
+            IList<string> wordDict = inputWordDict.Parse1DArray(x => x).ToList();
+
+            SortedDictionary<int, HashSet<string>> l2w = new();
+            foreach (string word in wordDict)
+            {
+                if (!l2w.TryGetValue(word.Length, out HashSet<string>? set))
+                {
+                    l2w[word.Length] = set = [];
+                }
+
+                set.Add(word);
+            }
+
+            int minLength = l2w.Keys.ElementAt(0);
+            int maxLength = l2w.Keys.ElementAt(l2w.Count - 1);
+
+            SortedSet<string> queue = new([s]);
+
+            bool actual = false;
+            while (!actual && queue.Count > 0)
+            {
+                string phrase = queue.Min!;
+                queue.Remove(phrase);
+
+                // Can't even make the minimum length, move on
+                if (phrase.Length < minLength) continue;
+
+                StringBuilder sb = new(phrase.Substring(0, minLength));
+
+                for (int index = minLength; index <= maxLength; index++)
+                {
+                    // Each time we can find a match, add that to the end of the queue to continue the search
+                    if (l2w.TryGetValue(sb.Length, out HashSet<string>? set) && set.Contains(sb.ToString()))
+                    {
+                        // We managed to consume the whole string, bail out
+                        if (index == phrase.Length)
+                        {
+                            actual = true;
+                            break;
+                        }
+                        else if (phrase.Length - index >= minLength)
+                        {
+                            // Otherwise continue searching
+                            queue.Add(phrase.Substring(index));
+                        }
+                    }
+
+                    // Accept one more letter from the word until we can no longer grow
+                    if (index < phrase.Length) sb.Append(phrase[index]);
+                }
+            }
+
+            Assert.Equal(expected, actual);
+        }
+
 
         /// <summary>
         /// 198. House Robber
