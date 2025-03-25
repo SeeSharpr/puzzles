@@ -1,12 +1,5 @@
-﻿using System.ComponentModel.Design;
-using static leetcode.Lists.BitManipulation;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
-using Microsoft.VisualBasic;
-using System.Collections.Generic;
+﻿using leetcode.Types.Trie;
 using System.Text;
-using System;
 
 namespace leetcode.Lists.Top150
 {
@@ -114,54 +107,136 @@ namespace leetcode.Lists.Top150
         {
             IList<string> wordDict = inputWordDict.Parse1DArray(x => x).ToList();
 
-            SortedDictionary<int, HashSet<string>> l2w = new();
-            foreach (string word in wordDict)
+            bool actual = s.Length == 0;
+
+            string solution = "dp";
+            switch (solution)
             {
-                if (!l2w.TryGetValue(word.Length, out HashSet<string>? set))
-                {
-                    l2w[word.Length] = set = [];
-                }
-
-                set.Add(word);
-            }
-
-            int minLength = l2w.Keys.ElementAt(0);
-            int maxLength = l2w.Keys.ElementAt(l2w.Count - 1);
-
-            SortedSet<string> queue = new([s]);
-
-            bool actual = false;
-            while (!actual && queue.Count > 0)
-            {
-                string phrase = queue.Min!;
-                queue.Remove(phrase);
-
-                // Can't even make the minimum length, move on
-                if (phrase.Length < minLength) continue;
-
-                StringBuilder sb = new(phrase.Substring(0, minLength));
-
-                for (int index = minLength; index <= maxLength; index++)
-                {
-                    // Each time we can find a match, add that to the end of the queue to continue the search
-                    if (l2w.TryGetValue(sb.Length, out HashSet<string>? set) && set.Contains(sb.ToString()))
+                case "buffer":
+                    SortedDictionary<int, HashSet<string>> l2w = new();
+                    foreach (string word in wordDict)
                     {
-                        // We managed to consume the whole string, bail out
-                        if (index == phrase.Length)
+                        if (!l2w.TryGetValue(word.Length, out HashSet<string>? set))
+                        {
+                            l2w[word.Length] = set = [];
+                        }
+
+                        set.Add(word);
+                    }
+
+                    int minLength = l2w.Keys.ElementAt(0);
+                    int maxLength = l2w.Keys.ElementAt(l2w.Count - 1);
+
+                    SortedSet<string> queue = new([s]);
+
+                    while (!actual && queue.Count > 0)
+                    {
+                        string phrase = queue.Min!;
+                        queue.Remove(phrase);
+
+                        // Can't even make the minimum length, move on
+                        if (phrase.Length < minLength) continue;
+
+                        StringBuilder sb = new(phrase.Substring(0, minLength));
+
+                        for (int index = minLength; index <= maxLength; index++)
+                        {
+                            // Each time we can find a match, add that to the end of the queue to continue the search
+                            if (l2w.TryGetValue(sb.Length, out HashSet<string>? set) && set.Contains(sb.ToString()))
+                            {
+                                // We managed to consume the whole string, bail out
+                                if (index == phrase.Length)
+                                {
+                                    actual = true;
+                                    break;
+                                }
+                                else if (phrase.Length - index >= minLength)
+                                {
+                                    // Otherwise continue searching
+                                    queue.Add(phrase.Substring(index));
+                                }
+                            }
+
+                            // Accept one more letter from the word until we can no longer grow
+                            if (index < phrase.Length) sb.Append(phrase[index]);
+                        }
+                    }
+                    break;
+
+                case "trie":
+                    MyNode trie = MyNode.Make(wordDict);
+
+                    SortedSet<int> matches = new([0]);
+
+                    while (!actual && matches.Count > 0)
+                    {
+                        int from = matches.Max;
+                        matches.Remove(from);
+
+                        if (from == s.Length)
                         {
                             actual = true;
                             break;
                         }
-                        else if (phrase.Length - index >= minLength)
+
+                        foreach (var to in trie.Matches(s, from))
                         {
-                            // Otherwise continue searching
-                            queue.Add(phrase.Substring(index));
+                            string word = s.Substring(from, to - from + 1);
+
+                            if (to == s.Length - 1)
+                            {
+                                actual = true;
+                                break;
+                            }
+
+                            matches.Add(to + 1);
                         }
                     }
 
-                    // Accept one more letter from the word until we can no longer grow
-                    if (index < phrase.Length) sb.Append(phrase[index]);
-                }
+                    break;
+
+                case "dp":
+                    bool[] dp = new bool[s.Length + 1];
+                    dp[0] = true;
+
+                    for (int j = 1; !actual && j <= s.Length; j++)
+                    {
+                        // Ignore places where we can't start from
+                        if (dp[j - 1] != true) continue;
+
+                        foreach (string word in wordDict)
+                        {
+                            int next = j + word.Length - 1;
+
+                            // If we will end up outside of the string or we already know we can get there, ignore
+                            if (next > s.Length || dp[next] == true) continue;
+
+                            bool match = true;
+                            for (int i = 0; i < word.Length; i++)
+                            {
+                                if (s[j - 1 + i] != word[i])
+                                {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if (!match) continue;
+
+                            if (next == s.Length)
+                            {
+                                actual = true;
+                                break;
+                            }
+
+                            dp[next] = true;
+                        }
+                    }
+
+                    break;
+
+                default:
+                    throw new NotImplementedException(solution);
             }
 
             Assert.Equal(expected, actual);
