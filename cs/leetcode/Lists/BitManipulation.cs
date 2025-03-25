@@ -521,7 +521,7 @@ namespace leetcode.Lists
                 {
                     case "loop":
                         actual = x;
-                        while (--n > 0) actual = (actual + 1) | x;
+                        while (--n > 0) actual = (actual + 1) | (long)x;
                         break;
                     case "merge":
                         actual = x;
