@@ -109,7 +109,7 @@ namespace leetcode.Lists.Top150
 
             bool actual = s.Length == 0;
 
-            string solution = "dp";
+            string solution = "trie";
             switch (solution)
             {
                 case "buffer":
@@ -166,50 +166,47 @@ namespace leetcode.Lists.Top150
                 case "trie":
                     MyNode trie = MyNode.Make(wordDict);
 
-                    SortedSet<int> matches = new([0]);
+                    bool[] dptrie = new bool[s.Length + 1];
+                    dptrie[0] = true;
 
-                    while (!actual && matches.Count > 0)
+                    for (int j = 1; !actual && j <= s.Length; j++)
                     {
-                        int from = matches.Max;
-                        matches.Remove(from);
+                        // Ignore places where we can't start from
+                        if (dptrie[j - 1] != true) continue;
 
-                        if (from == s.Length)
+                        foreach (int next in trie.Matches(s, j - 1))
                         {
-                            actual = true;
-                            break;
-                        }
+                            // If we will end up outside of the string or we already know we can get there, ignore
+                            if (next >= s.Length || dptrie[next + 1] == true) continue;
 
-                        foreach (var to in trie.Matches(s, from))
-                        {
-                            string word = s.Substring(from, to - from + 1);
-
-                            if (to == s.Length - 1)
+                            // If we got to the end, bail out
+                            if (next == s.Length-1)
                             {
                                 actual = true;
                                 break;
                             }
 
-                            matches.Add(to + 1);
+                            dptrie[next + 1] = true;
                         }
                     }
 
                     break;
 
                 case "dp":
-                    bool[] dp = new bool[s.Length + 1];
-                    dp[0] = true;
+                    bool[] dppure = new bool[s.Length + 1];
+                    dppure[0] = true;
 
                     for (int j = 1; !actual && j <= s.Length; j++)
                     {
                         // Ignore places where we can't start from
-                        if (dp[j - 1] != true) continue;
+                        if (dppure[j - 1] != true) continue;
 
                         foreach (string word in wordDict)
                         {
                             int next = j + word.Length - 1;
 
                             // If we will end up outside of the string or we already know we can get there, ignore
-                            if (next > s.Length || dp[next] == true) continue;
+                            if (next > s.Length || dppure[next] == true) continue;
 
                             bool match = true;
                             for (int i = 0; i < word.Length; i++)
@@ -229,7 +226,7 @@ namespace leetcode.Lists.Top150
                                 break;
                             }
 
-                            dp[next] = true;
+                            dppure[next] = true;
                         }
                     }
 
