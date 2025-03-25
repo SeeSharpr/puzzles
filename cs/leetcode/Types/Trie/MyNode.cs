@@ -6,7 +6,7 @@ namespace leetcode.Types.Trie
     {
         private bool isTerminal = false;
 
-        public readonly Dictionary<char, MyNode> children = [];
+        private readonly Dictionary<char, MyNode> children = [];
 
         public bool TryAdd(string s)
         {
