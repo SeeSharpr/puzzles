@@ -1,9 +1,11 @@
 ﻿using leetcode.Types.Trie;
+using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Helpers;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Xunit.Sdk;
 
 namespace leetcode.Lists.Top150
 {
@@ -401,6 +403,104 @@ namespace leetcode.Lists.Top150
 
                     Assert.Equal(expected, actual);
                 }
+            }
+
+            /// <summary>
+            /// 300. Longest Increasing Subsequence
+            /// Given an integer array nums, return the length of the longest strictly increasing subsequence.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/longest-increasing-subsequence/?envType=study-plan-v2&envId=top-interview-150"/>
+            [Theory]
+            [InlineData("[10,9,2,5,3,7,101,18]", 4)]
+            [InlineData("[0,1,0,3,2,3]", 4)]
+            [InlineData("[7,7,7,7,7,7,7]", 1)]
+            public void LengthOfLIS(string input, int expected)
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+
+                static int PureDP(int[] nums)
+                {
+                    int[] dp = new int[nums.Length];
+
+                    for (int i = 0; i < nums.Length; i++)
+                    {
+                        dp[i] = 1;
+
+                        for (int j = 0; j < i; j++)
+                        {
+                            if (nums[j] < nums[i])
+                            {
+                                dp[i] = Math.Max(dp[i], dp[j] + 1);
+                            }
+                        }
+                    }
+
+                    return dp.Max();
+                }
+
+                static int Build(int[] nums)
+                {
+                    if (nums.Length == 0) return 0;
+
+                    List<List<int>> seqs = [];
+                    List<List<int>> newSeqs = [];
+                    seqs.Add([nums[0]]);
+
+                    for (int i = 1; i < nums.Length; i++)
+                    {
+                        for (int j = 0; j < seqs.Count; j++)
+                        {
+                            if (nums[i] > seqs[j][^1])
+                            {
+                                seqs[j].Add(nums[i]);
+                            }
+                            else
+                            {
+                                List<int> newSeq = seqs[j].Where(x => x < nums[i]).ToList();
+                                newSeq.Add(nums[i]);
+                                newSeqs.Add(newSeq);
+                            }
+                        }
+
+                        seqs.AddRange(newSeqs);
+                        newSeqs.Clear();
+                    }
+
+                    return seqs.Select(seq => seq.Count).Max();
+                }
+
+                static int Build2(int[] nums)
+                {
+                    if (nums.Length == 0) return 0;
+
+                    List<int> seq = [nums[0]];
+
+                    for (int i = 1; i < nums.Length; i++)
+                    {
+                        if (nums[i] > seq[^1])
+                        {
+                            seq.Add(nums[i]);
+                        }
+                        else
+                        {
+                            int j = 0;
+                            while (j < seq.Count && seq[j] < nums[i]) j++;
+                            seq[j] = nums[i];
+                        }
+                    }
+
+                    return seq.Count;
+                }
+
+                string solution = "build2";
+
+                int actual =
+                    solution == "dp" ? PureDP(nums) :
+                    solution == "build" ? Build(nums) :
+                    solution == "build2" ? Build2(nums) :
+                    throw new NotImplementedException(solution);
+
+                Assert.Equal(expected, actual);
             }
 
             // 322. Coin Change
