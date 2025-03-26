@@ -455,6 +455,7 @@ namespace leetcode.Lists.Top150
             [InlineData("bbbab", 4)]
             [InlineData("cbbd", 2)]
             [InlineData("xaxbxcyzbzaz", 5)]
+            [InlineData("aabaa", 5)]
             public void LongestPalindromeSubseq(string s, int expected)
             {
                 static int Recursive(string s, int from, int to, int[][] memo)
@@ -485,12 +486,7 @@ namespace leetcode.Lists.Top150
                 static int InteractiveDP(string s)
                 {
                     int n = s.Length;
-
-                    int[][] dp = new int[n][];
-                    for (int i = 0; i < n; i++)
-                    {
-                        dp[i] = new int[n];
-                    }
+                    int[][] dp = Enumerable.Range(0, n).Select(_ => new int[n]).ToArray();
 
                     for (int from = n - 1; from >= 0; from--)
                     {
@@ -507,14 +503,43 @@ namespace leetcode.Lists.Top150
                             }
                         }
                     }
+
                     return dp[0][n - 1];
                 }
 
-                foreach (string solution in new string[] { "recursive", "interactive" })
+                static int OptimizedDP(string s)
+                {
+                    int n = s.Length;
+                    int[] dp = new int[n];
+                    int[] dpPrev = new int[n];
+
+                    for (int from = n - 1; from >= 0; from--)
+                    {
+                        dp[from] = 1;
+                        for (int to = from + 1; to < n; to++)
+                        {
+                            if (s[from] == s[to])
+                            {
+                                dp[to] = dpPrev[to - 1] + 2;
+                            }
+                            else
+                            {
+                                dp[to] = Math.Max(dpPrev[to], dp[to - 1]);
+                            }
+                        }
+
+                        Array.Copy(dp, dpPrev, dp.Length);
+                    }
+
+                    return dp[n - 1];
+                }
+
+                foreach (string solution in new string[] { "recursive", "interactive", "optimized" })
                 {
 
                     int actual = solution == "recursive" ? Recursive(s, 0, s.Length - 1, Enumerable.Range(0, s.Length).Select(_ => new int[s.Length]).ToArray()) :
                         solution == "interactive" ? InteractiveDP(s) :
+                        solution == "optimized" ? OptimizedDP(s) :
                         throw new NotImplementedException(solution);
 
                     Assert.Equal(expected, actual);
