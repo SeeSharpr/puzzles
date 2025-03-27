@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace leetcode.Lists.Top150
+﻿namespace leetcode.Lists.Top150
 {
     public class GraphBFS
     {
@@ -25,12 +23,13 @@ namespace leetcode.Lists.Top150
             [Theory]
             [InlineData("[[-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1],[-1,-1,-1,-1,-1,-1],[-1,35,-1,-1,13,-1],[-1,-1,-1,-1,-1,-1],[-1,15,-1,-1,-1,-1]]", 4)]
             [InlineData("[[-1,-1],[-1,3]]", 1)]
+            [InlineData("[[-1,-1],[-1,1]]", 1)]
+            [InlineData("[[-1,1,2,-1],[2,13,15,-1],[-1,10,-1,-1],[-1,6,2,8]]", 2)]
+            [InlineData("[[-1,-1,-1,-1,48,5,-1],[12,29,13,9,-1,2,32],[-1,-1,21,7,-1,12,49],[42,37,21,40,-1,22,12],[42,-1,2,-1,-1,-1,6],[39,-1,35,-1,-1,39,-1],[-1,36,-1,-1,-1,-1,5]]", 3)]
             [InlineData("[]", 0)]
             [InlineData("[[-1]]", 0)]
             [InlineData("[[1]]", -1)]
             [InlineData("[[1,1][-1,1]]", -1)]
-            [InlineData("[[-1,-1],[-1,1]]", 1)]
-            [InlineData("[[-1,1,2,-1],[2,13,15,-1],[-1,10,-1,-1],[-1,6,2,8]]", 2)]
             public void SnakesAndLadders(string input, int expected)
             {
                 int[][] board = [.. input.Parse2DArray(int.Parse).Select(e => e.ToArray())];
@@ -45,36 +44,39 @@ namespace leetcode.Lists.Top150
 
                 static int DP(int[][] board)
                 {
-                    int limit = board.Length * board.Length;
+                    if (board.Length == 0) return 0;
+                    if (board.Length == 1) return board[0][0] == 1 ? -1 : 0;
+
+                    int side = board.Length;
+                    int limit = side * side;
                     int[] dp = new int[limit];
-                    if (dp.Length > 1) dp[^1] = -1;
-                    if (dp.Length == 1) dp[^1] = board[0][0] == -1 ? 0 : -1;
+                    dp[^1] = -1;
 
-                    for (int curr = 0; curr < limit; curr++)
+                    for (int square = 1; square < limit; square++)
                     {
-                        ConvertIndex(board.Length, curr, out int row, out int col);
+                        int currIndex = square - 1;
 
-                        // Skip the jumps since we analyze them in advance down the road
-                        if (board[row][col] > curr) continue;
+                        // We need to skip evaluating the squares that are the source of a black hole if we have not arrived there coming from somewhere else
+                        ConvertIndex(side, currIndex, out int currRow, out int currCol);
+                        if (dp[currIndex] == 0 && board[currRow][currCol] > 0) continue;
 
-                        int rollLimit = Math.Min(6, limit - 1 - curr);
-                        int defaultCost = dp[curr] + 1;
-
-                        for (int roll = 1; roll <= rollLimit; roll++)
+                        int rollLimit = square + Math.Min(6, limit - square);
+                        int currentCost = dp[currIndex] + 1;
+                        for (int nextSquare = square + 1; nextSquare <= rollLimit; nextSquare++)
                         {
-                            ConvertIndex(board.Length, curr + roll, out int nextRow, out int nextCol);
-
-                            int dpNext = board[nextRow][nextCol] < 0 ? curr + roll : board[nextRow][nextCol] - 1;
-
-                            dp[dpNext] = dp[dpNext] < 1 ? defaultCost : Math.Min(dp[dpNext], defaultCost);
+                            ConvertIndex(side, nextSquare - 1, out int nextRow, out int nextCol);
+                            int nextIndex = (board[nextRow][nextCol] == -1 ? nextSquare : board[nextRow][nextCol]) - 1;
+                            dp[nextIndex] = dp[nextIndex] < 1 ? currentCost : Math.Min(dp[nextIndex], currentCost);
                         }
                     }
 
-                    return board.Length < 1 ? 0 : dp[^1];
+                    return dp[^1];
                 }
 
                 static int BFS(int[][] board)
                 {
+                    if (board.Length == 0) return 0;
+
                     int result = -1;
                     int limit = board.Length * board.Length;
 
@@ -110,10 +112,47 @@ namespace leetcode.Lists.Top150
                     return result;
                 }
 
-                string solution = "bfs";
+                static int BFS2(int[][] board)
+                {
+                    if (board.Length == 0) return 0;
+                    if (board.Length == 1) return board[0][0] == 1 ? -1 : 0;
+
+                    int side = board.Length;
+                    int limit = side * side;
+
+                    int[] maxCost = new int[limit];
+                    Array.Fill(maxCost, int.MaxValue);
+
+                    PriorityQueue<int, int> queue = new();
+                    queue.Enqueue(1, 0);
+                    while (queue.TryDequeue(out int curr, out int cost))
+                    {
+                        if (cost >= maxCost[^1]) continue;
+
+                        int nextCost = cost + 1;
+                        int rollLimit = Math.Min(curr + 6, limit);
+
+                        for (int roll = curr + 1; roll <= rollLimit; roll++)
+                        {
+                            ConvertIndex(board.Length, roll - 1, out int row, out int col);
+                            int next = board[row][col] == -1 ? roll : board[row][col];
+
+                            if (nextCost < maxCost[next - 1])
+                            {
+                                maxCost[next - 1] = nextCost;
+                                queue.Enqueue(next, nextCost);
+                            }
+                        }
+                    }
+
+                    return maxCost[^1] == int.MaxValue ? -1 : maxCost[^1];
+                }
+
+                string solution = "bfs2";
                 int actual =
                     solution == "dp" ? DP(board) :
                     solution == "bfs" ? BFS(board) :
+                    solution == "bfs2" ? BFS2(board) :
                     throw new NotImplementedException(solution);
 
                 Assert.Equal(expected, actual);
