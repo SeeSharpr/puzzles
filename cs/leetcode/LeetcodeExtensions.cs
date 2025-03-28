@@ -11,6 +11,11 @@ namespace leetcode
             INode<T>? Right { get; set; }
         }
 
+        public static IEnumerable<string> Parse1DArray(this string input)
+        {
+            return Parse1DArray(input, s => s);
+        }
+
         public static IEnumerable<T> Parse1DArray<T>(this string input, Func<string, T> parse)
         {
             StringBuilder sb = new(Math.Min(256, input.Length));
@@ -35,15 +40,20 @@ namespace leetcode
             }
         }
 
+        public static IEnumerable<IEnumerable<string>> Parse2DArray(this string input)
+        {
+            return Parse2DArray(input, s => s);
+        }
+
         public static IEnumerable<IEnumerable<T>> Parse2DArray<T>(this string input, Func<string, T> parse)
         {
-            for (int start = input.IndexOf('[', input.IndexOf('[') + 1); start > 0; )
+            for (int start = input.IndexOf('[', input.IndexOf('[') + 1); start > 0;)
             {
                 int end = input.IndexOf(']', start + 1);
                 int length = end - start + 1;
 
                 yield return Parse1DArray(input.Substring(start, length), parse);
-                
+
                 start = input.IndexOf('[', end + 1);
             }
         }
