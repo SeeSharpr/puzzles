@@ -1,10 +1,111 @@
-﻿namespace leetcode.Lists.Top150
+﻿using Microsoft.VisualBasic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Drawing;
+using Xunit;
+
+namespace leetcode.Lists.Top150
 {
     public class GraphBFS
     {
         [Trait("Difficulty", "Medium")]
         public class Medium
         {
+            /// <summary>
+            /// 433. Minimum Genetic Mutation
+            /// A gene string can be represented by an 8-character long string, with choices from 'A', 'C', 'G', and 'T'.
+            /// Suppose we need to investigate a mutation from a gene string startGene to a gene string endGene where one mutation is defined as one single character changed in the gene string.
+            /// For example, "AACCGGTT" --> "AACCGGTA" is one mutation.
+            /// There is also a gene bank bank that records all the valid gene mutations. A gene must be in bank to make it a valid gene string.
+            /// Given the two gene strings startGene and endGene and the gene bank bank, return the minimum number of mutations needed to mutate from startGene to endGene. If there is no such a mutation, return -1.
+            /// Note that the starting point is assumed to be valid, so it might not be included in the bank.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/minimum-genetic-mutation/description/?envType=study-plan-v2&envId=top-interview-150"/>
+            [Theory]
+            [InlineData("AACCGGTT", "AACCGGTA", "[AACCGGTA]", 1)]
+            [InlineData("AACCGGTT", "AAACGGTA", "[AACCGGTA,AACCGCTA,AAACGGTA]", 2)]
+            public void MinMutation(string startGene, string endGene, string bankInput, int expected)
+            {
+                string[] bank = bankInput.Parse1DArray(x => x).ToArray();
+
+                static Dictionary<string, HashSet<string>> BuildGraph(List<string> bank)
+                {
+                    Dictionary<string, HashSet<string>> graph = [];
+
+                    for (int i = 0; i < bank.Count - 1; i++)
+                    {
+                        string src = bank[i];
+                        for (int j = i + 1; j < bank.Count; j++)
+                        {
+                            string dst = bank[j];
+
+                            bool tooMany = false;
+                            for (int k = 0, diff = 0; k < src.Length; k++)
+                            {
+                                if (src[k] != dst[k] && ++diff > 1)
+                                {
+                                    tooMany = true;
+                                    break;
+                                }
+                            }
+
+                            if (tooMany) continue;
+
+                            if (!graph.TryGetValue(src, out var set))
+                            {
+                                graph[src] = set = [];
+                            }
+
+                            set.Add(dst);
+
+                            if (!graph.TryGetValue(dst, out set))
+                            {
+                                graph[dst] = set = [];
+                            }
+
+                            set.Add(src);
+                        }
+                    }
+
+                    return graph;
+                }
+
+                static int GetPathLength(string startGene, string endGene, List<string> genes)
+                {
+                    if (!genes.Contains(endGene)) return -1;
+                    if (!genes.Contains(startGene)) genes.Add(startGene);
+
+                    var graph = BuildGraph(genes);
+
+                    Dictionary<string, int> minCosts = [];
+                    minCosts.Add(startGene, 0);
+                    minCosts.Add(endGene, int.MaxValue);
+
+                    PriorityQueue<string, int> queue = new();
+                    queue.Enqueue(startGene, 0);
+
+                    while (queue.TryDequeue(out string? curKey, out int curCost))
+                    {
+                        // Skip nodes with no connectivity
+                        if (!graph.TryGetValue(curKey, out var nextKeys)) continue;
+
+                        foreach (var nextKey in nextKeys)
+                        {
+                            // Skip cases where we would increase the current minimum cost
+                            if (minCosts.TryGetValue(nextKey, out int minCost) && minCost <= curCost) continue;
+
+                            minCosts[nextKey] = curCost + 1;
+                            queue.Enqueue(nextKey, curCost + 1);
+                        }
+                    }
+
+                    return minCosts[endGene] == int.MaxValue ? -1 : minCosts[endGene];
+                }
+
+                int actual = GetPathLength(startGene, endGene, bank.ToList());
+
+                Assert.Equal(expected, actual);
+            }
+
             /// <summary>
             /// 909. Snakes and Ladders
             /// 
