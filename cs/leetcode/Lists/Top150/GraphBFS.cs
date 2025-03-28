@@ -69,7 +69,7 @@ namespace leetcode.Lists.Top150
                     return graph;
                 }
 
-                static int GetPathLength(string startGene, string endGene, List<string> genes)
+                static int Dijkstra(string startGene, string endGene, List<string> genes)
                 {
                     if (!genes.Contains(endGene)) return -1;
                     if (!genes.Contains(startGene)) genes.Add(startGene);
@@ -83,7 +83,7 @@ namespace leetcode.Lists.Top150
                     PriorityQueue<string, int> queue = new();
                     queue.Enqueue(startGene, 0);
 
-                    while (queue.TryDequeue(out string? curKey, out int curCost))
+                    while (queue.TryDequeue(out string curKey, out int curCost))
                     {
                         // Skip nodes with no connectivity
                         if (!graph.TryGetValue(curKey, out var nextKeys)) continue;
@@ -101,7 +101,45 @@ namespace leetcode.Lists.Top150
                     return minCosts[endGene] == int.MaxValue ? -1 : minCosts[endGene];
                 }
 
-                int actual = GetPathLength(startGene, endGene, bank.ToList());
+                static int SimpleBFS(string startGene, string endGene, string[] genes)
+                {
+                    Queue<Tuple<string, int>> queue = new([new(startGene, 0)]);
+                    HashSet<string> visited = new([startGene]);
+                    char[] chars = "ACTG".ToCharArray();
+
+                    while (queue.TryDequeue(out var tuple))
+                    {
+                        string curGene = tuple.Item1;
+                        int curCost = tuple.Item2;
+
+                        if (curGene == endGene) return curCost;
+
+                        char[] curChars = curGene.ToCharArray();
+                        for (int i = 0; i < curGene.Length; i++)
+                        {
+                            char[] copy = curChars.ToArray();
+                            foreach (char c in chars)
+                            {
+                                copy[i] = c;
+
+                                string nextGene = new string(copy);
+
+                                if (!genes.Contains(nextGene) || visited.Contains(nextGene)) continue;
+
+                                visited.Add(nextGene);
+                                queue.Enqueue(new(nextGene, curCost + 1));
+                            }
+                        }
+                    }
+
+                    return -1;
+                }
+
+                string solution = "simplebfs";
+                int actual =
+                    solution == "simplebfs" ? SimpleBFS(startGene, endGene, bank) :
+                    solution == "dijkstra" ? Dijkstra(startGene, endGene, bank.ToList()) :
+                    throw new NotImplementedException(solution);
 
                 Assert.Equal(expected, actual);
             }
