@@ -2,6 +2,9 @@
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Drawing;
 using Xunit;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System;
 
 namespace leetcode.Lists.Top150
 {
@@ -83,7 +86,7 @@ namespace leetcode.Lists.Top150
                     PriorityQueue<string, int> queue = new();
                     queue.Enqueue(startGene, 0);
 
-                    while (queue.TryDequeue(out string curKey, out int curCost))
+                    while (queue.TryDequeue(out string? curKey, out int curCost))
                     {
                         // Skip nodes with no connectivity
                         if (!graph.TryGetValue(curKey, out var nextKeys)) continue;
@@ -292,6 +295,187 @@ namespace leetcode.Lists.Top150
                     solution == "dp" ? DP(board) :
                     solution == "bfs" ? BFS(board) :
                     solution == "bfs2" ? BFS2(board) :
+                    throw new NotImplementedException(solution);
+
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        [Trait("Difficulty", "Hard")]
+        public class Hard
+        {
+            /// <summary>
+            /// 127. Word Ladder
+            /// A transformation sequence from word beginWord to word endWord using a dictionary wordList is a sequence of words beginWord -> s1 -> s2 -> ... -> sk such that:
+            /// Every adjacent pair of words differs by a single letter.
+            /// Every si for 1 <= i <= k is in wordList.Note that beginWord does not need to be in wordList.
+            /// sk == endWord
+            /// Given two words, beginWord and endWord, and a dictionary wordList, return the number of words in the shortest transformation sequence from beginWord to endWord, or 0 if no such sequence exists.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/word-ladder/?envType=study-plan-v2&envId=top-interview-150"/>
+            [Theory]
+            [InlineData("hit", "cog", "[hot,dot,dog,lot,log,cog]", 5)]
+            [InlineData("hit", "cog", "[hot,dot,dog,lot,log]", 0)]
+            public void LadderLength(string beginWord, string endWord, string listInput, int expected)
+            {
+                IList<string> wordList = listInput.Parse1DArray(x => x).ToList();
+
+                static Dictionary<string, HashSet<int>> BuildGraph(IList<string> words)
+                {
+                    Dictionary<string, HashSet<int>> graph = new();
+
+                    for (int left = 0; left < words.Count - 1; left++)
+                    {
+                        string leftWord = words[left];
+
+                        for (int right = left + 1; right < words.Count; right++)
+                        {
+                            string rightWord = words[right];
+
+                            bool valid = true;
+                            for (int i = 0, diff = 0; valid && i < leftWord.Length; i++)
+                            {
+                                if (leftWord[i] != rightWord[i] && ++diff > 1) valid = false;
+                            }
+
+                            // Skip invalid words (differ by more than 1 character)
+                            if (!valid) continue;
+
+                            if (!graph.TryGetValue(leftWord, out var leftSet)) graph[leftWord] = leftSet = [];
+                            leftSet.Add(right);
+
+                            if (!graph.TryGetValue(rightWord, out var rightSet)) graph[rightWord] = rightSet = [];
+                            rightSet.Add(left);
+                        }
+                    }
+
+                    return graph;
+                }
+
+                static int BFS(string src, string dst, IList<string> words)
+                {
+                    if (!words.Contains(dst)) return 0;
+                    if (!words.Contains(src)) words.Add(src);
+                    words.Add(dst);
+
+                    var graph = BuildGraph(words);
+
+                    Queue<Tuple<string, int>> queue = new([new(src, 0)]);
+                    HashSet<string> visited = new([src]);
+
+                    while (queue.TryDequeue(out var tuple))
+                    {
+                        string currWord = tuple.Item1;
+                        int currCost = tuple.Item2;
+
+                        if (currWord == dst) return 1 + currCost;
+
+                        // Skip empty edges
+                        if (!graph.TryGetValue(currWord, out var nextIdxs)) continue;
+
+                        foreach (var nextIdx in nextIdxs)
+                        {
+                            string nextWord = words[nextIdx];
+
+                            // Skip visited words
+                            if (visited.Contains(nextWord)) continue;
+
+                            // Enqueue next exploration
+                            queue.Enqueue(new(nextWord, currCost + 1));
+                        }
+                    }
+
+                    return 0;
+                }
+
+                static int BFSDual(string src, string dst, IList<string> words)
+                {
+                    if (!words.Contains(dst)) return 0;
+                    if (!words.Contains(src)) words.Add(src);
+                    words.Add(dst);
+
+                    var graph = BuildGraph(words);
+
+                    Queue<Tuple<string, int, char>> queue = new([new(src, 0, 's'), new(dst, 0, 'd')]);
+                    Dictionary<string, int> visitedSrc = new() { { src, 0 }, };
+                    Dictionary<string, int> visitedDst = new() { { dst, 0 }, };
+
+                    while (queue.TryDequeue(out var tuple))
+                    {
+                        string currWord = tuple.Item1;
+                        int currCost = tuple.Item2;
+                        char direction = tuple.Item3;
+
+                        if (visitedSrc.TryGetValue(currWord, out int srcCost) && visitedDst.TryGetValue(currWord, out int dstCost))
+                        {
+                            // Found on both sides, this is the stopping criteria
+                            return 1 + srcCost + dstCost;
+                        }
+
+                        // Skip empty edges
+                        if (!graph.TryGetValue(currWord, out var nextIdxs)) continue;
+
+                        foreach (var nextIdx in nextIdxs)
+                        {
+                            string nextWord = words[nextIdx];
+
+                            // Skip visited words
+                            if ((direction == 's' && visitedSrc.ContainsKey(nextWord)) || (direction == 'd' && visitedDst.ContainsKey(nextWord))) continue;
+
+                            // Enqueue next exploration
+                            switch (direction)
+                            {
+                                case 's':
+                                    visitedSrc.Add(nextWord, currCost + 1);
+                                    break;
+                                case 'd':
+                                    visitedDst.Add(nextWord, currCost + 1);
+                                    break;
+                            }
+
+                            queue.Enqueue(new(nextWord, currCost + 1, direction));
+                        }
+                    }
+
+                    return 0;
+                }
+
+                static int Dijkstra(string src, string dst, IList<string> words)
+                {
+                    if (!words.Contains(dst)) return 0;
+                    if (!words.Contains(src)) words.Add(src);
+                    words.Add(dst);
+
+                    var graph = BuildGraph(words);
+
+                    Dictionary<string, int> minCosts = new() { { src, 0 }, { dst, int.MaxValue }, };
+                    PriorityQueue<string, int> queue = new([(src, 0)]);
+
+                    while (queue.TryDequeue(out string? currWord, out int currCost))
+                    {
+                        // Skip empty edges
+                        if (!graph.TryGetValue(currWord, out var nextIdxs)) continue;
+
+                        foreach (var nextIdx in nextIdxs)
+                        {
+                            string nextWord = words[nextIdx];
+
+                            // Skip increased costs
+                            if (minCosts.TryGetValue(nextWord, out int minCost) && minCost <= currCost) continue;
+
+                            // Enqueue next exploration
+                            queue.Enqueue(nextWord, minCosts[nextWord] = currCost + 1);
+                        }
+                    }
+
+                    return minCosts.TryGetValue(dst, out int result) && result != int.MaxValue ? 1 + result : 0;
+                }
+
+                string solution = "bfsdual";
+                int actual =
+                    solution == "bfs" ? BFS(beginWord, endWord, wordList) :
+                    solution == "bfsdual" ? BFSDual(beginWord, endWord, wordList) :
+                    solution == "dijkstra" ? Dijkstra(beginWord, endWord, wordList) :
                     throw new NotImplementedException(solution);
 
                 Assert.Equal(expected, actual);
