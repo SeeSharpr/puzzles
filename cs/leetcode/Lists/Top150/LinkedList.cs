@@ -1,4 +1,6 @@
 ﻿using leetcode.Types.LinkedList;
+using System.Collections.Generic;
+using System;
 
 namespace leetcode.Lists.Top150
 {
@@ -479,12 +481,6 @@ namespace leetcode.Lists.Top150
             Assert.Equal(expected?.Select(n => n.val) ?? [], head?.Select(n => n.val) ?? []);
         }
 
-        // Design a data structure that follows the constraints of a Least Recently Used(LRU) cache.
-        // Implement the LRUCache class:
-        // LRUCache(int capacity) Initialize the LRU cache with positive size capacity.
-        // int get(int key) Return the value of the key if the key exists, otherwise return -1.
-        // void put(int key, int value) Update the value of the key if the key exists.Otherwise, add the key-value pair to the cache.If the number of keys exceeds the capacity from this operation, evict the least recently used key.
-        // The functions get and put must each run in O(1) average time complexity.
         public class LRUCache
         {
             private class MyNode(int key, int value, MyNode? next = null, MyNode? prev = null)
@@ -606,68 +602,242 @@ namespace leetcode.Lists.Top150
             }
         }
 
-        [Trait("List", "TopInterview150")]
-        [Fact]
-        public void LRUCacheTest()
+        public class LRUCacheV2(int capacity)
         {
-            KeyValuePair<int, int> p11 = new(1, 1);
-            KeyValuePair<int, int> p22 = new(2, 2);
-            KeyValuePair<int, int> p33 = new(3, 3);
-            KeyValuePair<int, int> p44 = new(4, 4);
-
+            private class LRUNode(int key, int value)
             {
-                LRUCache lRUCache = new LRUCache(2);
+                public class LRUQueue
+                {
+                    private LRUNode? head = null;
+                    private LRUNode? tail = null;
 
-                lRUCache.Put(1, 1); // cache is {1=1}
-                Assert.Equal([p11], lRUCache.GetQueue());
+                    public void Requeue(LRUNode node)
+                    {
+                        if (head == null && tail == null)
+                        {
+                            head = tail = node;
+                        }
+                        else if (node != head)
+                        {
+                            if (node.prev != null || node.next != null) Detach(node);
+                            AttachBefore(node, head!);
+                        }
+                    }
 
-                lRUCache.Put(2, 2); // cache is {1=1, 2=2}
-                Assert.Equal([p22, p11], lRUCache.GetQueue());
+                    public LRUNode Dequeue()
+                    {
+                        LRUNode node = tail!;
 
-                Assert.Equal(1, lRUCache.Get(1));    // return 1
+                        Detach(node);
 
-                lRUCache.Put(3, 3); // LRU key was 2, evicts key 2, cache is {1=1, 3=3}
-                Assert.Equal([p33, p11], lRUCache.GetQueue());
+                        return node;
+                    }
 
-                Assert.Equal(-1, lRUCache.Get(2));    // returns -1 (not found)
+                    public override string ToString()
+                    {
+                        return $"[{(head?.ToString() ?? "null")}...{(tail?.ToString() ?? "null")}]";
+                    }
 
-                lRUCache.Put(4, 4); // LRU key was 1, evicts key 1, cache is {4=4, 3=3}
-                Assert.Equal([p44, p33], lRUCache.GetQueue());
+                    private void AttachBefore(LRUNode node, LRUNode succ)
+                    {
+                        if (head == succ)
+                        {
+                            head = node;
+                        }
 
+                        node.next = succ;
+                        succ.prev = node;
+                    }
 
-                Assert.Equal(-1, lRUCache.Get(1));    // return -1 (not found)
+                    private void Detach(LRUNode node)
+                    {
+                        if (head == node)
+                        {
+                            head = head.next;
+                        }
 
-                Assert.Equal(3, lRUCache.Get(3));    // return 3
+                        if (tail == node)
+                        {
+                            tail = tail.prev;
+                        }
 
-                Assert.Equal(4, lRUCache.Get(4));    // return 4
+                        if (node.prev != null)
+                        {
+                            node.prev.next = node.next;
+                        }
+
+                        if (node.next != null)
+                        {
+                            node.next.prev = node.prev;
+                        }
+
+                        node.prev = null;
+                        node.next = null;
+                    }
+                }
+
+                public readonly int key = key;
+                public int value = value;
+                private LRUNode? prev;
+                private LRUNode? next;
+
+                public override string ToString()
+                {
+                    return $"{(prev?.key.ToString() ?? "null")}<-({key},{value})->{(next?.key.ToString() ?? "null")}";
+                }
             }
 
+            private readonly Dictionary<int, LRUNode> map = new(capacity);
+            private readonly LRUNode.LRUQueue queue = new();
+
+            public void Put(int key, int value)
             {
-                LRUCache lRUCache = new LRUCache(2);
-                lRUCache.Put(1, 0);
-                lRUCache.Put(2, 2);
-                Assert.Equal(0, lRUCache.Get(1));
-                lRUCache.Put(3, 3);
-                Assert.Equal(-1, lRUCache.Get(2));
-                lRUCache.Put(4, 4);
-                Assert.Equal(-1, lRUCache.Get(1));
-                Assert.Equal(3, lRUCache.Get(3));
-                Assert.Equal(4, lRUCache.Get(4));
+                if (!map.TryGetValue(key, out var node))
+                {
+                    // If we need to add a new node and the cache is at capacity, first we need to drop the queue tail
+                    if (map.Count == capacity)
+                    {
+                        map.Remove(queue.Dequeue().key);
+                    }
+
+                    // Create a new node
+                    map[key] = node = new(key, value);
+                }
+                else
+                {
+                    // We can simply update the value on the existing node
+                    node.value = value;
+                }
+
+                // Update the LRU queue if needed
+                queue.Requeue(node);
             }
 
+            public int Get(int key)
             {
-                LRUCache lRUCache = new LRUCache(1);
-                Assert.Equal(-1, lRUCache.Get(1));
-                Assert.Equal(-1, lRUCache.Get(6));
-                Assert.Equal(-1, lRUCache.Get(8));
-                lRUCache.Put(12, 1);
-                Assert.Equal(-1, lRUCache.Get(2));
-                lRUCache.Put(15, 11);
-                lRUCache.Put(5, 2);
-                lRUCache.Put(1, 15);
-                lRUCache.Put(4, 2);
-                Assert.Equal(-1, lRUCache.Get(5));
-                lRUCache.Put(15, 15);
+                if (!map.TryGetValue(key, out var node)) return -1;
+
+                queue.Requeue(node);
+
+                return node.value;
+            }
+        }
+
+        [Trait("Difficulty", "Medium")]
+        public class Medium
+        {
+            /// <summary>
+            /// 143. Reorder List
+            /// You are given the head of a singly linked-list.The list can be represented as:
+            /// L0 → L1 → … → Ln - 1 → Ln
+            /// Reorder the list to be on the following form:
+            /// L0 → Ln → L1 → Ln - 1 → L2 → Ln - 2 → …
+            /// You may not modify the values in the list's nodes. Only nodes themselves may be changed.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/reorder-list/description/"/>
+            [Theory]
+            [InlineData("[1,2,3,4]", "[1,4,2,3]")]
+            [InlineData("[1,2,3,4,5]", "[1,5,2,4,3]")]
+            public void ReorderList(string input, string output)
+            {
+                ListNode? head = ListNode.ParseFromLC(input);
+                ListNode? expected = ListNode.ParseFromLC(output);
+
+                int[] inputIds = head?.Select(n => n.id)?.ToArray() ?? [];
+                int[] inputValues = input.Parse1DArray(int.Parse).ToArray();
+                Dictionary<int, int> inputMap = [];
+                for (int i = 0; i < inputIds.Length; i++)
+                {
+                    inputMap[inputValues[i]] = inputIds[i];
+                }
+
+                // ---
+
+                Stack<ListNode> left = new();
+                Stack<ListNode> right = new();
+
+                int count = 0;
+                for (ListNode? n = head; n != null; n = n.next)
+                {
+                    left.Push(n);
+                    count++;
+                }
+
+                count /= 2;
+                for (int i = 0; i < count; i++)
+                {
+                    right.Push(left.Pop());
+                }
+
+                // Now stacks have 1/2/3/(x) and 4/5/6. All we need to do is to take the middle node (if one exists) and
+                // connect the new head and new tail to the tops of the stacks.
+                head = left.Count - right.Count == 0 ? null : left.Pop();
+                
+                if (head != null) head.next = null;
+
+                while (left.TryPop(out var leftNode) && right.TryPop(out var rightNode))
+                {
+                    leftNode.next = rightNode;
+                    rightNode.next = head;
+                    head = leftNode;
+                }
+
+                // ---
+
+                for (ListNode? an = head, en = expected; an != null && en != null; an = an.next, en = en.next)
+                {
+                    Assert.Equal(en.val, an.val);
+                    Assert.Equal(inputMap[an.val], an.id);
+                }
+            }
+
+            /// <summary>
+            /// 146. LRU Cache
+            /// Design a data structure that follows the constraints of a Least Recently Used(LRU) cache.
+            /// Implement the LRUCache class:
+            /// LRUCache(int capacity) Initialize the LRU cache with positive size capacity.
+            /// int get(int key) Return the value of the key if the key exists, otherwise return -1.
+            /// void put(int key, int value) Update the value of the key if the key exists.Otherwise, add the key-value pair to the cache.If the number of keys exceeds the capacity from this operation, evict the least recently used key.
+            /// The functions get and put must each run in O(1) average time complexity.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/lru-cache/description/"/>
+            [Trait("List", "TopInterview150")]
+            [Trait("List", "Facebook")]
+            [Theory]
+            [InlineData("[LRUCache,put,put,get,put,get,put,get,get,get]", "[[2],[1,1],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]", "[null,null,null,1,null,-1,null,-1,3,4]")]
+            [InlineData("[LRUCache,put,put,get,put,get,put,get,get,get]", "[[2],[1,0],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]", "[null,null,null,0,null,-1,null,-1,3,4]")]
+            [InlineData("[LRUCache,get,get,get,put,get,put,put,put,put,get,put]", "[[1],[1],[6],[8],[12,1],[2],[15,11],[5,2],[1,15],[4,2],[5],[15,15]]", "[null,-1,-1,-1,null,-1,null,null,null,null,-1,null]")]
+            [InlineData("[LRUCache,put,put,put,put,get,get,get,get,put,get,get,get,get,get]", "[[3],[1,1],[2,2],[3,3],[4,4],[4],[3],[2],[1],[5,5],[1],[2],[3],[4],[5]]", "[null,null,null,null,null,4,3,2,-1,null,-1,2,3,-1,5]]")]
+            public void LRUCacheTest(string cmdsInput, string argsInput, string expsInput)
+            {
+                string[] cmds = cmdsInput.Parse1DArray().ToArray();
+                string[][] args = argsInput.Parse2DArray().Select(x => x.ToArray()).ToArray();
+                string[] exps = expsInput.Parse1DArray().ToArray();
+
+                Assert.Equal(exps.Length, cmds.Length);
+                Assert.Equal(exps.Length, args.Length);
+
+                LRUCacheV2? lruCache = null;
+                for (int i = 0; i < exps.Length; i++)
+                {
+                    switch (cmds[i])
+                    {
+                        case "LRUCache":
+                            lruCache = new(int.Parse(args[i][0]));
+                            break;
+
+                        case "put":
+                            lruCache!.Put(int.Parse(args[i][0]), int.Parse(args[i][1]));
+                            break;
+
+                        case "get":
+                            Assert.Equal(int.Parse(exps[i]), lruCache!.Get(int.Parse(args[i][0])));
+                            break;
+
+                        default:
+                            throw new NotSupportedException(cmds[0]);
+                    }
+                }
             }
         }
     }

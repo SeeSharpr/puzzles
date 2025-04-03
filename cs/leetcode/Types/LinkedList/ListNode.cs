@@ -5,7 +5,7 @@ namespace leetcode.Types.LinkedList
     public class ListNode : IEnumerable<ListNode>
     {
         private static int idGen = -1;
-        private int id = Interlocked.Increment(ref idGen);
+        public readonly int id = Interlocked.Increment(ref idGen);
 
         public int x;
 
