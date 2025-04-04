@@ -18,7 +18,12 @@ namespace leetcode.Types.LinkedList
 
         public override string ToString()
         {
-            return $"(id:{id}, val:{val}, next:{next?.id ?? 0}, random: {random?.id ?? 0})";
+            return ToString(false);
+        }
+
+        private string ToString(bool useId)
+        {
+            return $"({val}{(useId ? id.ToString() : "")})->{next?.val.ToString() ?? "null"}/{random?.val.ToString() ?? "null"}";
         }
 
         IEnumerator IEnumerable.GetEnumerator()
