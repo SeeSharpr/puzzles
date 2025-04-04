@@ -4,6 +4,81 @@ namespace leetcode.Lists.Top150
 {
     public class ArrayString
     {
+        [Trait("Difficulty", "Easy")]
+        public class Easy
+        {
+            /// <summary>
+            /// 283. Move Zeroes
+            /// Given an integer array nums, move all 0's to the end of it while maintaining the relative order of the non-zero elements.
+            /// Note that you must do this in-place without making a copy of the array.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/move-zeroes/description/"/>
+            [Theory]
+            [InlineData("[0,1,0,3,12]", "[1,3,12,0,0]")]
+            [InlineData("[0]", "[0]")]
+            [InlineData("[1]", "[1]")]
+            public void MoveZeroes(string input, string output)
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+                int[] expected = output.Parse1DArray(int.Parse).ToArray();
+                //--
+                static void MoveNumbersToCorrectPosition(int[] nums)
+                {
+                    if (nums.Length < 2) return;
+
+                    int count = 0;
+                    for (int i = 0; i < nums.Length; i++)
+                    {
+                        if (count != i && nums[i] != 0)
+                        {
+                            nums[count++] = nums[i];
+                        }
+                    }
+
+                    for (int i = count; i < nums.Length; i++)
+                    {
+                        nums[i] = 0;
+                    }
+                }
+
+                static void BubbleZeroes(int[] nums)
+                {
+                    for (int left = 0, right = 0; right < nums.Length; right++)
+                    {
+                        if (nums[right] != 0)
+                        {
+                            if (left != right)
+                            {
+                                nums[left] ^= nums[right];
+                                nums[right] ^= nums[left];
+                                nums[left] ^= nums[right];
+                            }
+
+                            left++;
+                        }
+                    }
+                }
+
+                string solution = nameof(BubbleZeroes);
+                switch (solution)
+                {
+                    case nameof(MoveNumbersToCorrectPosition):
+                        MoveNumbersToCorrectPosition(nums);
+                        break;
+
+                    case nameof(BubbleZeroes):
+                        BubbleZeroes(nums);
+                        break;
+
+                    default:
+                        throw new NotSupportedException(solution);
+                }
+                //--
+                Assert.Equal(expected, nums);
+            }
+        }
+
+
         // You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
         // Merge nums1 and nums2 into a single array sorted in non-decreasing order.
         // The final sorted array should not be returned by the function, but instead be stored inside the array nums1. To accommodate this, nums1 has a length of m + n, where the first m elements denote the elements that should be merged, and the last n elements are set to 0 and should be ignored. nums2 has a length of n.
