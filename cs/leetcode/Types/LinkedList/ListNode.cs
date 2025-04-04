@@ -43,7 +43,12 @@ namespace leetcode.Types.LinkedList
 
         public override string ToString()
         {
-            return $"(id:{id}, val:{val}, next:{next?.id ?? 0}[{next?.val ?? 0}])";
+            return ToString(false);
+        }
+
+        private string ToString(bool showId)
+        {
+            return $"({val}{(showId ? $": {id}" : "")})->{(next?.val.ToString() ?? "null")}";
         }
 
         public IEnumerator<ListNode> GetEnumerator()

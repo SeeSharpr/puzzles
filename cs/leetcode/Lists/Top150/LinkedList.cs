@@ -753,33 +753,91 @@ namespace leetcode.Lists.Top150
 
                 // ---
 
-                Stack<ListNode> left = new();
-                Stack<ListNode> right = new();
-
-                int count = 0;
-                for (ListNode? n = head; n != null; n = n.next)
+                static void UsingStack(ListNode? head)
                 {
-                    left.Push(n);
-                    count++;
+
+                    Stack<ListNode> left = new();
+                    Stack<ListNode> right = new();
+
+                    int count = 0;
+                    for (ListNode? n = head; n != null; n = n.next)
+                    {
+                        left.Push(n);
+                        count++;
+                    }
+
+                    count /= 2;
+                    for (int i = 0; i < count; i++)
+                    {
+                        right.Push(left.Pop());
+                    }
+
+                    // Now stacks have 1/2/3/(x) and 4/5/6. All we need to do is to take the middle node (if one exists) and
+                    // connect the new head and new tail to the tops of the stacks.
+                    head = left.Count - right.Count == 0 ? null : left.Pop();
+
+                    if (head != null) head.next = null;
+
+                    while (left.TryPop(out var leftNode) && right.TryPop(out var rightNode))
+                    {
+                        leftNode.next = rightNode;
+                        rightNode.next = head;
+                        head = leftNode;
+                    }
                 }
 
-                count /= 2;
-                for (int i = 0; i < count; i++)
+                static void UsingFastSlow(ListNode? head)
                 {
-                    right.Push(left.Pop());
+                    if (head == null) return;
+
+                    // Find middle
+                    ListNode? middle = head;
+                    ListNode? predMiddle = null;
+                    for (ListNode? fast = head; fast != null; fast = fast?.next?.next)
+                    {
+                        predMiddle = middle;
+                        middle = middle?.next;
+                    }
+
+                    // Cut the middle
+                    if (predMiddle != null) predMiddle.next = null;
+
+                    // Invert the second half
+                    for (ListNode? curr = middle, pred = null; curr != null;)
+                    {
+                        ListNode? temp = curr?.next;
+                        curr!.next = pred;
+                        middle = pred = curr;
+                        curr = temp;
+                    }
+
+                    // First half is on head, second is on curr. Now merge
+                    for (ListNode? left = head, right = middle; left != null && right != null;)
+                    {
+                        ListNode? leftNext = left.next;
+                        ListNode? rightNext = right.next;
+
+                        left.next = right;
+                        right.next = leftNext;
+
+                        left = leftNext;
+                        right = rightNext;
+                    }
                 }
 
-                // Now stacks have 1/2/3/(x) and 4/5/6. All we need to do is to take the middle node (if one exists) and
-                // connect the new head and new tail to the tops of the stacks.
-                head = left.Count - right.Count == 0 ? null : left.Pop();
-                
-                if (head != null) head.next = null;
-
-                while (left.TryPop(out var leftNode) && right.TryPop(out var rightNode))
+                string solution = "fastslow";
+                switch (solution)
                 {
-                    leftNode.next = rightNode;
-                    rightNode.next = head;
-                    head = leftNode;
+                    case "stack":
+                        UsingStack(head);
+                        break;
+
+                    case "fastslow":
+                        UsingFastSlow(head);
+                        break;
+
+                    default:
+                        throw new NotSupportedException(solution);
                 }
 
                 // ---
