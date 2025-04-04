@@ -287,7 +287,7 @@ namespace leetcode.Lists.Top150
                     Node? tgtHead = head.next;
 
                     // Assign randoms
-                    for (Node? srcNode = head, tgtNode = tgtHead; srcNode != null && tgtNode != null; srcNode = srcNode.next, tgtNode = tgtNode.next)
+                    for (Node? srcNode = head, tgtNode = tgtHead; srcNode != null && tgtNode != null; srcNode = srcNode.next?.next, tgtNode = tgtNode.next?.next)
                     {
                         tgtNode.random = srcNode.random?.next;
                     }
@@ -311,25 +311,32 @@ namespace leetcode.Lists.Top150
 
                 // -- Test validation
 
-                // Values match
-                Assert.Equal(head?.Select(n => n.val) ?? [], actual?.Select(n => n.val) ?? []);
-                // No IDs match for next
-                int[]? nextIdLeft = head?.Select(n => n.id)?.ToArray();
-                int[]? nextIdRight = actual?.Select(n => n.id)?.ToArray();
-                Assert.NotNull(nextIdLeft);
-                Assert.NotNull(nextIdRight);
-                Assert.Empty(nextIdLeft.Intersect(nextIdRight));
-                // No IDs match for random
-                int?[]? randomIdLeft = head?.Where(n => n.random != null).Select(n => n.random?.id)?.ToArray();
-                int?[]? randomIdRight = actual?.Where(n => n.random != null).Select(n => n.random?.id)?.ToArray();
-                Assert.NotNull(randomIdLeft);
-                Assert.NotNull(randomIdRight);
-                Assert.Empty(randomIdLeft.Intersect(randomIdRight));
-                // Index of random matches
-                int[]? oldRandomIndex = head?.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = head; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
-                int[]? newRandomIndex = actual?.Select(x => { int index = x.random == null ? -1 : 0; for (Node? p = actual; p != null && p != x.random; p = p?.next) index++; return index; }).ToArray();
+                SortedSet<int> idsLeft = [];
+                SortedSet<int> idsRight = [];
+                Dictionary<Node, Node> map = [];
+                for (Node? left = head, right = actual; left != null && right != null; left = left.next, right = right.next)
+                {
+                    map[left] = right;
+                    Assert.True(idsLeft.Add(left.id));
+                    Assert.True(idsRight.Add(right.id));
+                }
 
-                Assert.Equal(oldRandomIndex, newRandomIndex);
+                // Id's do not overlap
+                Assert.Empty(idsLeft.Intersect(idsRight));
+
+                for (Node? left = head, right = actual; left != null && right != null; left = left.next, right = right.next)
+                {
+                    // Values match
+                    Assert.Equal(right.val, map[left].val);
+
+                    // Id's don't get reused
+                    Assert.True(idsLeft.Remove(left.id));
+                    Assert.True(idsRight.Remove(right.id));
+
+                    // Random points to the equivalent node
+                    Assert.True(right.random != null && left.random != null || right.random == null && left.random == null);
+                    if (left.random != null) Assert.Equal(right.random, map[left.random]);
+                }
             }
 
             /// <summary>
