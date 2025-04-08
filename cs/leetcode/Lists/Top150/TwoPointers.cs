@@ -1,10 +1,155 @@
-﻿using System.Collections.Immutable;
+﻿using Microsoft.VisualStudio.TestPlatform.CoreUtilities.Helpers;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using Xunit.Sdk;
 
 namespace leetcode.Lists.Top150
 {
     public class TwoPointers
     {
+        [Trait("Difficulty", "Medium")]
+        public class Medium
+        {
+
+            /// <summary>
+            /// 15. 3Sum
+            /// Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+            /// Notice that the solution set must not contain duplicate triplets.
+            /// Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/3sum/"/>
+            [Theory]
+            [InlineData("[-1,0,1,2,-1,-4]", "[[-1,-1,2],[-1,0,1]]")]
+            [InlineData("[0,1,1]", "[]")]
+            [InlineData("[0,0,0]", "[[0,0,0]]")]
+            public void ThreeSum(string input, string output)
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+                int[][] results = output.Parse2DArray(int.Parse).Select(x => x.ToArray()).ToArray();
+
+                // --
+                static List<IList<int>> SortAndSearch(int[] nums)
+                {
+                    List<IList<int>> result = [];
+
+                    Array.Sort(nums);
+
+                    int n = nums.Length - 2;
+
+                    for (int i = 0; i < n; i++)
+                    {
+                        if (i > 0 && nums[i] == nums[i - 1]) continue;
+
+                        int left = i + 1;
+                        int right = n + 1;
+
+                        while (left < right)
+                        {
+                            int sum = nums[i] + nums[left] + nums[right];
+
+                            if (sum < 0)
+                            {
+                                left++;
+                            }
+                            else if (sum > 0)
+                            {
+                                right--;
+                            }
+                            else // sum == 0
+                            {
+                                result.Add(new List<int>() { nums[i], nums[left], nums[right] });
+
+                                while (left < right && nums[left] == nums[left + 1]) left++;
+                                while (left < right && nums[right - 1] == nums[right]) right--;
+
+                                left++;
+                                right--;
+                            }
+                        }
+                    }
+
+                    return result;
+                }
+
+                static bool ComplementSet2(int[] nums, int from, int to, int target, out List<List<int>>? result)
+                {
+                    result = [];
+                    HashSet<int> others = [];
+                    for (int i = from; i < to; i++)
+                    {
+                        int other = target - nums[i];
+
+                        if (others.Contains(other))
+                        {
+                            result.Add([nums[i], other]);
+                        }
+
+                        others.Add(nums[i]);
+                    }
+
+                    return result.Count > 0;
+                }
+
+                static List<IList<int>> ComplementSet3(int[] nums)
+                {
+                    List<IList<int>> result = [];
+
+                    Array.Sort(nums);
+
+                    for (int i = 0, limit = nums.Length - 2; i < limit; i++)
+                    {
+                        if (nums[i] == nums[i] + 1) continue;
+
+                        if (ComplementSet2(nums, i + 1, nums.Length, -nums[i], out var threeSums))
+                        {
+                            foreach (var threeSum in threeSums!) threeSum.Insert(0, nums[i]);
+                            result.AddRange(threeSums);
+                        }
+                    }
+
+                    return result;
+                }
+
+                static List<IList<int>> NoSort(int[] nums)
+                {
+                    HashSet<Tuple<int, int, int>> seen = [];
+
+                    List<IList<int>> result = [];
+
+                    for (int i = 0, limit = nums.Length - 2; i < limit; i++)
+                    {
+                        if (ComplementSet2(nums, i + 1, nums.Length, -nums[i], out var threeSums))
+                        {
+                            foreach (var threeSum in threeSums!)
+                            {
+                                threeSum.Add(nums[i]);
+                                threeSum.Sort();
+
+                                if (!seen.Add(new(threeSum[0], threeSum[1], threeSum[2]))) continue;
+
+                                result.Add(threeSum);
+                            }
+                        }
+                    }
+
+                    return result;
+                }
+
+                string solution = nameof(NoSort);
+                List<IList<int>> result =
+                    solution == nameof(SortAndSearch) ? SortAndSearch(nums) :
+                    solution == nameof(ComplementSet3) ? ComplementSet3(nums) :
+                    solution == nameof(NoSort) ? NoSort(nums) :
+                    throw new NotSupportedException(solution);
+
+                // --
+                HashSet<Tuple<int, int, int>> actual = result.Select(x => { int[] a = x.ToArray(); Array.Sort(a); return new Tuple<int, int, int>(a[0], a[1], a[2]); }).ToHashSet();
+                HashSet<Tuple<int, int, int>> expected = results.Select(x => { int[] a = x.ToArray(); Array.Sort(a); return new Tuple<int, int, int>(a[0], a[1], a[2]); }).ToHashSet();
+
+                Assert.Equal(expected, actual);
+            }
+        }
+
         // A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.
         // Given a string s, return true if it is a palindrome, or false otherwise.
         [Trait("List", "TopInterview150")]
@@ -137,61 +282,6 @@ namespace leetcode.Lists.Top150
             }
 
             Assert.Equal(expected, maxArea);
-        }
-
-        // Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
-        // Notice that the solution set must not contain duplicate triplets.
-        // Notice that the order of the output and the order of the triplets does not matter.
-        [Trait("List", "TopInterview150")]
-        [Theory]
-        [InlineData(new[] { -1, 0, 1, 2, -1, -4 }, new[] { -1, -1, 2 }, new[] { -1, 0, 1 })]
-        [InlineData(new[] { 0, 1, 1 })]
-        [InlineData(new[] { 0, 0, 0 }, new[] { 0, 0, 0 })]
-        [InlineData(new[] { -2, 0, 1, 1, 2 }, new[] { -2, 0, 2 }, new[] { -2, 1, 1 })]
-        public void ThreeSum(int[] nums, params int[][] results)
-        {
-            List<IList<int>> result = new();
-
-            Array.Sort(nums);
-
-            int n = nums.Length - 2;
-
-            for (int i = 0; i < n; i++)
-            {
-                if (i > 0 && nums[i] == nums[i - 1]) continue;
-
-                int left = i + 1;
-                int right = n + 1;
-
-                while (left < right)
-                {
-                    int sum = nums[i] + nums[left] + nums[right];
-
-                    if (sum < 0)
-                    {
-                        left++;
-                    }
-                    else if (sum > 0)
-                    {
-                        right--;
-                    }
-                    else // sum == 0
-                    {
-                        result.Add(new List<int>() { nums[i], nums[left], nums[right] });
-
-                        while (left < right && nums[left] == nums[left + 1]) left++;
-                        while (left < right && nums[right - 1] == nums[right]) right--;
-
-                        left++;
-                        right--;
-                    }
-                }
-            }
-
-            HashSet<Tuple<int, int, int>> actual = result.Select(x => { int[] a = x.ToArray(); Array.Sort(a); return new Tuple<int, int, int>(a[0], a[1], a[2]); }).ToHashSet();
-            HashSet<Tuple<int, int, int>> expected = results.Select(x => { int[] a = x.ToArray(); Array.Sort(a); return new Tuple<int, int, int>(a[0], a[1], a[2]); }).ToHashSet();
-
-            Assert.Equal(expected, actual);
         }
     }
 }

@@ -8,6 +8,39 @@ namespace leetcode.Lists.Top150
         public class Easy
         {
             /// <summary>
+            /// 67. Add Binary
+            /// Given two binary strings a and b, return their sum as a binary string.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/add-binary/description/"/>
+            [Theory]
+            [InlineData("11", "1", "100")]
+            [InlineData("1010", "1011", "10101")]
+            [InlineData("0", "0", "0")]
+            [InlineData("10100000100100110110010000010101111011011001101110111111111101000000101111001110001111100001101", "110101001011101110001111100110001010100001101011101010000011011011001011101111001100000011011110011", "110111101100010011000101110110100000011101000101011001000011011000001100011110011010010011000000000")]
+            public void AddBinary(string a, string b, string expected)
+            {
+                int n = Math.Max(a.Length, b.Length);
+                char[] r = new char[n + 1];
+                int cc = 0;
+
+                for (int i = n, ia = a.Length - 1, ib = b.Length - 1; i > 0; i--, ia--, ib--)
+                {
+                    int ca = ia >= 0 ? a[ia] - '0' : 0;
+                    int cb = ib >= 0 ? b[ib] - '0' : 0;
+
+                    r[i] = (char)('0' + ((cc + ca + cb) % 2));
+                    cc = (cc + ca + cb) / 2;
+                }
+
+                r[0] = (char)('0' + cc);
+
+                char[] digits = r.Skip(1 - cc).ToArray();
+                string actual = new(digits);
+
+                Assert.Equal(expected, actual);
+            }
+
+            /// <summary>
             /// 283. Move Zeroes
             /// Given an integer array nums, move all 0's to the end of it while maintaining the relative order of the non-zero elements.
             /// Note that you must do this in-place without making a copy of the array.

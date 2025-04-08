@@ -73,6 +73,33 @@
             }
         }
 
+        public static void VisitPreOrder(Node? node, Action<Node> visitor)
+        {
+            if (node == null) return;
+
+            visitor(node);
+            VisitPreOrder(node.left, visitor);
+            VisitPreOrder(node.right, visitor);
+        }
+
+        public static void VisitInOrder(Node? node, Action<Node> visitor)
+        {
+            if (node == null) return;
+
+            VisitInOrder(node.left, visitor);
+            visitor(node);
+            VisitInOrder(node.right, visitor);
+        }
+
+        public static void VisitPostOrder(Node? node, Action<Node> visitor)
+        {
+            if (node == null) return;
+
+            VisitPostOrder(node.left, visitor);
+            visitor(node);
+            VisitPostOrder(node.right, visitor);
+        }
+
         private static void BuildNodeMap(Node? node, Dictionary<int, Node> map)
         {
             if (node == null) return;

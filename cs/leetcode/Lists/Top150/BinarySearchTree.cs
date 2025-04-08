@@ -1,12 +1,78 @@
 ﻿using leetcode.Types.BinaryTree;
-using leetcode.Types.LinkedList;
-using System;
-using System.ComponentModel;
+using System.Net.NetworkInformation;
 
 namespace leetcode.Lists.Top150
 {
     public class BinarySearchTree
     {
+        [Trait("Difficulty", "Medium")]
+        public class Medium
+        {
+            /// <summary>
+            /// 426. Convert Binary Search Tree to Sorted Doubly Linked List
+            /// Convert a Binary Search Tree to a sorted Circular Doubly-Linked List in place.
+            /// You can think of the left and right pointers as synonymous to the predecessor and successor pointers in a doubly-linked list.For a circular doubly linked list, the predecessor of the first element is the last element, and the successor of the last element is the first element.
+            /// We want to do the transformation in place.After the transformation, the left pointer of the tree node should point to its predecessor, and the right pointer should point to its successor.You should return the pointer to the smallest element of the linked list.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/description/"/>
+            [Theory]
+            [InlineData("[4,2,5,1,3]", "[1,2,3,4,5]")]
+            [InlineData("[2,1,3]", "[1,2,3]")]
+            [InlineData("[2,1]", "[1,2]")]
+            public void TreeToDoublyList(string input, string output)
+            {
+                Node? root = input.ParseLCTree(Node.Create, Node.Update);
+                int[] expected = output.Parse1DArray(int.Parse).ToArray();
+                //--
+                static Node? InternalTreeToDoublyList(Node? node)
+                {
+                    if (node == null) return node;
+
+                    Node? left = InternalTreeToDoublyList(node.left);
+                    Node? right = InternalTreeToDoublyList(node.right);
+
+                    if (left != null)
+                    {
+                        while (left?.right != null) left = left?.right;
+                        left!.right = node;
+                    }
+
+                    if (right != null)
+                    {
+                        while (right?.left != null) right = right?.left;
+                        right!.left = node;
+                    }
+
+                    node.left = left;
+                    node.right = right;
+
+                    return node;
+                }
+
+                Node? center = InternalTreeToDoublyList(root);
+                Node? first = center;
+                Node? last = center;
+
+                while (first?.left != null) first = first?.left;
+                while (last?.right != null) last = last?.right;
+
+                if (first != null) first.left = last;
+                if (last != null) last.right = first;
+
+                Node? actual = first;
+
+                // --
+                Assert.Equal(first?.left, last);
+                Assert.Equal(last?.right, first);
+
+                for (int i = 0; i < expected.Length; i++, actual = actual!.right)
+                {
+                    Assert.Equal(expected[i], actual!.val);
+                }
+
+                Assert.Equal(first, actual);
+            }
+        }
 
         // 530. Minimum Absolute Difference in BST
         // Given the root of a Binary Search Tree (BST), return the minimum absolute difference between the values of any two different nodes in the tree.
@@ -17,7 +83,6 @@ namespace leetcode.Lists.Top150
         public void GetMinimumDifference(string input, int expected)
         {
             TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
-
             static void InternalTraverseTree(TreeNode? node, List<int> values)
             {
                 if (node == null) return;
