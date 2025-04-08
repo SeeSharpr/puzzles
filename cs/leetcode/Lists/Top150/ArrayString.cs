@@ -111,6 +111,59 @@ namespace leetcode.Lists.Top150
             }
         }
 
+        [Trait("Difficulty", "Medium")]
+        public class Medium
+        {
+            /// <summary>
+            /// 161. One Edit Distance
+            /// Given two strings s and t, return true if they are both one edit distance apart, otherwise return false.
+            /// A string s is said to be one distance apart from a string t if you can:
+            /// Insert exactly one character into s to get t.
+            /// Delete exactly one character from s to get t.
+            /// Replace exactly one character of s with a different character to get t.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/one-edit-distance/description/"/>
+            [Theory]
+            [InlineData("ab", "acb", true)]
+            [InlineData("", "", false)]
+            [InlineData("a", "A", true)]
+            [InlineData("cb", "ab", true)]
+            [InlineData("a", "", true)]
+            public void IsOneEditDistance(string s, string t, bool expected)
+            {
+                static bool InternalIsOneEditDistance(string s, string t)
+                {
+                    if (t.Length - s.Length > 1) return false;
+
+                    int diff = t.Length - s.Length;
+                    int si = 0;
+                    for (int ti = 0; diff < 2 && si < s.Length && ti < t.Length; si++, ti++)
+                    {
+                        if (s[si] == t[ti]) continue;
+
+                        if (s.Length == t.Length)
+                        {
+                            // Only allowed diff is replacement
+                            diff++;
+                        }
+                        else
+                        {
+                            // Only allowed diff is skipping
+                            si--;
+                        }
+
+                        if (diff > 1) return false;
+                    }
+
+                    return diff == 1 && si == s.Length;
+                }
+
+                bool actual = s.Length < t.Length ? InternalIsOneEditDistance(s, t) : InternalIsOneEditDistance(t, s);
+
+                Assert.Equal(expected, actual);
+            }
+        }
+
 
         // You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
         // Merge nums1 and nums2 into a single array sorted in non-decreasing order.
