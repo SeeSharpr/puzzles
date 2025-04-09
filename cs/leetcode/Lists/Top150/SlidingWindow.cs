@@ -126,6 +126,71 @@
 
                 Assert.Equal(expected, actual);
             }
+
+            /// <summary>
+            /// 340. Longest Substring with At Most K Distinct Characters
+            /// Given a string s and an integer k, return the length of the longest substring of s that contains at most k distinct characters.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/description/"/>
+            [Theory]
+            [InlineData("eceba", 2, 3)]
+            [InlineData("aa", 1, 2)]
+            [InlineData("a", 0, 0)]
+            [InlineData("", 42, 0)]
+            public void LengthOfLongestSubstringKDistinct(string s, int k, int expected)
+            {
+                static int SlidingWindow(string s, int k)
+                {
+                    if (s.Length == 0 || k == 0) return 0;
+
+                    Dictionary<char, int> bag = [];
+                    int maxLen = 0;
+                    for (int left = 0, right = 0; right < s.Length; right++)
+                    {
+                        bag[s[right]] = bag.GetValueOrDefault(s[right], 0) + 1;
+
+                        while (left < right && bag.Count > k)
+                        {
+                            if (--bag[s[left]] == 0) bag.Remove(s[left]);
+                            left++;
+                        }
+
+                        maxLen = Math.Max(maxLen, right - left + 1);
+                    }
+                    return maxLen;
+                }
+
+                static int SlidingWindow2(string s, int k)
+                {
+                    if (s.Length == 0 || k == 0) return 0;
+
+                    Dictionary<char, int> bag = [];
+                    int maxLen = 0;
+                    for (int right = 0; right < s.Length; right++)
+                    {
+                        bag[s[right]] = bag.GetValueOrDefault(s[right], 0) + 1;
+
+                        if (bag.Count > k)
+                        {
+                            if (--bag[s[right - maxLen]] == 0) bag.Remove(s[right - maxLen]);
+                        }
+                        else
+                        {
+                            maxLen++;
+                        }
+                    }
+
+                    return maxLen;
+                }
+
+                string solution = nameof(SlidingWindow2);
+                int actual =
+                    solution == nameof(SlidingWindow) ? SlidingWindow(s, k) :
+                    solution == nameof(SlidingWindow2) ? SlidingWindow2(s, k) :
+                    throw new NotSupportedException(solution);
+
+                Assert.Equal(expected, actual);
+            }
         }
 
         // Given an array of positive integers nums and a positive integer target, return the minimal length of a subarray whose sum is greater than or equal to target.
