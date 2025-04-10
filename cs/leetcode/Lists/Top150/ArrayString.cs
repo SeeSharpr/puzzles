@@ -1,9 +1,31 @@
-﻿using System.Text;
+﻿using System.Diagnostics.Metrics;
+using System.Text;
+using static leetcode.Lists.Top150.ArrayString.Easy;
 
 namespace leetcode.Lists.Top150
 {
     public class ArrayString
     {
+        public abstract class Reader4(string input) : IDisposable
+        {
+            StringReader? reader = new(input);
+
+            protected int Read4(char[] buf4)
+            {
+                if (buf4.Length != 4) throw new ArgumentException(buf4?.Length.ToString() ?? "null", nameof(buf4));
+
+                return reader?.ReadBlock(buf4) ?? 0;
+            }
+
+            public abstract int Read(char[] buf, int n);
+
+            public void Dispose()
+            {
+                reader?.Dispose();
+                reader = null;
+            }
+        }
+
         [Trait("Difficulty", "Easy")]
         public class Easy
         {
@@ -38,6 +60,48 @@ namespace leetcode.Lists.Top150
                 string actual = new(digits);
 
                 Assert.Equal(expected, actual);
+            }
+
+            /// <summary>
+            /// 157. Read N Characters Given Read4
+            /// Given a file and assume that you can only read the file using a given method read4, implement a method to read n characters.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/read-n-characters-given-read4/description/"/>
+            public class LC157(string input) : Reader4(input)
+            {
+                public override int Read(char[] buf, int n)
+                {
+                    char[] read4 = new char[4];
+
+                    int actual = 0;
+                    for (int bufIndex = 0; actual < n; bufIndex += 4)
+                    {
+                        int read = Read4(read4);
+                        if (read == 0) break;
+
+                        int bufReq = Math.Min(read, n - actual);
+                        Array.Copy(read4, 0, buf, bufIndex, bufReq);
+                        actual += bufReq;
+                    }
+
+                    return actual;
+                }
+            }
+
+            [Theory]
+            [InlineData("abc", 4, 3)]
+            [InlineData("abcde", 5, 5)]
+            [InlineData("abcdABCD1234", 12, 12)]
+            [InlineData("leetcode", 5, 5)]
+            public void Read(string input, int n, int expected)
+            {
+                char[] buf = new char[expected];
+
+                using LC157 reader = new(input);
+                int actual = reader.Read(buf, n);
+
+                Assert.Equal(expected, actual);
+                Assert.Equal(input.ToCharArray().Take(n), buf);
             }
 
             /// <summary>
@@ -164,6 +228,70 @@ namespace leetcode.Lists.Top150
             }
         }
 
+        [Trait("Difficulty", "Hard")]
+        public class Hard
+        {
+            /// <summary>
+            /// 158. Read N Characters Given read4 II - Call Multiple Times
+            /// Given a file and assume that you can only read the file using a given method read4, implement a method read to read n characters.Your method read may be called multiple times.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/read-n-characters-given-read4-ii-call-multiple-times/description/"/>
+            public class LC158(string input) : Reader4(input)
+            {
+                private char[] read4 = new char[4];
+                private int available = 0;
+                private int read4Idx = 0;
+
+                public override int Read(char[] buf, int n)
+                {
+                    int read = 0;
+                    int bufIndex = 0;
+
+                    while (n > 0)
+                    {
+                        if (available == 0)
+                        {
+                            available = Read4(read4);
+                            read4Idx = 0;
+                        }
+
+                        if (available == 0) break;
+
+                        while (n > 0 && available > 0)
+                        {
+                            buf[bufIndex++] = read4[read4Idx++];
+                            read++;
+                            available--;
+                            n--;
+                        }
+                    }
+
+                    return read;
+                }
+            }
+
+            [Theory]
+            [InlineData("abc", "[1,2,1]", "[1,2,0]")]
+            [InlineData("abc", "[4,1]", "[3,0]")]
+            public void Read(string inputFile, string inputQuery, string output)
+            {
+                int[] query = inputQuery.Parse1DArray(int.Parse).ToArray();
+                int[] expected = output.Parse1DArray(int.Parse).ToArray();
+
+                char[] buf = new char[query.Max()];
+                int bufPtr = 0;
+
+                using LC158 reader = new(inputFile);
+                for (int i = 0; i < query.Length; i++)
+                {
+                    int actual = reader.Read(buf, query[i]);
+                    Assert.Equal(expected[i], actual);
+                    Assert.Equal(inputFile.Skip(bufPtr).Take(actual), buf.Take(actual));
+
+                    bufPtr += actual;
+                }
+            }
+        }
 
         // You are given two integer arrays nums1 and nums2, sorted in non-decreasing order, and two integers m and n, representing the number of elements in nums1 and nums2 respectively.
         // Merge nums1 and nums2 into a single array sorted in non-decreasing order.

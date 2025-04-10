@@ -13,6 +13,7 @@ namespace leetcode.Lists.Top150
         [InlineData("1,1,1,1,0|1,1,0,1,0|1,1,0,0,0|0,0,0,0,0", 1)]
         [InlineData("1,1,0,0,0|1,1,0,0,0|0,0,1,0,0|0,0,0,1,1", 3)]
         [InlineData("1,0,1,1,0,1,1", 3)]
+        [InlineData("[[1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1],[0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0],[1,0,1,1,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1],[0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1],[1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1],[1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]", 1)]
         public void NumIslands(string input, int expected)
         {
             char[][] grid = input.ParseNestedArrayStringLC(char.Parse).Select(e => e.ToArray()).ToArray();
@@ -27,18 +28,64 @@ namespace leetcode.Lists.Top150
                 if (y + 1 < grid.Length && grid[y + 1][x] == '1') NukeIsland(grid, x, y + 1);
             }
 
-            int actual = 0;
-            for (int y = 0; y < grid.Length; y++)
+            static int Recursive(char[][] grid)
             {
-                for (int x = 0; x < grid[y].Length; x++)
+                int count = 0;
+                for (int y = 0; y < grid.Length; y++)
                 {
-                    if (grid[y][x] == '1')
+                    for (int x = 0; x < grid[y].Length; x++)
                     {
-                        actual++;
-                        NukeIsland(grid, x, y);
+                        if (grid[y][x] == '1')
+                        {
+                            count++;
+                            NukeIsland(grid, x, y);
+                        }
                     }
                 }
+
+                return count;
             }
+
+            static int Interactive(char[][] grid)
+            {
+                if (grid == null || grid.Length == 0) return 0;
+
+                int count = 0;
+
+                int rows = grid.Length;
+                int cols = grid[0].Length;
+
+                for (int j = 0; j < rows; j++)
+                {
+                    for (int i = 0; i < cols; i++)
+                    {
+                        if (grid[j][i] == '0') continue;
+
+                        grid[j][i] = '0';
+
+                        count++;
+                        Queue<int> queue = new([j * cols + i]);
+                        while (queue.TryDequeue(out var offset))
+                        {
+                            int y = offset / cols;
+                            int x = offset % cols;
+
+                            if (y > 0 && grid[y - 1][x] == '1') { grid[y - 1][x] = '0'; queue.Enqueue((y - 1) * cols + x); }
+                            if (y + 1 < rows && grid[y + 1][x] == '1') { grid[y + 1][x] = '0'; queue.Enqueue((y + 1) * cols + x); }
+                            if (x > 0 && grid[y][x - 1] == '1') { grid[y][x - 1] = '0'; queue.Enqueue(y * cols + x - 1); }
+                            if (x + 1 < cols && grid[y][x + 1] == '1') { grid[y][x + 1] = '0'; queue.Enqueue(y * cols + x + 1); }
+                        }
+                    }
+                }
+
+                return count;
+            }
+
+            string solution = nameof(Interactive);
+            int actual =
+                solution == nameof(Recursive) ? Recursive(grid) :
+                solution == nameof(Interactive) ? Interactive(grid) :
+                throw new NotSupportedException(solution);
 
             Assert.Equal(expected, actual);
         }
