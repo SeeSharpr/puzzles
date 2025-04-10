@@ -114,6 +114,7 @@ namespace leetcode.Types.Trie
         }
     }
 
+    [Trait("Category", "Helpers")]
     public class MyNodeTests
     {
         [Theory]

@@ -143,6 +143,7 @@ namespace leetcode
         }
     }
 
+    [Trait("Category","Helpers")]
     public class LeetcodeExtensionsTests
     {
         private class TestNode(int val, TestNode? left = null, TestNode? right = null)

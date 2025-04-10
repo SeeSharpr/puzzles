@@ -8,127 +8,124 @@ namespace leetcode.Lists.Top150
         [Trait("Difficulty", "Hard")]
         public class Hard
         {
-            public class AlienOrderImpl
+            /// <summary>
+            /// 269. Alien Dictionary
+            /// There is a new alien language that uses the English alphabet.However, the order of the letters is unknown to you.
+            /// You are given a list of strings words from the alien language's dictionary. Now it is claimed that the strings in words are sorted lexicographically by the rules of this new language.
+            /// If this claim is incorrect, and the given arrangement of string in words cannot correspond to any order of letters, return "".
+            /// Otherwise, return a string of the unique letters in the new alien language sorted in lexicographically increasing order by the new language's rules. If there are multiple solutions, return any of them.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/alien-dictionary/description/"/>
+            public class AlienNode(char letter)
             {
-                /// <summary>
-                /// 269. Alien Dictionary
-                /// There is a new alien language that uses the English alphabet.However, the order of the letters is unknown to you.
-                /// You are given a list of strings words from the alien language's dictionary. Now it is claimed that the strings in words are sorted lexicographically by the rules of this new language.
-                /// If this claim is incorrect, and the given arrangement of string in words cannot correspond to any order of letters, return "".
-                /// Otherwise, return a string of the unique letters in the new alien language sorted in lexicographically increasing order by the new language's rules. If there are multiple solutions, return any of them.
-                /// </summary>
-                /// <see cref="https://leetcode.com/problems/alien-dictionary/description/"/>
-                public class Node(char letter)
+                public readonly char letter = letter;
+                public readonly HashSet<AlienNode> pred = [];
+                public readonly HashSet<AlienNode> succ = [];
+
+                public override bool Equals(object? obj)
                 {
-                    public readonly char letter = letter;
-                    public readonly HashSet<Node> pred = [];
-                    public readonly HashSet<Node> succ = [];
-
-                    public override bool Equals(object? obj)
-                    {
-                        return obj is Node node && node.letter == letter;
-                    }
-
-                    public override int GetHashCode()
-                    {
-                        return letter.GetHashCode();
-                    }
-
-                    public override string ToString()
-                    {
-                        return $"{{{string.Join("", pred.Select(p => p.letter))}}}<-({letter})->{{{string.Join("", succ.Select(p => p.letter))}}}";
-                    }
+                    return obj is AlienNode node && node.letter == letter;
                 }
 
-                [Theory]
-                [InlineData("[wrt,wrf,er,ett,rftt]", "wertf")]
-                [InlineData("[z,x]", "zx")]
-                [InlineData("[z,x,z]", "")]
-                [InlineData("[zy,zx]", "zyx")]
-                [InlineData("[ac,ab,b]", "acb")]
-                [InlineData("[ac,ab,zc,zb]", "aczb")]
-                [InlineData("[abc,ab]", "")]
-                [InlineData("[wrt,wrtkj]", "wrtkj")]
-                [InlineData("[aba]", "ab")]
-                public void AlienOrder(string input, string expected)
+                public override int GetHashCode()
                 {
-                    string[] words = input.Parse1DArray().ToArray();
+                    return letter.GetHashCode();
+                }
 
-                    static string InternalAlienOrder(string[] words)
+                public override string ToString()
+                {
+                    return $"{{{string.Join("", pred.Select(p => p.letter))}}}<-({letter})->{{{string.Join("", succ.Select(p => p.letter))}}}";
+                }
+            }
+
+            [Theory]
+            [InlineData("[wrt,wrf,er,ett,rftt]", "wertf")]
+            [InlineData("[z,x]", "zx")]
+            [InlineData("[z,x,z]", "")]
+            [InlineData("[zy,zx]", "zyx")]
+            [InlineData("[ac,ab,b]", "acb")]
+            [InlineData("[ac,ab,zc,zb]", "aczb")]
+            [InlineData("[abc,ab]", "")]
+            [InlineData("[wrt,wrtkj]", "wrtkj")]
+            [InlineData("[aba]", "ab")]
+            public void AlienOrder(string input, string expected)
+            {
+                string[] words = input.Parse1DArray().ToArray();
+
+                static string InternalAlienOrder(string[] words)
+                {
+                    Dictionary<char, AlienNode> graph = [];
+
+                    // Initialize the graph
+                    foreach (var word in words)
                     {
-                        Dictionary<char, Node> graph = [];
-
-                        // Initialize the graph
-                        foreach (var word in words)
+                        foreach (var letter in word)
                         {
-                            foreach (var letter in word)
+                            if (!graph.ContainsKey(letter))
                             {
-                                if (!graph.ContainsKey(letter))
-                                {
-                                    graph[letter] = new(letter);
-                                }
+                                graph[letter] = new(letter);
                             }
                         }
-
-                        // Infer order
-                        for (int i = 1; i < words.Length; i++)
-                        {
-                            string prev = words[i - 1];
-                            string curr = words[i];
-
-                            // Claim is incorrect, prefix word cannot come after
-                            if (curr.Length < prev.Length && prev.StartsWith(curr)) return "";
-
-                            for (int pi = 0, ci = 0; pi < prev.Length && ci < curr.Length; pi++, ci++)
-                            {
-                                char p = prev[pi];
-                                char c = curr[pi];
-
-                                // If letters are the same we can't infer any information
-                                if (p == c) continue;
-
-                                // They are different, we can infer precedence between these two letters
-                                var pSucc = graph[p].succ;
-                                var cPred = graph[c].pred;
-
-                                pSucc.Add(graph[c]);
-                                cPred.Add(graph[p]);
-
-                                // Once we found the first difference, there is nothing else we can infer
-                                break;
-                            }
-                        }
-
-                        // Traverse in order
-                        StringBuilder sb = new();
-                        Queue<Node> queue = new(graph.Values.Where(n => n.pred.Count == 0));
-
-                        while (queue.TryDequeue(out Node? node))
-                        {
-                            sb.Append(node.letter);
-
-                            foreach (var succ in node.succ)
-                            {
-                                // Removes the edge between the current node and its successor
-                                // If the successor becomes a starter, add it to the queue for further processing
-                                if (succ.pred.Remove(node) && succ.pred.Count == 0) queue.Enqueue(succ);
-                            }
-
-                            // Removes the successors from this node
-                            node.succ.Clear();
-
-                            // Removes the node from the graph
-                            graph.Remove(node.letter);
-                        }
-
-                        // Return the partial order or empty if a cycle was detected
-                        return graph.Count == 0 ? sb.ToString() : "";
                     }
 
-                    string actual = InternalAlienOrder(words);
+                    // Infer order
+                    for (int i = 1; i < words.Length; i++)
+                    {
+                        string prev = words[i - 1];
+                        string curr = words[i];
 
-                    Assert.Equal(expected, actual);
+                        // Claim is incorrect, prefix word cannot come after
+                        if (curr.Length < prev.Length && prev.StartsWith(curr)) return "";
+
+                        for (int pi = 0, ci = 0; pi < prev.Length && ci < curr.Length; pi++, ci++)
+                        {
+                            char p = prev[pi];
+                            char c = curr[pi];
+
+                            // If letters are the same we can't infer any information
+                            if (p == c) continue;
+
+                            // They are different, we can infer precedence between these two letters
+                            var pSucc = graph[p].succ;
+                            var cPred = graph[c].pred;
+
+                            pSucc.Add(graph[c]);
+                            cPred.Add(graph[p]);
+
+                            // Once we found the first difference, there is nothing else we can infer
+                            break;
+                        }
+                    }
+
+                    // Traverse in order
+                    StringBuilder sb = new();
+                    Queue<AlienNode> queue = new(graph.Values.Where(n => n.pred.Count == 0));
+
+                    while (queue.TryDequeue(out AlienNode? node))
+                    {
+                        sb.Append(node.letter);
+
+                        foreach (var succ in node.succ)
+                        {
+                            // Removes the edge between the current node and its successor
+                            // If the successor becomes a starter, add it to the queue for further processing
+                            if (succ.pred.Remove(node) && succ.pred.Count == 0) queue.Enqueue(succ);
+                        }
+
+                        // Removes the successors from this node
+                        node.succ.Clear();
+
+                        // Removes the node from the graph
+                        graph.Remove(node.letter);
+                    }
+
+                    // Return the partial order or empty if a cycle was detected
+                    return graph.Count == 0 ? sb.ToString() : "";
                 }
+
+                string actual = InternalAlienOrder(words);
+
+                Assert.Equal(expected, actual);
             }
 
 
