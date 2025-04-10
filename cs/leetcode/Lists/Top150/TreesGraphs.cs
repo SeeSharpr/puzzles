@@ -1,12 +1,50 @@
 ﻿using leetcode.Types.BinaryTree;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Text;
 
 namespace leetcode.Lists.Top150
 {
     public class TreesGraphs
     {
+        [Trait("Difficulty", "Easy")]
+        public class Easy
+        {
+            /// <summary>
+            /// 543. Diameter of Binary Tree
+            /// Given the root of a binary tree, return the length of the diameter of the tree.
+            /// The diameter of a binary tree is the length of the longest path between any two nodes in a tree. This path may or may not pass through the root.
+            /// The length of a path between two nodes is represented by the number of edges between them.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/diameter-of-binary-tree/description/"/>
+            [Theory]
+            [InlineData("[1,2,3,4,5]", 3)]
+            [InlineData("[1,2]", 1)]
+            public void DiameterOfBinaryTree(string input, int expected)
+            {
+                TreeNode? root = input.ParseLCTree(TreeNode.Create, TreeNode.Update);
+                //-
+                static int Diameter(TreeNode? node, ref int max)
+                {
+                    if (node == null) return 0;
+
+                    int left = Diameter(node?.left, ref max);
+                    int right = Diameter(node?.right, ref max);
+                    int diameter = left + right;
+
+                    max = Math.Max(max, diameter);
+
+                    return 1 + Math.Max(left, right);
+                }
+
+                int actual = 0;
+                _ = Diameter(root, ref actual);
+                //-
+                Assert.Equal(expected, actual);
+            }
+        }
+
         [Trait("Difficulty", "Hard")]
         public class Hard
         {
