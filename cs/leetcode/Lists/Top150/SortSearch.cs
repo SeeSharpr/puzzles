@@ -5,60 +5,141 @@ namespace leetcode.Lists.Top150
 {
     public class SortSearch
     {
-        // 215. Kth Largest Element in an Array
-        // Given an integer array nums and an integer k, return the kth largest element in the array.
-        // Note that it is the kth largest element in the sorted order, not the kth distinct element.
-        // Can you solve it without sorting?
-        [Trait("Company", "Amazon")]
-        [Theory]
-        [InlineData("[3,2,1,5,6,4]", 2, 5)]
-        [InlineData("[3,2,3,1,2,4,5,5,6]", 4, 4)]
-        public void FindKthLargest(string input, int k, int expected)
+        [Trait("Difficulty", "Medium")]
+        public class Medium
         {
-            int[] nums = input.ParseArrayStringLC(int.Parse).ToArray();
-
-            SortedDictionary<int, int> topK = new();
-            int totalCount = 0;
-
-            foreach (int num in nums)
+            // 215. Kth Largest Element in an Array
+            // Given an integer array nums and an integer k, return the kth largest element in the array.
+            // Note that it is the kth largest element in the sorted order, not the kth distinct element.
+            // Can you solve it without sorting?
+            [Trait("Company", "Amazon")]
+            [Trait("Company", "Meta")]
+            [Theory]
+            [InlineData("[3,2,1,5,6,4]", 2, 5)]
+            [InlineData("[3,2,3,1,2,4,5,5,6]", 4, 4)]
+            [InlineData("[1]", 1, 1)]
+            public void FindKthLargest(string input, int k, int expected)
             {
-                if (totalCount < k)
+                int[] nums = input.ParseArrayStringLC(int.Parse).ToArray();
+                // --
+                static int SortedBag(int[] nums, int k)
                 {
-                    if (!topK.ContainsKey(num))
-                    {
-                        topK[num] = 1;
-                    }
-                    else
-                    {
-                        topK[num]++;
-                    }
+                    SortedDictionary<int, int> topK = new();
+                    int totalCount = 0;
 
-                    totalCount++;
-                }
-                else
-                {
-                    int min = topK.Keys.First();
-
-                    if (num > min)
+                    foreach (int num in nums)
                     {
-                        topK[min]--;
-                        if (topK[min] == 0) topK.Remove(min);
-
-                        if (!topK.ContainsKey(num))
+                        if (totalCount < k)
                         {
-                            topK[num] = 1;
+                            if (!topK.ContainsKey(num))
+                            {
+                                topK[num] = 1;
+                            }
+                            else
+                            {
+                                topK[num]++;
+                            }
+
+                            totalCount++;
                         }
                         else
                         {
-                            topK[num]++;
+                            int min = topK.Keys.First();
+
+                            if (num > min)
+                            {
+                                topK[min]--;
+                                if (topK[min] == 0) topK.Remove(min);
+
+                                if (!topK.ContainsKey(num))
+                                {
+                                    topK[num] = 1;
+                                }
+                                else
+                                {
+                                    topK[num]++;
+                                }
+                            }
                         }
                     }
+
+                    return topK.Keys.First();
                 }
+
+                static void Heapify2(ref int a, ref int b)
+                {
+                    if (b > a)
+                    {
+                        a ^= b;
+                        b ^= a;
+                        a ^= b;
+                    }
+                }
+
+                static void Heapify3(ref int a, ref int b, ref int c)
+                {
+                    if (b > c) Heapify2(ref a, ref b);
+                    else if (c > b) Heapify2(ref a, ref c);
+                }
+
+                static void HeapifyUp(int[] heap, int from, int to)
+                {
+                    int limit = (to - from + 1) / 2;
+
+                    for (int left = limit; left > 0; left--)
+                    {
+                        int right = left + 1;
+                        int head = left / 2;
+
+                        if (from + right <= to) Heapify3(ref heap[from + head], ref heap[from + left], ref heap[from + right]);
+                        else Heapify2(ref heap[from + head], ref heap[from + left]);
+                    }
+                }
+
+                static int Heap(int[] nums, int k)
+                {
+                    int[] heap = new int[k + 1];
+                    int limit = -1;
+
+                    foreach (var num in nums)
+                    {
+                        if (limit + 1 < heap.Length)
+                        {
+                            limit++;
+                        }
+
+                        heap[limit] = num;
+
+                        for (int i = 0; i <= limit; i++) HeapifyUp(heap, i, limit);
+
+                    }
+
+                    return heap[k - 1];
+                }
+
+                static int PQueue(int[] nums, int k)
+                {
+                    PriorityQueue<int, int> pq = new(k + 1);
+
+                    foreach (var num in nums)
+                    {
+                        pq.Enqueue(num, num);
+
+                        if (pq.Count > k) pq.Dequeue();
+                    }
+
+                    return pq.Dequeue();
+                }
+
+                string solution = nameof(PQueue);
+                int actual =
+                    solution == nameof(SortedBag) ? SortedBag(nums, k) :
+                    solution == nameof(Heap) ? Heap(nums, k) :
+                    solution == nameof(PQueue) ? PQueue(nums, k) :
+                    throw new NotSupportedException(solution);
+                // --
+                Assert.Equal(expected, actual);
             }
-
-            int actual = topK.Keys.First();
-
-            Assert.Equal(expected, actual);
         }
 
         // 973. K Closest Points to Origin
