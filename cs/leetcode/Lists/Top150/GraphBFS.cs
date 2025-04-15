@@ -299,6 +299,98 @@ namespace leetcode.Lists.Top150
 
                 Assert.Equal(expected, actual);
             }
+
+            /// <summary>
+            /// </summary>
+            /// <see cref=""/>
+            [Theory]
+            [InlineData("[[2,1,1],[1,1,0],[0,1,1]]", 4)]
+            [InlineData("[[2,1,1],[0,1,1],[1,0,1]]", -1)]
+            [InlineData("[[0,2]]", 0)]
+            public void OrangesRotting(string input, int expected)
+            {
+                int[][] grid = input.Parse2DArray(int.Parse).Select(a => a.ToArray()).ToArray();
+                //-
+                static int InternalBFS(int[][] grid)
+                {
+                    int fresh = 0;
+                    int rows = grid.Length;
+                    int cols = grid[0].Length;
+
+                    // Initialize queue of rotten and count fresh
+                    List<int> firstBatch = [];
+                    for (int j = 0; j < rows; j++)
+                    {
+                        for (int i = 0; i < cols; i++)
+                        {
+                            switch (grid[j][i])
+                            {
+                                case 0:
+                                    continue;
+                                case 1:
+                                    fresh++;
+                                    break;
+                                case 2:
+                                    firstBatch.Add(j * cols + i);
+                                    break;
+                            }
+                        }
+                    }
+
+                    Queue<int[]> queue = [];
+                    queue.Enqueue(firstBatch.ToArray());
+
+                    // Count how long it will take for all to rot
+                    int duration = 0;
+                    while (fresh > 0 && queue.TryDequeue(out int[]? rotIndexes))
+                    {
+                        duration++;
+
+                        List<int> nextBatch = [];
+                        foreach (int rotIndex in rotIndexes)
+                        {
+                            int row = rotIndex / cols;
+                            int col = rotIndex % cols;
+
+                            if (row > 0 && grid[row - 1][col] == 1)
+                            {
+                                grid[row - 1][col] = 2;
+                                fresh--;
+                                nextBatch.Add(rotIndex - cols);
+                            }
+
+                            if (row + 1 < rows && grid[row + 1][col] == 1)
+                            {
+                                grid[row + 1][col] = 2;
+                                fresh--;
+                                nextBatch.Add(rotIndex + cols);
+                            }
+
+                            if (col > 0 && grid[row][col - 1] == 1)
+                            {
+                                grid[row][col - 1] = 2;
+                                fresh--;
+                                nextBatch.Add(rotIndex - 1);
+                            }
+
+                            if (col + 1 < cols && grid[row][col + 1] == 1)
+                            {
+                                grid[row][col + 1] = 2;
+                                fresh--;
+                                nextBatch.Add(rotIndex + 1);
+                            }
+                        }
+
+                        if (nextBatch.Count > 0) queue.Enqueue(nextBatch.ToArray());
+                    }
+
+                    return fresh == 0 ? duration : -1;
+                }
+
+                int actual = InternalBFS(grid);
+
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Trait("Difficulty", "Hard")]
