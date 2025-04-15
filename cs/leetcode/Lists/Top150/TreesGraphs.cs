@@ -1,7 +1,4 @@
 ﻿using leetcode.Types.BinaryTree;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Text;
 
 namespace leetcode.Lists.Top150
@@ -249,9 +246,146 @@ namespace leetcode.Lists.Top150
             public void ShortestDistance(string input, int expected)
             {
                 int[][] grid = input.Parse2DArray(int.Parse).Select(x => x.ToArray()).ToArray();
-                //-
+                // --
+                static IEnumerable<int> GetNextSteps(int[][] grid, int rows, int cols, int index, HashSet<int> visited)
+                {
+                    int row = index / cols;
+                    int col = index % cols;
+                    int indexUp = index - cols;
+                    int indexDown = index + cols;
+                    int indexLeft = index - 1;
+                    int indexRight = index + 1;
 
-                int actual = -1;
+                    if (row - 1 >= 0 && grid[row - 1][col] != 2 && visited.Add(indexUp)) yield return indexUp;
+                    if (row + 1 < rows && grid[row + 1][col] != 2 && visited.Add(indexDown)) yield return indexDown;
+                    if (col - 1 >= 0 && grid[row][col - 1] != 2 && visited.Add(indexLeft)) yield return indexLeft;
+                    if (col + 1 < cols && grid[row][col + 1] != 2 && visited.Add(indexRight)) yield return indexRight;
+                }
+
+                static int[] FindHouses(int[][] grid, int rows, int cols)
+                {
+                    List<int> houseIndexes = [];
+
+                    for (int row = 0; row < rows; row++) for (int col = 0; col < cols; col++) if (grid[row][col] == 1) houseIndexes.Add(row * cols + col);
+
+                    return houseIndexes.ToArray();
+                }
+
+                static int TotalDistanceFromAllHouses(int[][] grid, int rows, int cols, int startIndex, int[] houseIndexes)
+                {
+                    int sumDist = 0;
+                    HashSet<int> remaining = new(houseIndexes);
+
+                    PriorityQueue<Tuple<int, HashSet<int>>, int> queue = new();
+                    queue.Enqueue(new(startIndex, [startIndex]), 0);
+
+                    while (remaining.Count > 0 && queue.TryDequeue(out var currTuple, out int currDist))
+                    {
+                        int currIndex = currTuple.Item1;
+                        HashSet<int> currVisited = currTuple.Item2;
+
+                        if (remaining.Remove(currIndex))
+                        {
+                            sumDist += currDist;
+                            continue;
+                        }
+
+                        currDist++;
+                        foreach (int nextIndex in GetNextSteps(grid, rows, cols, currIndex, currVisited)) queue.Enqueue(new(nextIndex, currVisited), currDist);
+                    }
+
+                    return remaining.Count == 0 ? sumDist : int.MaxValue;
+                }
+
+                static int BFS(int[][] grid)
+                {
+                    if (grid == null || grid.Length == 0 || grid[0].Length == 0) return 0;
+
+                    int rows = grid.Length;
+                    int cols = grid[0].Length;
+                    int[] houseIndexes = FindHouses(grid, rows, cols);
+
+                    int minDistance = int.MaxValue;
+                    for (int row = 0; row < rows; row++)
+                    {
+                        for (int col = 0; col < cols; col++)
+                        {
+                            if (grid[row][col] != 0) continue;
+
+                            int startIndex = row * cols + col;
+
+                            int currDistance = TotalDistanceFromAllHouses(grid, rows, cols, startIndex, houseIndexes);
+
+                            minDistance = Math.Min(minDistance, currDistance);
+                        }
+                    }
+
+                    return minDistance == int.MaxValue ? -1 : minDistance;
+                }
+
+                static int Dijskstra(int[][] grid)
+                {
+                    if (grid == null || grid.Length == 0 || grid[0].Length == 0) return 0;
+
+                    int rows = grid.Length;
+                    int cols = grid[0].Length;
+
+                    // Create a single working copy of the original grid and an accumulator
+                    int[][] acc = Enumerable.Range(0, rows).Select(_ => new int[cols]).ToArray();
+                    int[][] work = Enumerable.Range(0, rows).Select(_ => new int[cols]).ToArray();
+                    int[] houseIndexes = FindHouses(grid, rows, cols);
+
+                    foreach (int houseIndex in houseIndexes)
+                    {
+                        for (int row = 0; row < rows; row++) for (int col = 0; col < cols; col++) work[row][col] = grid[row][col] == 0 ? int.MaxValue : -grid[row][col];
+
+                        // This can be a simple flood-fill to avoid enqueueing every single node
+                        PriorityQueue<int, int> queue = new([(houseIndex, 0)]);
+                        while (queue.TryDequeue(out int curIndex, out int curDist))
+                        {
+                            // Consider we are taking one more step and enqueue the next index only if the current distance is better than what we had before
+                            curDist++;
+
+                            // Note that we inverted the values of other houses and walls (to -1 and -2) so that is never going to be greater than the current
+                            // distance, making us to skip all houses and walls and consider only land that has not been visited before or visited at a higher cost
+                            int curRow = curIndex / cols;
+                            int curCol = curIndex % cols;
+
+                            if (curRow > 0 && work[curRow - 1][curCol] > curDist) { work[curRow - 1][curCol] = curDist; queue.Enqueue(curIndex - cols, curDist); }
+                            if (curRow + 1 < rows && work[curRow + 1][curCol] > curDist) { work[curRow + 1][curCol] = curDist; queue.Enqueue(curIndex + cols, curDist); }
+                            if (curCol > 0 && work[curRow][curCol - 1] > curDist) { work[curRow][curCol - 1] = curDist; queue.Enqueue(curIndex - 1, curDist); }
+                            if (curCol + 1 < cols && work[curRow][curCol + 1] > curDist) { work[curRow][curCol + 1] = curDist; queue.Enqueue(curIndex + 1, curDist); }
+                        }
+
+                        // By the end of the iteration, we will know the distance of each house to all empty spaces, we need to accumulate that
+                        for (int row = 0; row < rows; row++) for (int col = 0; col < cols; col++)
+                            {
+                                // Not land or inaccessible
+                                if (acc[row][col] < 0 || acc[row][col] == int.MaxValue) continue;
+                                if (work[row][col] == int.MaxValue) { acc[row][col] = int.MaxValue; continue; }
+
+                                acc[row][col] += work[row][col];
+                            }
+                    }
+
+                    // Now all we need to do is to find the smallest entry in the accumulator, that will be the location of the land that is closest to all houses
+                    int minDistance = int.MaxValue;
+                    for (int row = 0; row < rows; row++) for (int col = 0; col < cols; col++)
+                        {
+                            if (acc[row][col] < 0) continue;
+
+                            minDistance = Math.Min(minDistance, acc[row][col]);
+                        }
+
+                    return minDistance == int.MaxValue ? -1 : minDistance;
+                }
+
+                string solution = nameof(Dijskstra);
+                int actual =
+                    solution == nameof(BFS) ? BFS(grid) :
+                    solution == nameof(Dijskstra) ? Dijskstra(grid) :
+                    throw new NotSupportedException(solution);
+                // --
                 Assert.Equal(expected, actual);
             }
         }

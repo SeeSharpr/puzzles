@@ -173,6 +173,55 @@ namespace leetcode.Lists.Top150
                 //--
                 Assert.Equal(expected, nums);
             }
+
+            /// <summary>
+            /// 2357. Make Array Zero by Subtracting Equal Amounts
+            /// You are given a non-negative integer array nums.In one operation, you must:
+            /// Choose a positive integer x such that x is less than or equal to the smallest non-zero element in nums.
+            /// Subtract x from every positive element in nums.
+            /// Return the minimum number of operations to make every element in nums equal to 0.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/make-array-zero-by-subtracting-equal-amounts"/>
+            [Theory]
+            [InlineData("[1,5,0,3,5]", 3)]
+            [InlineData("[0]", 0)]
+            public void MinimumOperations(string input, int expected)
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+                //-
+                static int InternalSet(int[] nums)
+                {
+                    if (nums == null || nums.Length < 1 || nums[^1] == 0) return 0;
+
+                    HashSet<int> seen = [0];
+                    int count = 0;
+                    for (int i = 0; i < nums.Length; i++)
+                    {
+                        if (seen.Add(nums[i])) count++;
+                    }
+
+                    return count;
+                }
+
+                static int InternalSort(int[] nums)
+                {
+                    Array.Sort(nums);
+                    int count = 1;
+                    for (int i = 1; i < nums.Length; i++)
+                    {
+                        if (nums[i - 1] == 0 || nums[i - 1] == nums[i]) continue;
+                        count++;
+                    }
+
+                    return count;
+                }
+
+                string solution = nameof(InternalSet);
+                int actual =
+                    solution == nameof(InternalSet) ? InternalSet(nums) :
+                    solution == nameof(InternalSort) ? InternalSort(nums) :
+                    throw new NotSupportedException(solution);
+            }
         }
 
         [Trait("Difficulty", "Medium")]
