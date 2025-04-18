@@ -1,10 +1,8 @@
 #include "pch.h"
-#include "CppUnitTest.h"
+#include "leetcode.h"
 #include <unordered_map>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-
-#define TEST_LC_DIFFICULTY(traitValue) TEST_CLASS_ATTRIBUTE(L"Difficulty", traitValue)
 
 namespace leetcode
 {
@@ -26,10 +24,10 @@ namespace leetcode
 	public:
 		BEGIN_TEST_CLASS_ATTRIBUTE()
 			TEST_LC_DIFFICULTY(L"Medium")
-			END_TEST_CLASS_ATTRIBUTE()
+		END_TEST_CLASS_ATTRIBUTE()
 
-			// 138. Copy List with Random Pointer
-			static Node* copyRandomList(Node* head) {
+		// 138. Copy List with Random Pointer
+		static Node* copyRandomList(Node* head) {
 			std::unordered_map<Node*, Node*> map;
 
 			// Clone each node
