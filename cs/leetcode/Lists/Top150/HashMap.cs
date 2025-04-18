@@ -20,6 +20,65 @@ namespace leetcode.Lists.Top150
 
     public class HashMap
     {
+        [Trait("Difficulty", "Medium")]
+        public class Medium
+        {
+            /// <summary>
+            /// 49. Group Anagrams
+            /// Given an array of strings strs, group the anagrams together.You can return the answer in any order.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/group-anagrams/"/>
+            [Trait("List", "TopInterview150")]
+            [Theory]
+            [InlineData("eat,tea,tan,ate,nat,bat", "bat|nat,tan|ate,eat,tea")]
+            [InlineData("", "")]
+            [InlineData("a", "a")]
+            public void GroupAnagrams(string input, string output)
+            {
+                string[] strs = input.ParseEnumerable(s => s).ToArray();
+                IList<IList<string>> expected = output.ParseNestedEnumerable(s => s).Select(e => e.ToList() as IList<string>).ToList();
+
+                Dictionary<string, IList<string>> map = [];
+
+                foreach (string str in strs)
+                {
+                    char[] keyChars = str.ToCharArray();
+                    Array.Sort(keyChars);
+                    string key = new(keyChars);
+
+                    if (!map.TryGetValue(key, out IList<string>? value))
+                    {
+                        map.Add(key, value = []);
+                    }
+
+                    value.Add(str);
+                }
+
+                IList<IList<string>> result = [.. map.Values];
+
+                List<string[]> sortedResult = result.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
+                List<string[]> sortedExpected = expected.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
+
+                while (sortedResult.Count > 0 && sortedExpected.Count > 0)
+                {
+                    string[] oneResult = sortedResult[0];
+                    sortedResult.RemoveAt(0);
+
+                    for (int i = 0; i < sortedExpected.Count; i++)
+                    {
+                        if (oneResult.SequenceEqual(sortedExpected[i]))
+                        {
+                            sortedExpected.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+
+                Assert.Empty(sortedExpected);
+                Assert.Empty(sortedExpected);
+            }
+        }
+
         // Given two strings ransomNote and magazine, return true if ransomNote can be constructed by using the letters from magazine and false otherwise.
         // Each letter in magazine can only be used once in ransomNote.
         [Trait("List", "TopInterview150")]
@@ -225,57 +284,6 @@ namespace leetcode.Lists.Top150
             }
 
             Assert.Equal(expected, result);
-        }
-
-        // Given an array of strings strs, group the anagrams together.You can return the answer in any order.
-        [Trait("List", "TopInterview150")]
-        [Theory]
-        [InlineData("eat,tea,tan,ate,nat,bat", "bat|nat,tan|ate,eat,tea")]
-        [InlineData("", "")]
-        [InlineData("a", "a")]
-        public void GroupAnagrams(string input, string output)
-        {
-            string[] strs = input.ParseEnumerable(s => s).ToArray();
-            IList<IList<string>> expected = output.ParseNestedEnumerable(s => s).Select(e => e.ToList() as IList<string>).ToList();
-
-            Dictionary<string, IList<string>> map = [];
-
-            foreach (string str in strs)
-            {
-                char[] keyChars = str.ToCharArray();
-                Array.Sort(keyChars);
-                string key = new(keyChars);
-
-                if (!map.TryGetValue(key, out IList<string>? value))
-                {
-                    map.Add(key, value = []);
-                }
-
-                value.Add(str);
-            }
-
-            IList<IList<string>> result = [.. map.Values];
-
-            List<string[]> sortedResult = result.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
-            List<string[]> sortedExpected = expected.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
-
-            while (sortedResult.Count > 0 && sortedExpected.Count > 0)
-            {
-                string[] oneResult = sortedResult[0];
-                sortedResult.RemoveAt(0);
-
-                for (int i = 0; i < sortedExpected.Count; i++)
-                {
-                    if (oneResult.SequenceEqual(sortedExpected[i]))
-                    {
-                        sortedExpected.RemoveAt(i);
-                        break;
-                    }
-                }
-            }
-
-            Assert.Empty(sortedExpected);
-            Assert.Empty(sortedExpected);
         }
 
         // Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.

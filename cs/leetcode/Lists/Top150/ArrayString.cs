@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-using System.Text;
-using static leetcode.Lists.Top150.ArrayString.Easy;
+﻿using System.Text;
 
 namespace leetcode.Lists.Top150
 {
@@ -221,6 +219,8 @@ namespace leetcode.Lists.Top150
                     solution == nameof(InternalSet) ? InternalSet(nums) :
                     solution == nameof(InternalSort) ? InternalSort(nums) :
                     throw new NotSupportedException(solution);
+
+                Assert.Equal(expected, actual);
             }
         }
 
@@ -275,6 +275,44 @@ namespace leetcode.Lists.Top150
 
                 Assert.Equal(expected, actual);
             }
+
+            /// <summary>
+            /// 2214. Minimum Health to Beat Game
+            /// You are playing a game that has n levels numbered from 0 to n - 1. You are given a 0-indexed integer array damage where damage[i] is the amount of health you will lose to complete the ith level.
+            /// You are also given an integer armor. You may use your armor ability at most once during the game on any level which will protect you from at most armor damage.
+            /// You must complete the levels in order and your health must be greater than 0 at all times to beat the game.
+            /// Return the minimum health you need to start with to beat the game.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/minimum-health-to-beat-game"/>
+            [Theory]
+            [InlineData("[2,7,4,3]", 4, 13)]
+            [InlineData("[2,5,3,4]", 7, 10)]
+            [InlineData("[3,3,3]", 0, 10)]
+            public void MinimumHealth(string input, int armor, long expected)
+            {
+                int[] damage = input.Parse1DArray(int.Parse).ToArray();
+                //-
+                static long InternalMinimumHealth(int[] damage, int armor)
+                {
+                    int maxDamage = int.MinValue;
+                    long health = 1;
+
+                    foreach (int d in damage)
+                    {
+                        health += d;
+                        maxDamage = Math.Max(maxDamage, d);
+                    }
+
+                    health -= maxDamage;
+                    health += Math.Max(maxDamage - armor, 0);
+
+                    return health;
+                }
+                //-
+                long actual = InternalMinimumHealth(damage, armor);
+
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Trait("Difficulty", "Hard")]
@@ -317,6 +355,62 @@ namespace leetcode.Lists.Top150
 
                     return read;
                 }
+            }
+
+            /// <summary>
+            /// 767. Reorganize String
+            /// Given a string s, rearrange the characters of s so that any two adjacent characters are not the same.
+            /// Return any possible rearrangement of s or return "" if not possible.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/reorganize-string"/>
+            [Theory]
+            [InlineData("aab", "aba")]
+            [InlineData("aaab", "")]
+            public void ReorganizeString(string s, string expected)
+            {
+                static string InternalReorganizeString(string s)
+                {
+                    if (s == null || s.Length == 0) return "";
+
+                    if (s.Length == 1) return s;
+
+                    StringBuilder sb = new();
+
+                    // Count how many of each char
+                    Dictionary<char, int> bag = [];
+                    foreach (char c in s)
+                    {
+                        bag[c] = bag.TryGetValue(c, out int count) ? count + 1 : 1;
+                    }
+
+                    // Build a priority queue of character and count
+                    PriorityQueue<char, int> queue = new(bag.Count, Comparer<int>.Create((a, b) => b - a));
+                    foreach (var pair in bag)
+                    {
+                        queue.Enqueue(pair.Key, pair.Value);
+                    }
+
+                    // Combine characters from the first and second position of the queue
+                    while (queue.TryDequeue(out char first, out int firstCount))
+                    {
+                        if (queue.Count == 0 && firstCount > 1) return "";
+
+                        sb.Append(first);
+                        if (queue.TryDequeue(out char second, out int secondCount))
+                        {
+                            sb.Append(second);
+                        }
+
+                        if (firstCount > 1) queue.Enqueue(first, firstCount - 1);
+                        if (secondCount > 1) queue.Enqueue(second, secondCount - 1);
+                    }
+
+                    return sb.ToString();
+                }
+
+                string actual = InternalReorganizeString(s);
+
+                Assert.Equal(expected, actual);
             }
 
             [Theory]
