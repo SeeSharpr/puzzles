@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.Metrics;
+using System.Text;
 
 namespace leetcode.Lists.Top150
 {
@@ -318,6 +319,95 @@ namespace leetcode.Lists.Top150
         [Trait("Difficulty", "Hard")]
         public class Hard
         {
+            /// <summary>
+            /// 42. Trapping Rain Water
+            /// Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/trapping-rain-water/"/>
+            [Trait("List", "TopInterview150")]
+            [Theory]
+            [InlineData(new[] { 0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1 }, 6)]
+            [InlineData(new[] { 4, 2, 0, 3, 2, 5 }, 9)]
+            public void Trap(int[] height, int expected)
+            {
+                static int BruteForce(int[] height)
+                {
+                    int trappedWater = 0;
+
+                    for (int i = 0; i < height.Length; i++)
+                    {
+                        int maxLeft = i > 0 ? height.Take(i).Max() : 0;
+                        int maxRight = i + 1 < height.Length ? height.Skip(i + 1).Max() : 0;
+
+                        trappedWater += Math.Max(0, Math.Min(maxLeft, maxRight) - height[i]);
+                    }
+
+                    return trappedWater;
+                }
+
+                static int DP(int[] height)
+                {
+                    int n = height.Length;
+
+                    // Left to right, find what is the maximum height of the left border
+                    int[] leftMax = new int[n];
+                    leftMax[0] = height[0];
+                    for (int i = 1; i < n; i++)
+                    {
+                        leftMax[i] = Math.Max(leftMax[i - 1], height[i]);
+                    }
+
+                    // Right to left, find what is the maximum height of the right border
+                    int[] rightMax = new int[n];
+                    rightMax[n - 1] = height[n - 1];
+                    for (int i = n - 2; i >= 0; i--)
+                    {
+                        rightMax[i] = Math.Max(rightMax[i + 1], height[i]);
+                    }
+
+                    int trappedWater = 0;
+                    for (int i = 0; i < n; i++)
+                    {
+                        trappedWater += Math.Min(leftMax[i], rightMax[i]) - height[i];
+                    }
+
+                    return trappedWater;
+                }
+
+                static int TwoPointers(int[] height)
+                {
+                    if (height.Length < 1) return 0;
+
+                    int left = 0;
+                    int right = height.Length - 1;
+                    int water = 0, maxLeft = 0, maxRight = 0;
+                    while (left < right)
+                    {
+                        if (height[left] < height[right])
+                        {
+                            maxLeft = Math.Max(maxLeft, height[left]);
+                            water += Math.Min(maxLeft, height[right]) - height[left];
+                            left++;
+                        }
+                        else
+                        {
+                            maxRight = Math.Max(maxRight, height[right]);
+                            water += Math.Min(height[left], maxRight) - height[right];
+                            right--;
+                        }
+                    }
+
+                    return water;
+                }
+
+                foreach (Func<int[], int> solution in new[] { BruteForce, DP, TwoPointers, })
+                {
+                    int actual = solution.Invoke(height);
+
+                    Assert.Equal(expected, actual);
+                }
+            }
+
             /// <summary>
             /// 158. Read N Characters Given read4 II - Call Multiple Times
             /// Given a file and assume that you can only read the file using a given method read4, implement a method read to read n characters.Your method read may be called multiple times.
@@ -1120,41 +1210,6 @@ namespace leetcode.Lists.Top150
 
             Assert.Equal(expected, n);
         }
-
-        // Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
-        [Trait("List", "TopInterview150")]
-        [Theory]
-        [InlineData(new[] { 0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1 }, 6)]
-        [InlineData(new[] { 4, 2, 0, 3, 2, 5 }, 9)]
-        public void Trap(int[] height, int expected)
-        {
-            int n = height.Length;
-
-            // Left to right, find what is the maximum height of the left border
-            int[] leftMax = new int[n];
-            leftMax[0] = height[0];
-            for (int i = 1; i < n; i++)
-            {
-                leftMax[i] = Math.Max(leftMax[i - 1], height[i]);
-            }
-
-            // Right to left, find what is the maximum height of the right border
-            int[] rightMax = new int[n];
-            rightMax[n - 1] = height[n - 1];
-            for (int i = n - 2; i >= 0; i--)
-            {
-                rightMax[i] = Math.Max(rightMax[i + 1], height[i]);
-            }
-
-            int trappedWater = 0;
-            for (int i = 0; i < n; i++)
-            {
-                trappedWater += Math.Min(leftMax[i], rightMax[i]) - height[i];
-            }
-
-            Assert.Equal(expected, trappedWater);
-        }
-
 
         // The string "PAYPALISHIRING" is written in a zigzag pattern on a given number of rows like this: (you may want to display this pattern in a fixed font for better legibility)
         // 

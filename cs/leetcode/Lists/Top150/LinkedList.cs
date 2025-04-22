@@ -725,11 +725,56 @@ namespace leetcode.Lists.Top150
                     }
                 }
 
+                public class LRUCacheV3(int capacity) : ILRUCache
+                {
+                    private readonly Dictionary<int, LinkedListNode<KeyValuePair<int, int>>> _map = new();
+                    private readonly LinkedList<KeyValuePair<int, int>> _list = new();
+
+                    public int Get(int key)
+                    {
+                        if (!_map.TryGetValue(key, out var node)) return -1;
+
+                        // Update LRU
+                        _list.Remove(node);
+                        _list.AddFirst(node);
+
+                        return node.Value.Value;
+                    }
+
+                    public void Put(int key, int value)
+                    {
+                        if (_map.TryGetValue(key, out var node))
+                        {
+                            // Update value
+                            if (node.Value.Value != value) node.Value = new(key, value);
+
+                            // Update LRU
+                            _list.Remove(node);
+                            _list.AddFirst(node);
+
+                            return;
+                        }
+
+                        if (_map.Count >= capacity)
+                        {
+                            // Drop LRU
+                            _map.Remove(_list.Last!.Value.Key);
+                            _list.RemoveLast();
+                        }
+
+                        // Insert
+                        node = new(new(key, value));
+                        _map.Add(key, node);
+                        _list.AddFirst(node);
+                    }
+                }
+
                 [Theory]
                 [InlineData("[LRUCache,put,put,get,put,get,put,get,get,get]", "[[2],[1,1],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]", "[null,null,null,1,null,-1,null,-1,3,4]")]
                 [InlineData("[LRUCache,put,put,get,put,get,put,get,get,get]", "[[2],[1,0],[2,2],[1],[3,3],[2],[4,4],[1],[3],[4]]", "[null,null,null,0,null,-1,null,-1,3,4]")]
                 [InlineData("[LRUCache,get,get,get,put,get,put,put,put,put,get,put]", "[[1],[1],[6],[8],[12,1],[2],[15,11],[5,2],[1,15],[4,2],[5],[15,15]]", "[null,-1,-1,-1,null,-1,null,null,null,null,-1,null]")]
                 [InlineData("[LRUCache,put,put,put,put,get,get,get,get,put,get,get,get,get,get]", "[[3],[1,1],[2,2],[3,3],[4,4],[4],[3],[2],[1],[5,5],[1],[2],[3],[4],[5]]", "[null,null,null,null,null,4,3,2,-1,null,-1,2,3,-1,5]]")]
+                [InlineData("[LRUCache,put,put,get,put,put,get]", "[[2],[2,1],[2,2],[2],[1,1],[4,1],[2]]", "[null,null,null,2,null,null,-1]")]
                 public void Test(string cmdsInput, string argsInput, string expsInput)
                 {
                     string[] cmds = cmdsInput.Parse1DArray().ToArray();
@@ -740,10 +785,11 @@ namespace leetcode.Lists.Top150
                     Assert.Equal(exps.Length, args.Length);
 
 
-                    string solution = "v2";
+                    string solution = "v3";
                     Func<int, ILRUCache> ctor =
                         solution == "v1" ? c => new LRUCacheV1(c) :
                         solution == "v2" ? c => new LRUCacheV2(c) :
+                        solution == "v3" ? c => new LRUCacheV3(c) :
                         throw new NotSupportedException(solution);
 
                     ILRUCache? lruCache = null;
