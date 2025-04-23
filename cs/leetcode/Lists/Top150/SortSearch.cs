@@ -140,58 +140,100 @@ namespace leetcode.Lists.Top150
                 // --
                 Assert.Equal(expected, actual);
             }
-        }
 
-        // 973. K Closest Points to Origin
-        // Given an array of points where points[i] = [xi, yi] represents a point on the X-Y plane and an integer k, return the k closest points to the origin(0, 0).
-        // The distance between two points on the X-Y plane is the Euclidean distance(i.e., √(x1 - x2)2 + (y1 - y2)2).
-        // You may return the answer in any order.The answer is guaranteed to be unique (except for the order that it is in).
-        [Trait("Company", "Amazon")]
-        [Theory]
-        [InlineData("[1,3|-2,2]", 1, "[-2,2]")]
-        [InlineData("[3,3|5,-1|-2,4]]", 2, "[3,3|-2,4]")]
-        [InlineData("[0,1|1,0]", 2, "[0,1|1,0]")]
-        public void KClosest(string input, int k, string output)
-        {
-            int[][] points = input.ParseNestedArrayStringLC(int.Parse).Select(e => e.ToArray()).ToArray();
-            int[][] expected = output.ParseNestedArrayStringLC(int.Parse).Select(e => e.ToArray()).ToArray();
-
-            SortedDictionary<int, List<int[]>> map = new();
-
-            foreach (int[] pair in points)
+            /// <summary>
+            /// 973. K Closest Points to Origin
+            /// Given an array of points where points[i] = [xi, yi] represents a point on the X-Y plane and an integer k, return the k closest points to the origin(0, 0).
+            /// The distance between two points on the X-Y plane is the Euclidean distance(i.e., √(x1 - x2)2 + (y1 - y2)2).
+            /// You may return the answer in any order.The answer is guaranteed to be unique (except for the order that it is in).
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/k-closest-points-to-origin"/>
+            [Trait("Company", "Amazon")]
+            [Theory]
+            [InlineData("[1,3|-2,2]", 1, "[-2,2]")]
+            [InlineData("[3,3|5,-1|-2,4]]", 2, "[3,3|-2,4]")]
+            [InlineData("[0,1|1,0]", 2, "[0,1|1,0]")]
+            public void KClosest(string input, int k, string output)
             {
-                int key = pair[0] * pair[0] + pair[1] * pair[1];
+                int[][] points = input.ParseNestedArrayStringLC(int.Parse).Select(e => e.ToArray()).ToArray();
+                int[][] expected = output.ParseNestedArrayStringLC(int.Parse).Select(e => e.ToArray()).ToArray();
 
-                if (!map.TryGetValue(key, out List<int[]>? list))
+                static int[][] WithSortedDictionary(int[][] points, int k)
                 {
-                    list = new();
-                    map.Add(key, list);
+                    SortedDictionary<int, List<int[]>> map = new();
+
+                    foreach (int[] pair in points)
+                    {
+                        int key = pair[0] * pair[0] + pair[1] * pair[1];
+
+                        if (!map.TryGetValue(key, out List<int[]>? list))
+                        {
+                            list = new();
+                            map.Add(key, list);
+                        }
+
+                        list.Add(pair);
+                    }
+
+                    List<int[]> result = new();
+
+                    foreach (var values in map.Values)
+                    {
+                        foreach (int[] point in values)
+                        {
+                            result.Add(point);
+                            if (result.Count == k) break;
+                        }
+
+                        if (result.Count == k) break;
+                    }
+
+                    return result.ToArray();
                 }
 
-                list.Add(pair);
-            }
-
-            List<int[]> result = new();
-
-            foreach (var values in map.Values)
-            {
-                foreach (int[] point in values)
+                static int[][] MinHeap(int[][] points, int k)
                 {
-                    result.Add(point);
-                    if (result.Count == k) break;
+                    // PQ with inverted order
+                    PriorityQueue<int[], int> minHeap = new(Comparer<int>.Create((a, b) => b - a));
+
+                    foreach (int[] point in points)
+                    {
+                        int curr = point[0] * point[0] + point[1] * point[1];
+
+                        if (minHeap.Count < k)
+                        {
+                            minHeap.Enqueue(point, curr);
+                        }
+                        else if (minHeap.TryPeek(out int[] _, out int prev) && curr < prev)
+                        {
+                            minHeap.DequeueEnqueue(point, curr);
+                        }
+                    }
+
+                    List<int[]> result = [];
+                    while (minHeap.TryDequeue(out int[]? point, out int _))
+                    {
+                        result.Add(point);
+                    }
+
+                    return result.ToArray();
                 }
 
-                if (result.Count == k) break;
+                foreach (Func<int[][], int, int[][]> solution in new[] { WithSortedDictionary, MinHeap })
+                {
+                    int[][] actual = solution.Invoke(points, k);
+
+                    Assert.Equal(expected.Length, actual.Length);
+
+                    string[] expectedStr = expected.Select(e => $"{e[0]}|{e[1]}").ToArray();
+                    string[] actualStr = actual.Select(e => $"{e[0]}|{e[1]}").ToArray();
+
+                    Array.Sort(expectedStr);
+                    Array.Sort(actualStr);
+
+                    Assert.Equal(expectedStr, actualStr);
+                }
             }
-
-            int[][] actual = result.ToArray();
-
-            Assert.Equal(expected.Length, actual.Length);
-
-            string[] expectedStr = expected.Select(e => $"{e[0]}|{e[1]}").ToArray();
-            string[] actualStr = actual.Select(e => $"{e[0]}|{e[1]}").ToArray();
-
-            Assert.Equal(expectedStr, actualStr);
         }
     }
 }
