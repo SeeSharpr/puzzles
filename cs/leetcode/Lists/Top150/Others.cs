@@ -1,7 +1,62 @@
-﻿namespace leetcode.Lists.Top150
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace leetcode.Lists.Top150
 {
     public class Others
     {
+        [Trait("Difficulty", "Medium")]
+        public class Medium
+        {
+            /// <summary>
+            /// 253. Meeting Rooms II
+            /// Given an array of meeting time intervals intervals where intervals[i] = [starti, endi], return the minimum number of conference rooms required.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/meeting-rooms-ii"/>
+            [Theory]
+            [InlineData("[[0,30],[5,10],[15,20]]", 2)]
+            [InlineData("[[7,10],[2,4]]", 1)]
+            [InlineData("[[0,1],[1,2],[2,3]]", 1)]
+            [InlineData("[[0,2],[1,3],[2,4]]", 2)]
+            [InlineData("[[0,2],[1,4],[2,3],[3,5],[5,6]]", 2)]
+            public void MinMeetingRooms(string input, int expected)
+            {
+                // -
+                int MinHeap(int[][] intervals)
+                {
+                    if (intervals == null || intervals.Length < 1) return 0;
+
+                    Array.Sort(intervals, Comparer<int[]>.Create((a, b) => a[0] - b[0]));
+
+                    PriorityQueue<int, int> minHeap = new();
+                    for (int i = 0; i < intervals.Length; i++)
+                    {
+                        int curStart = intervals[i][0];
+                        int curEnd = intervals[i][1];
+
+                        if (!minHeap.TryPeek(out int previousStart, out int previousEnd) || curEnd < previousEnd || curStart < previousEnd)
+                        {
+                            minHeap.Enqueue(curStart, curEnd);
+                        }
+                        else
+                        {
+                            minHeap.DequeueEnqueue(curStart, curEnd);
+                        }
+                    }
+
+                    return minHeap.Count;
+                }
+                // -
+                foreach (Func<int[][], int> solution in new[] { MinHeap, })
+                {
+                    int[][] intervals = input.Parse2DArray(int.Parse).Select(a => a.ToArray()).ToArray();
+
+                    int actual = solution.Invoke(intervals);
+
+                    Assert.Equal(expected, actual);
+                }
+            }
+        }
+
         // Given a signed 32-bit integer x, return x with its digits reversed. If reversing x causes the value to go outside the signed 32-bit integer range [-231, 231 - 1], then return 0.
         // Assume the environment does not allow you to store 64-bit integers(signed or unsigned).
         [Trait("Company", "Amazon")]

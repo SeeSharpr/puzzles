@@ -38,44 +38,71 @@ namespace leetcode.Lists.Top150
                 string[] strs = input.ParseEnumerable(s => s).ToArray();
                 IList<IList<string>> expected = output.ParseNestedEnumerable(s => s).Select(e => e.ToList() as IList<string>).ToList();
 
-                Dictionary<string, IList<string>> map = [];
-
-                foreach (string str in strs)
+                static IList<IList<string>> DictionaryOfSorted(string[] strs)
                 {
-                    char[] keyChars = str.ToCharArray();
-                    Array.Sort(keyChars);
-                    string key = new(keyChars);
+                    Dictionary<string, IList<string>> map = [];
 
-                    if (!map.TryGetValue(key, out IList<string>? value))
+                    foreach (string str in strs)
                     {
-                        map.Add(key, value = []);
+                        char[] keyChars = str.ToCharArray();
+                        Array.Sort(keyChars);
+                        string key = new(keyChars);
+
+                        if (!map.TryGetValue(key, out IList<string>? value))
+                        {
+                            map.Add(key, value = []);
+                        }
+
+                        value.Add(str);
                     }
 
-                    value.Add(str);
+                    return map.Values.ToList();
                 }
 
-                IList<IList<string>> result = [.. map.Values];
-
-                List<string[]> sortedResult = result.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
-                List<string[]> sortedExpected = expected.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
-
-                while (sortedResult.Count > 0 && sortedExpected.Count > 0)
+                static IList<IList<string>> DictionaryOfCounts(string[] strs)
                 {
-                    string[] oneResult = sortedResult[0];
-                    sortedResult.RemoveAt(0);
+                    Dictionary<string, IList<string>> map = [];
 
-                    for (int i = 0; i < sortedExpected.Count; i++)
+                    foreach (string str in strs)
                     {
-                        if (oneResult.SequenceEqual(sortedExpected[i]))
+                        string key = string.Join(':', str.Aggregate(new int[26], (a, c) => { a[char.ToLower(c) - 'a']++; return a; }));
+
+                        if (!map.TryGetValue(key, out IList<string>? value))
                         {
-                            sortedExpected.RemoveAt(i);
-                            break;
+                            map.Add(key, value = []);
+                        }
+
+                        value.Add(str);
+                    }
+
+                    return map.Values.ToList();
+                }
+
+                foreach (Func<string[], IList<IList<string>>> solution in new[] { DictionaryOfSorted, DictionaryOfCounts, })
+                {
+                    var actual = solution.Invoke(strs);
+
+                    List<string[]> sortedResult = actual.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
+                    List<string[]> sortedExpected = expected.Select(sl => { string[] sa = [.. sl]; Array.Sort(sa); return sa; }).ToList();
+
+                    while (sortedResult.Count > 0 && sortedExpected.Count > 0)
+                    {
+                        string[] oneResult = sortedResult[0];
+                        sortedResult.RemoveAt(0);
+
+                        for (int i = 0; i < sortedExpected.Count; i++)
+                        {
+                            if (oneResult.SequenceEqual(sortedExpected[i]))
+                            {
+                                sortedExpected.RemoveAt(i);
+                                break;
+                            }
                         }
                     }
-                }
 
-                Assert.Empty(sortedExpected);
-                Assert.Empty(sortedExpected);
+                    Assert.Empty(sortedExpected);
+                    Assert.Empty(sortedExpected);
+                }
             }
         }
 
