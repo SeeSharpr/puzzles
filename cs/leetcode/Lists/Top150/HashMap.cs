@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Text;
 
 namespace leetcode.Lists.Top150
@@ -103,6 +104,84 @@ namespace leetcode.Lists.Top150
                     Assert.Empty(sortedExpected);
                     Assert.Empty(sortedExpected);
                 }
+            }
+        }
+
+        [Trait("Difficulty", "Hard")]
+        public class Hard
+        {
+            /// <summary>
+            /// 273. Integer to English Words
+            /// Convert a non-negative integer num to its English words representation.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/integer-to-english-words"/>
+            private static readonly Dictionary<int, string> _names = new()
+            {
+                {1, "One" },{2,"Two"},{3,"Three"},{4,"Four"}, {5, "Five"}, {6,"Six"},{7,"Seven"},{8,"Eight"},{9,"Nine"},
+                {10,"Ten"},{11,"Eleven"},{12,"Twelve"},{13,"Thirteen"},{14,"Fourteen"},{15,"Fifteen"},{16,"Sixteen"},{17,"Seventeen"},{18,"Eighteen"},{19,"Nineteen"},
+                {20,"Twenty"},{30,"Thirty"},{40,"Forty"},{50,"Fifty"},{60,"Sixty"},{70,"Seventy"},{80,"Eighty"},{90,"Ninety"}, {100, "Hundred"},
+            };
+
+            private static readonly Dictionary<int, string> _magnitude = new()
+            {
+                {1, "Thousand"},
+                {2, "Million"},
+                {3, "Billion"},
+                {4, "Trillion"},
+                {5, "Quadrillion"},
+            };
+
+            [Theory]
+            [InlineData(123, "One Hundred Twenty Three")]
+            [InlineData(12345, "Twelve Thousand Three Hundred Forty Five")]
+            [InlineData(1234567, "One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven")]
+            [InlineData(1000001, "One Million One")]
+            public void NumberToWords(int num, string expected)
+            {
+                static List<string> Recursive(int num, int magnitude)
+                {
+                    if (magnitude == 0 && num == 0) return ["Zero"];
+
+                    if (num == 0) return [];
+
+                    List<string> result = Recursive(num / 1000, magnitude + 1);
+
+                    num %= 1000;
+                    magnitude = num > 0 ? magnitude : 0;
+
+                    if (num >= 100)
+                    {
+                        result.Add(_names[num / 100]);
+                        result.Add(_names[100]);
+                    }
+
+                    num %= 100;
+
+                    if (num >= 20 || num == 10)
+                    {
+                        result.Add(_names[(num / 10) * 10]);
+                    }
+                    else if (num > 10)
+                    {
+                        result.Add(_names[num]);
+                        num = 0;
+                    }
+
+                    num %= 10;
+
+                    if (num > 0)
+                    {
+                        result.Add(_names[num]);
+                    }
+
+                    if (_magnitude.TryGetValue(magnitude, out string magStr)) result.Add(magStr);
+
+                    return result;
+                }
+
+                string actual = string.Join(" ", Recursive(num, 0));
+
+                Assert.Equal(expected, actual);
             }
         }
 
