@@ -1,9 +1,85 @@
 ﻿using leetcode.Types.BinaryTree;
+using Newtonsoft.Json.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace leetcode.Lists.Top150
 {
     public class BinaryTrees
     {
+        [Trait("Difficulty","Medium")]
+        public class Medium
+        {
+            /// <summary>
+            /// 863. All Nodes Distance K in Binary Tree
+            /// Given the root of a binary tree, the value of a target node target, and an integer k, return an array of the values of all nodes that have a distance k from the target node.
+            /// You can return the answer in any order.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree"/>
+            [Theory]
+            [InlineData("[3,5,1,6,2,0,8,null,null,7,4]", 5, 2, "[7,4,1]")]
+            [InlineData("[1]", 1, 3, "[]")]
+            public void DistanceK(string inputRoot, int inputTarget, int k, string output)
+            {
+                static TreeNode? Find(TreeNode? node, int val)
+                {
+                    if (node == null) return null;
+
+                    if (node.val == val) return node;
+
+                    TreeNode? result = Find(node.left, val);
+                    if (result == null) result = Find(node.right, val);
+
+                    return result;
+                }
+
+                TreeNode? root = inputRoot.ParseLCTree(TreeNode.Create, TreeNode.Update);
+                TreeNode target = Find(root, inputTarget)!;
+                IList<int> expected = output.Parse1DArray(int.Parse).ToList();
+
+                static void BuildParents(TreeNode? node, Dictionary<int, TreeNode> parents)
+                {
+                    if (node == null) return;
+
+                    if (node.left != null)
+                    {
+                        parents[node.left.val] = node;
+                        BuildParents(node.left, parents);
+                    }
+
+                    if (node.right != null)
+                    {
+                        parents[node.right.val] = node;
+                        BuildParents(node.right, parents);
+                    }
+                }
+
+                List<int> actual = [];
+                Dictionary<int, TreeNode> parents = [];
+                BuildParents(root, parents);
+
+                HashSet<int> visited = [target.val];
+                PriorityQueue<TreeNode, int> queue = new([new(target, 0)]);
+
+                while (queue.TryDequeue(out TreeNode? node, out int distance))
+                {
+                    if (distance == k)
+                    {
+                        actual.Add(node.val);
+                    }
+                    else if (distance < k)
+                    {
+                        if (parents.TryGetValue(node.val, out TreeNode? parent) && visited.Add(parent.val)) queue.Enqueue(parent, distance + 1);
+                        if (node.left != null && visited.Add(node.left.val)) queue.Enqueue(node.left, distance + 1);
+                        if (node.right != null && visited.Add(node.right.val)) queue.Enqueue(node.right, distance + 1);
+                    }
+                }
+
+                Assert.Equal(expected.Count, actual.Count);
+                Assert.Equal(expected.ToHashSet(), actual.ToHashSet());
+            }
+
+        }
+
         // 104. Maximum Depth of Binary Tree
         // Given the root of a binary tree, return its maximum depth.
         // A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.

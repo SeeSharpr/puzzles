@@ -2,6 +2,9 @@
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using System.Collections;
+using System.Net.Quic;
+using System.Runtime.Intrinsics.X86;
 
 namespace leetcode.Lists.Top150
 {
@@ -94,6 +97,85 @@ namespace leetcode.Lists.Top150
                         default:
                             throw new NotSupportedException(actions[i]);
                     }
+                }
+            }
+
+            [Theory]
+            [InlineData("[1,3,-1,-3,5,3,6,7]", 3, "[3,3,5,5,6,7]")]
+            [InlineData("[1]", 1, "[1]")]
+            public void MaxSlidingWindow(string input, int k, string output)
+            {
+                int[] nums = input.Parse1DArray(int.Parse).ToArray();
+                int[] expected = output.Parse1DArray(int.Parse).ToArray();
+
+                static void AddToBag(SortedDictionary<int, int> bag, int value)
+                {
+                    bag[value] = bag.TryGetValue(value, out var count) ? count + 1 : 1;
+                }
+
+                static void RemoveFromBag(SortedDictionary<int, int> bag, int value)
+                {
+                    if (--bag[value] < 1) bag.Remove(value);
+                }
+
+                static int[] SortedBag(int[] nums, int k)
+                {
+                    if (nums == null || nums.Length == 0) return [];
+
+                    List<int> result = [];
+                    SortedDictionary<int, int> bag = new(Comparer<int>.Create((a, b) => b - a));
+
+                    // Add the first K elements
+                    for (int i = 0; i < k; i++)
+                    {
+                        AddToBag(bag, nums[i]);
+                    }
+
+                    // Iffy...
+                    result.Add(bag.Keys.ElementAt(0));
+
+                    for (int i = 1; i <= nums.Length - k; i++)
+                    {
+                        RemoveFromBag(bag, nums[i - 1]);
+                        AddToBag(bag, nums[i - 1 + k]);
+                        result.Add(bag.Keys.ElementAt(0));
+                    }
+
+                    return result.ToArray();
+                }
+
+                static int[] MonotonicQueue(int[] nums, int k)
+                {
+                    if (nums == null || nums.Length == 0) return [];
+
+                    List<int> result = [];
+                    LinkedList<int> dq = new();
+
+                    for (int i = 0; i < k; i++)
+                    {
+                        while (dq.Count > 0 && nums[i] >= nums[dq.Last!.Value]) dq.RemoveLast();
+                        dq.AddLast(i);
+                    }
+
+                    result.Add(nums[dq.First!.Value]);
+
+                    for (int i = k; i < nums.Length; i++)
+                    {
+                        if (dq.First!.Value == i - k) dq.RemoveFirst();
+                        while (dq.Count > 0 && nums[i] >= nums[dq.Last!.Value]) dq.RemoveLast();
+                        dq.AddLast(i);
+                        result.Add(nums[dq.First!.Value]);
+                    }
+
+
+                    return result.ToArray();
+                }
+
+                foreach (Func<int[], int, int[]> solution in new[] { SortedBag, MonotonicQueue,  })
+                {
+                    int[] actual = solution.Invoke(nums, k);
+
+                    Assert.Equal(expected, actual);
                 }
             }
         }
