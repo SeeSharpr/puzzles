@@ -24,7 +24,7 @@ namespace leetcode
 			}
 
 			nums.resize(newIt - nums.cbegin());
-			return nums.size();
+			return (int)nums.size();
 
 			//int left = 0;
 			//int right = 0;
@@ -80,11 +80,11 @@ namespace leetcode
 			//if (carry) actual + '1';
 			//actual.swap(std::string(actual.crbegin(), actual.crend()));
 
-			int n = std::max(a.size(), b.size());
+			size_t n = std::max(a.size(), b.size());
 			std::vector<char> r(n + 1);
 			int cc = 0;
 
-			for (int i = n, ia = a.size() - 1, ib = b.size() - 1; i > 0; i--, ia--, ib--)
+			for (size_t i = n, ia = a.size() - 1, ib = b.size() - 1; i > 0; i--, ia--, ib--)
 			{
 				int ca = ia >= 0 ? a[ia] - '0' : 0;
 				int cb = ib >= 0 ? b[ib] - '0' : 0;
