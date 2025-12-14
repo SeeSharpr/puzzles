@@ -193,6 +193,171 @@
             }
         }
 
+        [Trait("Difficulty", "Hard")]
+        public class Hard
+        {
+            private class TrieBag
+            {
+                class TrieBagNode
+                {
+                    public readonly Dictionary<char, TrieBagNode> children = new();
+                    public int terminalCount = 0;
+                }
+
+                private readonly TrieBagNode root = new();
+                public int wordCount = 0;
+
+                public int AddSubstring(string text, int start, int length)
+                {
+                    var curr = root;
+                    for (int i = 0; i < length; i++)
+                    {
+                        char c = text[start + i];
+                        if (!curr.children.TryGetValue(c, out TrieBagNode next))
+                        {
+                            next = new TrieBagNode();
+                            curr.children.Add(c, next);
+                        }
+
+                        curr = next;
+                    }
+
+                    curr.terminalCount++;
+                    wordCount++;
+
+                    return wordCount;
+                }
+
+                public int Add(string word)
+                {
+                    return AddSubstring(word, 0, word.Length);
+                }
+
+                public bool RemoveSubstring(string text, int start, int length)
+                {
+                    // We don't really need to remove the word, just uncheck the terminator (which indicates the word is there).
+                    // This is actually better, because the next time the word is added, we just flip the flag back to true, no memory churn.
+                    var curr = root;
+                    for (int i = 0; i < length; i++)
+                    {
+                        var c = text[start + i];
+
+                        if (!curr.children.TryGetValue(c, out TrieBagNode next))
+                        {
+                            return false;
+                        }
+
+                        curr = next;
+                    }
+
+                    if (curr.terminalCount == 0) return false;
+
+                    curr.terminalCount--;
+                    wordCount--;
+
+                    return true;
+                }
+
+                public bool Remove(string word)
+                {
+                    return RemoveSubstring(word, 0, word.Length);
+                }
+
+                public bool HasSubstring(string text, int start, int length)
+                {
+                    var curr = root;
+                    for (int i = 0; i < length; i++)
+                    {
+                        var c = text[start + i];
+
+                        if (!curr.children.TryGetValue(c, out TrieBagNode next))
+                        {
+                            return false;
+                        }
+
+                        curr = next;
+                    }
+
+                    return curr.terminalCount > 0;
+                }
+
+                public bool Has(string word)
+                {
+                    return HasSubstring(word, 0, word.Length);
+                }
+            }
+
+            /// <summary>
+            /// 30. Substring with Concatenation of All Words
+            /// You are given a string s and an array of strings words. All the strings of words are of the same length.
+            /// A concatenated string is a string that exactly contains all the strings of any permutation of words concatenated.
+            /// For example, if words = ["ab", "cd", "ef"], then "abcdef", "abefcd", "cdabef", "cdefab", "efabcd", and "efcdab" are all concatenated strings. "acdbef" is not a concatenated string because it is not the concatenation of any permutation of words.
+            /// Return an array of the starting indices of all the concatenated substrings in s.You can return the answer in any order.
+            /// </summary>
+            /// <see cref="https://leetcode.com/problems/substring-with-concatenation-of-all-words/"/>
+            [Trait("List", "TopInterview150")]
+            [Theory]
+            [InlineData("barfoothefoobarman", new string[] { "foo", "bar" }, new int[] { 0, 9 })]
+            [InlineData("wordgoodgoodgoodbestword", new string[] { "word", "good", "best", "word" }, new int[] { })]
+            [InlineData("barfoofoobarthefoobarman", new string[] { "bar", "foo", "the" }, new int[] { 6, 9, 12 })]
+            [InlineData("aaa", new string[] { "a", "a" }, new int[] { 0, 1 })]
+            public void SubstringWithConcatenationOfAllWords(string s, string[] words, int[] expected)
+            {
+                static int FindOneSubstring(TrieBag trie, string s, int start, int end, int length)
+                {
+                    int result = -1;
+                    var removedWords = new List<Tuple<int, int>>();
+                    for (int i = start; i < end; i += length)
+                    {
+                        if (!trie.RemoveSubstring(s, i, length)) break;
+
+                        removedWords.Add(new Tuple<int, int>(i, length));
+
+                        if (trie.wordCount == 0)
+                        {
+                            result = start;
+                            break;
+                        }
+                    }
+
+                    foreach (var removedWord in removedWords)
+                    {
+                        trie.AddSubstring(s, removedWord.Item1, removedWord.Item2);
+                    }
+
+                    return result;
+                }
+
+                static IList<int> FindSubstring(string s, string[] words)
+                {
+                    var trie = new TrieBag();
+                    foreach (var word in words) trie.Add(word);
+
+                    List<int> result = new();
+                    int length = words[0].Length;
+                    int permLength = words.Length * length;
+                    int limit = s.Length - permLength + 1;
+
+                    for (int i = 0; i < limit; i++)
+                    {
+                        var index = FindOneSubstring(trie, s, i, i + words.Length * length, length);
+
+                        if (index > -1)
+                        {
+                            i = index;
+                            result.Add(index);
+                        }
+                    }
+
+                    return result;
+                }
+
+                var actual = FindSubstring(s, words);
+
+                Assert.Equal(actual, expected);
+            }
+        }
+
         // Given an array of positive integers nums and a positive integer target, return the minimal length of a subarray whose sum is greater than or equal to target.
         // If there is no such subarray, return 0 instead.
         [Trait("List", "TopInterview150")]
